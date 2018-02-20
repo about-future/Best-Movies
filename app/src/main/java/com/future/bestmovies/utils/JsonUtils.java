@@ -12,8 +12,9 @@ public class JsonUtils {
     private static final String TOTAL_PAGES = "total_pages";
     private static final String RESULTS = "results";
     private static final String RESULT_ID = "id";
-    private static final String RESULT_TITLE = "title";
+    private static final String RESULT_TITLE = "original_title";
     private static final String RESULT_POSTER_PATH = "poster_path";
+    private static final String RESULT_BACKDROP_PATH = "backdrop_path";
     private static final String RESULT_OVERVIEW = "overview";
     private static final String RESULT_VOTE_AVERAGE = "vote_average";
     private static final String RESULT_RELESE_DATE = "release_date";
@@ -23,6 +24,7 @@ public class JsonUtils {
         double voteAverage;
         String title;
         String posterPath;
+        String backdropPath;
         String overview;
         String releseDate;
 
@@ -39,10 +41,11 @@ public class JsonUtils {
             voteAverage = movieJson.getDouble(RESULT_VOTE_AVERAGE);
             title = movieJson.getString(RESULT_TITLE);
             posterPath = movieJson.getString(RESULT_POSTER_PATH);
+            backdropPath = movieJson.getString(RESULT_BACKDROP_PATH);
             overview = movieJson.getString(RESULT_OVERVIEW);
             releseDate = movieJson.getString(RESULT_RELESE_DATE);
 
-            movies[i] = new Movie(id, voteAverage, title, posterPath, overview, releseDate);
+            movies[i] = new Movie(id, voteAverage, title, posterPath, backdropPath, overview, releseDate);
         }
 
         return movies;

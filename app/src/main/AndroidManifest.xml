@@ -23,6 +23,7 @@
         </activity>
         <activity
             android:name=".DetailsActivity"
+            android:label="@string/details_label"
             android:parentActivityName=".MainActivity"
             android:theme="@style/AppTheme">>
             <meta-data

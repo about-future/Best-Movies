@@ -84,14 +84,14 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Grid
     @Override
     //public void onGridItemClick(long movieId) {
     public void onGridItemClick(int clickedItemPosition) {
-        if (mToast != null) {
-            mToast.cancel();
-        }
-
-        String toastMessage = "Item #" + clickedItemPosition + " clicked";
-        mToast = Toast.makeText(this, toastMessage, Toast.LENGTH_LONG);
-
-        mToast.show();
+//        if (mToast != null) {
+//            mToast.cancel();
+//        }
+//
+//        String toastMessage = "Item #" + clickedItemPosition + " clicked";
+//        mToast = Toast.makeText(this, toastMessage, Toast.LENGTH_LONG);
+//
+//        mToast.show();
 
         Intent movieDetailsIntent = new Intent(MainActivity.this, DetailsActivity.class);
         movieDetailsIntent.putExtra(DetailsActivity.ITEM_POSITION, clickedItemPosition);

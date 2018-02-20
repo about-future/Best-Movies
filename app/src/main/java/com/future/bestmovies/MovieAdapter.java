@@ -2,12 +2,10 @@ package com.future.bestmovies;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
-import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.TextView;
 
 import com.future.bestmovies.data.Movie;
 import com.squareup.picasso.Picasso;
@@ -64,8 +62,6 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
 
     class MovieViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         ImageView moviePosterImageView;
-        TextView viewHolderIndex;
-        TextView listItemNumberView;
 
         public MovieViewHolder(View itemView) {
             super(itemView);
@@ -74,7 +70,6 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
         }
 
         void bind(int listIndex) {
-            //listItemNumberView.setText(String.valueOf(listIndex));
             //listItemNumberView.setText(mMovieTitles[listIndex]);
         }
 

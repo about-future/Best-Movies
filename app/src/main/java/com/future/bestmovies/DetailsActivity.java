@@ -50,21 +50,36 @@ public class DetailsActivity extends AppCompatActivity {
             }
 
             Movie selectedMovie = mMovies[position];
-            TextView results = (TextView) findViewById(R.id.jsonResult_tv);
+            ImageView movieBackdropImageView = (ImageView) findViewById(R.id.details_backdrop_iv);
+            TextView movieTitleTextView = (TextView) findViewById(R.id.details_title_tv);
+            ImageView moviePosterImageView = (ImageView) findViewById(R.id.details_poster_iv);
+            TextView moviePlotTextView = (TextView) findViewById(R.id.details_plot_tv);
+            TextView movieRatingTextView = (TextView) findViewById(R.id.details_ratings_tv);
+            TextView movieReleaseDateTextView = (TextView) findViewById(R.id.details_release_date_tv);
 
-            results.setText(selectedMovie.getOverview());
+            String basePath = "http://image.tmdb.org/t/p/w500";
 
-            setTitle(selectedMovie.getMovieTitle());
+            String backdropUrl = basePath.concat(selectedMovie.getBackdropPath());
+            Picasso.with(this)
+                    .load(backdropUrl)
+                    .into(movieBackdropImageView);
+
+            movieTitleTextView.setText(selectedMovie.getMovieTitle());
+            movieRatingTextView.setText(String.valueOf(selectedMovie.getVoteAverage()));
+            movieReleaseDateTextView.setText(selectedMovie.getReleaseDate());
+
+            String basePosterPath = "http://image.tmdb.org/t/p/w154";
+            String posterUrl = basePath.concat(selectedMovie.getPosterPath());
+            Picasso.with(this)
+                    .load(posterUrl)
+                    .into(moviePosterImageView);
+
+            moviePlotTextView.setText(selectedMovie.getOverview());
 
         } catch (JSONException e) {
             Log.e("DetailsActivity.java", "Error parsing Movies JSON: ", e);
         }
 
-//        ImageView iv = (ImageView) findViewById(R.id.details_poster_iv);
-//        String mImageUrl = "http://image.tmdb.org/t/p/w185/gajva2L0rPYkEWjzgFlBXCAVBE5.jpg";
-//        Picasso.with(this)
-//                .load(mImageUrl)
-//                .into(iv);
     }
 
     @Override

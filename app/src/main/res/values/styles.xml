@@ -1,0 +1,21 @@
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.AppCompat">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+    </style>
+
+    <!-- Main activity action bar styles -->
+    <style name="ActionBar.Solid.Movie.NoTitle" parent="@style/Widget.AppCompat.ActionBar.Solid">
+        <item name="displayOptions">useLogo|showHome</item>
+        <item name="logo">@drawable/ic_logo2</item>
+    </style>
+
+    <style name="AppTheme.Movie" parent="@style/AppTheme">
+        <item name="actionBarStyle">@style/ActionBar.Solid.Movie.NoTitle</item>
+    </style>
+
+</resources>

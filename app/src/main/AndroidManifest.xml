@@ -25,7 +25,7 @@
             android:name=".DetailsActivity"
             android:label="@string/details_label"
             android:parentActivityName=".MainActivity"
-            android:theme="@style/AppTheme">>
+            android:theme="@style/AppTheme.Details">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity" />

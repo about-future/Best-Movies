@@ -18,4 +18,15 @@
         <item name="actionBarStyle">@style/ActionBar.Solid.Movie.NoTitle</item>
     </style>
 
+    <style name="ActionBar.Details.Title" parent="@style/Widget.AppCompat.ActionBar">
+        <item name="displayOptions">showHome</item>
+        <!--item name="displayOptions">showTitle|showHome</item-->
+    </style>
+
+    <style name="AppTheme.Details" parent="@style/AppTheme">
+        <item name="actionBarStyle">@style/ActionBar.Details.Title</item>
+        <item name="android:windowTranslucentStatus">true</item>
+        <item name="android:windowTranslucentNavigation">true</item>
+    </style>
+
 </resources>

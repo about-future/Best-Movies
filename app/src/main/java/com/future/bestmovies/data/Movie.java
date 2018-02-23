@@ -1,6 +1,9 @@
 package com.future.bestmovies.data;
 
-public class Movie {
+import android.os.Parcel;
+import android.os.Parcelable;
+
+public class Movie implements Parcelable {
     private int id;
     private double voteAverage;
     private String title;
@@ -8,10 +11,6 @@ public class Movie {
     private String backdropPath;
     private String overview;
     private String releaseDate;
-
-    // No args constructor for use in serialization
-    public Movie() {
-    }
 
     public Movie(int id, double voteAverage, String title, String posterPath, String backdropPath, String overview, String releaseDate) {
         this.id = id;
@@ -22,6 +21,44 @@ public class Movie {
         this.overview = overview;
         this.releaseDate = releaseDate;
     }
+
+    private Movie(Parcel in) {
+        id = in.readInt();
+        voteAverage = in.readDouble();
+        title = in.readString();
+        posterPath = in.readString();
+        backdropPath = in.readString();
+        overview = in.readString();
+        releaseDate = in.readString();
+    }
+
+    @Override
+    public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeInt(id);
+        parcel.writeDouble(voteAverage);
+        parcel.writeString(title);
+        parcel.writeString(posterPath);
+        parcel.writeString(backdropPath);
+        parcel.writeString(overview);
+        parcel.writeString(releaseDate);
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    public static final Parcelable.Creator<Movie> CREATOR = new Parcelable.Creator<Movie>() {
+        @Override
+        public Movie createFromParcel(Parcel in) {
+            return new Movie(in);
+        }
+
+        @Override
+        public Movie[] newArray(int size) {
+            return new Movie[size];
+        }
+    };
 
     public int getMovieId() {
         return id;
@@ -54,9 +91,7 @@ public class Movie {
     public String getBackdropPath() {
         return backdropPath;
     }
-    public void setBackdropPath(String backdropPath) {
-        this.backdropPath = backdropPath;
-    }
+    public void setBackdropPath(String backdropPath) { this.backdropPath = backdropPath; }
 
     public String getOverview() {
         return overview;

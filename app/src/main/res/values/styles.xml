@@ -9,24 +9,67 @@
     </style>
 
     <!-- Main activity action bar styles -->
-    <style name="ActionBar.Solid.Movie.NoTitle" parent="@style/Widget.AppCompat.ActionBar.Solid">
-        <item name="displayOptions">useLogo|showHome</item>
-        <item name="logo">@drawable/ic_logo2</item>
+    <style name="AppTheme.WithLogo" parent="@style/AppTheme">
+        <item name="actionBarStyle">@style/ActionBar.WithLogo</item>
+        <item name="titleMarginStart">22dp</item>
     </style>
 
-    <style name="AppTheme.Movie" parent="@style/AppTheme">
-        <item name="actionBarStyle">@style/ActionBar.Solid.Movie.NoTitle</item>
+    <!-- Actionbar with logo -->
+    <style name="ActionBar.WithLogo" parent="@style/Widget.AppCompat.ActionBar.Solid">
+        <item name="displayOptions">useLogo|showTitle|showHome</item>
+        <item name="logo">@drawable/ic_logo</item>
+        <item name="titleTextStyle">@style/TextAppearance.Condensed.Big</item>
     </style>
 
-    <style name="ActionBar.Details.Title" parent="@style/Widget.AppCompat.ActionBar">
-        <item name="displayOptions">showHome</item>
-        <!--item name="displayOptions">showTitle|showHome</item-->
-    </style>
-
-    <style name="AppTheme.Details" parent="@style/AppTheme">
-        <item name="actionBarStyle">@style/ActionBar.Details.Title</item>
+    <!-- Details activity Theme and Action Bar styles -->
+    <!-- Transparent Style -->
+    <style name="AppTheme.Transparent" parent="@style/AppTheme">
+        <item name="actionBarStyle">@style/ActionBar.Transparent</item>
+        <!-- StatusBar -->
         <item name="android:windowTranslucentStatus">true</item>
+        <!-- ActionBar -->
         <item name="android:windowTranslucentNavigation">true</item>
     </style>
 
+    <style name="ActionBar.Transparent" parent="@style/Widget.AppCompat.ActionBar">
+        <item name="displayOptions">showHome</item>
+    </style>
+
+    <!-- Semitransparent Style -->
+    <style name="AppTheme.Semitransparent" parent="@style/AppTheme">
+        <item name="android:actionBarStyle">@style/ActionBar.Semitransparent</item>
+        <item name="android:windowActionBarOverlay">true</item>
+        <item name="actionBarStyle">@style/ActionBar.Semitransparent</item>
+        <item name="windowActionBarOverlay">true</item>
+    </style>
+
+    <style name="ActionBar.Semitransparent" parent="@style/Widget.AppCompat.ActionBar.Solid">
+        <item name="displayOptions">showHome|showTitle</item>
+        <item name="android:background">@color/transparent_black</item>
+        <item name="background">@color/transparent_black</item>
+    </style>
+
+    <!-- Collapsing NoActionBar Theme -->
+    <style name="AppTheme.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Dark" />
+
+    <!-- TextStyle used by ActionBars -->
+    <style name="TextAppearance.Condensed" parent="AppTheme.WithLogo">
+        <item name="android:fontFamily">sans-serif-condensed</item>
+        <item name="android:textSize">24sp</item>
+    </style>
+
+    <style name="TextAppearance.Condensed.Big" parent="Theme.AppCompat">
+        <item name="android:fontFamily">sans-serif-condensed</item>
+        <item name="android:windowTitleSize">34sp</item>
+    </style>
+
+    <style name="TextAppearance.Condensed.Small" parent="Theme.AppCompat">
+        <item name="android:fontFamily">sans-serif-condensed</item>
+        <item name="android:textSize">20sp</item>
+    </style>
 </resources>

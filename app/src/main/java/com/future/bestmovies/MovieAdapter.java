@@ -53,6 +53,9 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
         Picasso.with(mContext)
                 .load(posterUrl)
                 .into(holder.moviePosterImageView);
+
+        String description = mMovies[position].getMovieTitle().concat(mContext.getString(R.string.poster));
+        holder.moviePosterImageView.setContentDescription(description);
     }
 
     @Override
@@ -65,7 +68,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
 
         public MovieViewHolder(View itemView) {
             super(itemView);
-            moviePosterImageView = (ImageView) itemView.findViewById(R.id.movie_poster_iv);
+            moviePosterImageView = itemView.findViewById(R.id.movie_poster_iv);
             itemView.setOnClickListener(this);
         }
 

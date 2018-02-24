@@ -14,7 +14,7 @@
         <ImageView
             android:id="@+id/details_backdrop_iv"
             android:layout_width="match_parent"
-            android:layout_height="281dp"
+            android:layout_height="300dp"
             android:adjustViewBounds="true"
             android:contentDescription="@string/movie_backdrop"
             android:scaleType="centerCrop"
@@ -29,19 +29,33 @@
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
 
+        <ImageView
+            android:id="@+id/details_poster_iv"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="28dp"
+            android:adjustViewBounds="true"
+            android:paddingBottom="@dimen/details_vertical_spacing"
+            android:scaleType="centerCrop"
+            android:layout_marginStart="@dimen/details_horizontal_spacing"
+            android:contentDescription="@string/movie_poster"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/details_backdrop_iv"
+            tools:src="@drawable/poster" />
+
         <TextView
             android:id="@+id/details_title_tv"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="@dimen/details_horizontal_spacing"
+            android:layout_marginTop="16dp"
             android:layout_marginStart="@dimen/details_horizontal_spacing"
+            android:layout_marginEnd="@dimen/details_horizontal_spacing"
             android:fontFamily="sans-serif-condensed"
             android:textColor="@android:color/white"
             android:textSize="34sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintLeft_toRightOf="@id/details_poster_iv"
+            app:layout_constraintStart_toEndOf="@id/details_poster_iv"
             app:layout_constraintTop_toBottomOf="@id/details_backdrop_iv"
             tools:text="Movie Title" />
 
@@ -58,24 +72,31 @@
 
         <View
             android:id="@+id/separation_line"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="1dp"
-            android:layout_marginTop="@dimen/details_vertical_spacing"
             android:background="@color/colorPrimary"
-            app:layout_constraintTop_toBottomOf="@id/original_title_label" />
+            android:layout_marginTop="@dimen/details_vertical_spacing"
+            android:layout_marginStart="@dimen/details_horizontal_spacing"
+            android:layout_marginEnd="@dimen/details_horizontal_spacing"
+            android:layout_marginLeft="@dimen/details_horizontal_spacing"
+            android:layout_marginRight="@dimen/details_horizontal_spacing"
+            app:layout_constraintTop_toBottomOf="@id/original_title_label"
+            app:layout_constraintLeft_toRightOf="@id/details_poster_iv"
+            app:layout_constraintStart_toEndOf="@id/details_poster_iv"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintRight_toRightOf="parent"/>
 
         <TextView
             android:id="@+id/ratings_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/details_horizontal_spacing"
             android:layout_marginTop="@dimen/details_vertical_spacing"
-            android:paddingBottom="@dimen/details_horizontal_spacing"
+            android:layout_marginBottom="@dimen/details_vertical_spacing"
             android:text="@string/ratings_label"
             android:textColor="@color/colorAccent"
             android:textSize="@dimen/details_font_size"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintLeft_toLeftOf="@id/separation_line"
+            app:layout_constraintStart_toStartOf="@id/separation_line"
             app:layout_constraintTop_toBottomOf="@id/separation_line" />
 
         <TextView
@@ -115,25 +136,19 @@
 
         <View
             android:id="@+id/separation_line2"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="1dp"
             android:layout_marginTop="@dimen/details_vertical_spacing"
+            android:layout_marginStart="@dimen/details_horizontal_spacing"
+            android:layout_marginEnd="@dimen/details_horizontal_spacing"
+            android:layout_marginLeft="@dimen/details_horizontal_spacing"
+            android:layout_marginRight="@dimen/details_horizontal_spacing"
             android:background="@color/colorPrimary"
+            app:layout_constraintLeft_toRightOf="@id/details_poster_iv"
+            app:layout_constraintStart_toEndOf="@id/details_poster_iv"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toBottomOf="@id/details_ratings_tv" />
-
-        <ImageView
-            android:id="@+id/details_poster_iv"
-            android:layout_width="120dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/details_vertical_spacing"
-            android:adjustViewBounds="true"
-            android:contentDescription="@string/movie_poster"
-            android:paddingBottom="@dimen/details_vertical_spacing"
-            android:scaleType="centerCrop"
-            app:layout_constraintLeft_toLeftOf="@id/ratings_label"
-            app:layout_constraintStart_toStartOf="@id/ratings_label"
-            app:layout_constraintTop_toBottomOf="@id/separation_line2"
-            tools:src="@drawable/poster" />
 
         <TextView
             android:id="@+id/details_plot_tv"
@@ -156,4 +171,3 @@
     </android.support.constraint.ConstraintLayout>
 
 </ScrollView>
-

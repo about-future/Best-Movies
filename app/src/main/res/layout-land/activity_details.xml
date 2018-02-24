@@ -103,7 +103,7 @@
                     android:layout_marginStart="@dimen/details_horizontal_spacing"
                     android:layout_marginTop="@dimen/details_vertical_spacing"
                     android:text="@string/ratings_label"
-                    android:textSize="@dimen/details_overview_font_size"
+                    android:textSize="@dimen/details_font_size"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toEndOf="@id/details_poster_iv"
                     app:layout_constraintTop_toBottomOf="@id/separation_line1"

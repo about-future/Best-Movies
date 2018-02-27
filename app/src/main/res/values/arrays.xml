@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="pref_category_options">
+        <item>@string/pref_category_label_popular</item>
+        <item>@string/pref_category_label_top_rated</item>
+        <item>@string/pref_category_label_upcoming</item>
+        <item>@string/pref_category_label_now_playing</item>
+    </string-array>
+
+    <string-array name="pref_category_values">
+        <item>@string/pref_category_popular</item>
+        <item>@string/pref_category_top_rated</item>
+        <item>@string/pref_category_upcoming</item>
+        <item>@string/pref_category_now_playing</item>
+    </string-array>
+
+    <string-array name="pref_image_size_options">
+        <item>@string/pref_image_size_label_optimal</item>
+        <item>@string/pref_image_size_label_medium</item>
+        <item>@string/pref_image_size_label_small</item>
+    </string-array>
+
+    <string-array name="pref_image_size_values">
+        <item>@string/pref_image_size_optimal</item>
+        <item>@string/pref_image_size_medium</item>
+        <item>@string/pref_image_size_small</item>
+    </string-array>
+
+</resources>

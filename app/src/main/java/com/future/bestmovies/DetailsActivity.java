@@ -5,6 +5,8 @@ import android.graphics.Color;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
+import android.util.DisplayMetrics;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
@@ -12,7 +14,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.future.bestmovies.data.Movie;
+import com.future.bestmovies.utils.ImageUtils;
+import com.future.bestmovies.utils.NetworkUtils;
 import com.squareup.picasso.Picasso;
+
+import java.net.URL;
 
 public class DetailsActivity extends AppCompatActivity {
     public static final String MOVIE_OBJECT = "movie";
@@ -48,22 +54,31 @@ public class DetailsActivity extends AppCompatActivity {
             return;
         }
 
-        String basePath = "http://image.tmdb.org/t/p/w500";
-
-        String backdropUrl = basePath.concat(mSelectedMovie.getBackdropPath());
-        Picasso.with(this)
-                .load(backdropUrl)
-                .into(movieBackdropImageView);
+        if (!TextUtils.isEmpty(mSelectedMovie.getBackdropPath())) {
+            Picasso.with(this)
+                    .load(ImageUtils.buildImageUrlWithImageType(
+                            this,
+                            mSelectedMovie.getBackdropPath(),
+                            ImageUtils.BACKDROP))
+                    .into(movieBackdropImageView);
+        } else {
+            movieBackdropImageView.setImageResource(R.drawable.backdrop);
+        }
 
         movieTitleTextView.setText(mSelectedMovie.getMovieTitle());
         movieRatingTextView.setText(String.valueOf(mSelectedMovie.getVoteAverage()));
         movieReleaseDateTextView.setText(mSelectedMovie.getReleaseDate());
 
-        String basePosterPath = "http://image.tmdb.org/t/p/w185";
-        String posterUrl = basePosterPath.concat(mSelectedMovie.getPosterPath());
-        Picasso.with(this)
-                .load(posterUrl)
-                .into(moviePosterImageView);
+        if (!TextUtils.isEmpty(mSelectedMovie.getPosterPath())) {
+            Picasso.with(this)
+                    .load(ImageUtils.buildImageUrlWithImageType(
+                            this,
+                            mSelectedMovie.getPosterPath(),
+                            ImageUtils.POSTER))
+                    .into(moviePosterImageView);
+        } else {
+            moviePosterImageView.setImageResource(R.drawable.poster);
+        }
 
         moviePlotTextView.setText(mSelectedMovie.getOverview());
     }

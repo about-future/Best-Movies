@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ListPreference
+        android:defaultValue="@string/pref_category_popular"
+        android:entries="@array/pref_category_options"
+        android:entryValues="@array/pref_category_values"
+        android:key="@string/pref_category_key"
+        android:title="@string/pref_category_label" />
+
+    <ListPreference
+        android:defaultValue="@string/pref_image_size_optimal"
+        android:entries="@array/pref_image_size_options"
+        android:entryValues="@array/pref_image_size_values"
+        android:key="@string/pref_image_size_key"
+        android:title="@string/pref_image_size_label" />
+
+    <CheckBoxPreference
+        android:defaultValue="@bool/download_high_quality_images_by_default"
+        android:key="@string/pref_enable_image_quality_key"
+        android:summaryOff="@string/pref_enable_image_quality_false"
+        android:summaryOn="@string/pref_enable_image_quality_true"
+        android:title="@string/pref_enable_image_quality_label" />
+
+</PreferenceScreen>

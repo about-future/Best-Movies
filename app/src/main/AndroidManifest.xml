@@ -3,6 +3,7 @@
     package="com.future.bestmovies">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
         android:allowBackup="true"
@@ -15,7 +16,7 @@
             android:name=".MainActivity"
             android:label="@string/app_name"
             android:launchMode="singleTop"
-            android:theme="@style/AppTheme.NoActionBar">
+            android:theme="@style/AppTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -24,7 +25,7 @@
         </activity>
         <activity
             android:name=".DetailsActivity"
-            android:label="@string/details_label"
+            android:label="@string/activity_title_details"
             android:parentActivityName=".MainActivity"
             android:theme="@style/AppTheme.Transparent">
             <meta-data
@@ -33,7 +34,7 @@
         </activity>
         <activity
             android:name=".SettingsActivity"
-            android:label="@string/menu_settings"
+            android:label="@string/activity_title_settings"
             android:parentActivityName=".MainActivity"
             android:theme="@style/AppTheme.Transparent">
             <meta-data

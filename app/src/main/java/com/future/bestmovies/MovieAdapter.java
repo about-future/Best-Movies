@@ -1,14 +1,20 @@
 package com.future.bestmovies;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import com.future.bestmovies.data.Movie;
+import com.future.bestmovies.utils.ImageUtils;
+import com.future.bestmovies.utils.NetworkUtils;
 import com.squareup.picasso.Picasso;
+
+import java.net.URL;
 
 public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHolder> {
 
@@ -17,7 +23,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
     private final GridItemClickListener mOnclickListener;
 
     public interface GridItemClickListener {
-        void onGridItemClick(int clickedItemIndex);
+        void onGridItemClick(Movie movieClicked);
     }
 
     public MovieAdapter(Context context, Movie[] movies, GridItemClickListener listener) {
@@ -28,39 +34,42 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
 
     @Override
     public MovieViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        //Explicit version
-        Context context = parent.getContext();
-        int layoutIdForListItem = R.layout.movie_list_item;
-        LayoutInflater inflater = LayoutInflater.from(context);
-        boolean shouldAttachToParentImmediately = false;
-
-        View view = inflater.inflate(layoutIdForListItem, parent, shouldAttachToParentImmediately);
+        View view = LayoutInflater.from(mContext).inflate(R.layout.movie_list_item, parent, false);
         view.setFocusable(true);
-
-        //Short version
-        // View view = LayoutInflater.from(mContext).inflate(R.layout.movie_list_item, parent, false);
         return new MovieViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(MovieViewHolder holder, int position) {
-        //holder.bind(position);
+        String description;
 
-        String baseUrl = "http://image.tmdb.org/t/p/w500";
-        String imageUrl = mMovies[position].getPosterPath();
+        if (!TextUtils.isEmpty(mMovies[position].getPosterPath())) {
+            Picasso.with(mContext)
+                    .load(ImageUtils.buildImageUrlForRecyclerView(
+                            mContext,
+                            mMovies[position].getPosterPath()
+                            ))
+                    .into(holder.moviePosterImageView);
+            description = mMovies[position].
+                    getMovieTitle().
+                    concat(mContext.getString(R.string.poster));
 
-        String posterUrl = baseUrl.concat(imageUrl);
-        Picasso.with(mContext)
-                .load(posterUrl)
-                .into(holder.moviePosterImageView);
+        } else {
+            holder.moviePosterImageView.setImageResource(R.drawable.default_poster);
+            description = mContext.getString(R.string.no_poster);
+        }
 
-        String description = mMovies[position].getMovieTitle().concat(mContext.getString(R.string.poster));
         holder.moviePosterImageView.setContentDescription(description);
     }
 
     @Override
     public int getItemCount() {
         return mMovies.length;
+    }
+
+    void swapMovies(Movie[] newMovies) {
+        mMovies = newMovies;
+        notifyDataSetChanged();
     }
 
     class MovieViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
@@ -72,18 +81,12 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
             itemView.setOnClickListener(this);
         }
 
-        void bind(int listIndex) {
-            //listItemNumberView.setText(mMovieTitles[listIndex]);
-        }
-
         @Override
         public void onClick(View view) {
+            // Find the position of the movie that was clicked and pass the movie object from that
+            // position to the listener
             int clickedPosition = getAdapterPosition();
-            // Find the id of the movie, based on the clicked position and pass it to the listener
-            //mCursor.moveToPosition(adapterPosition);
-            //long movieID = mCursor.getLong(MainActivity.INDEX_MOVIE_ID);
-            //mOnclickListener.onGridItemClick(movieID);
-            mOnclickListener.onGridItemClick(clickedPosition);
+            mOnclickListener.onGridItemClick(mMovies[clickedPosition]);
         }
     }
 }

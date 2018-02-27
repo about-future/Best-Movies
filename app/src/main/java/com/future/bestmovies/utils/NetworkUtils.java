@@ -25,7 +25,7 @@ public class NetworkUtils {
     private static final String MOVIE = "movie";
     private static final String PAGE_NUMBER = "page";
     private static final String API_KEY = "api_key";
-    private static final String DEFAULT_ID = "0d2882c5bcce9ff1ceadd2f23236b077";
+    private static final String DEFAULT_ID = "xxx";
 
     public static URL getUrl(Context context) {
         String queryType = MoviePreferences.getPreferredQueryType(context);

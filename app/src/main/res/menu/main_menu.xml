@@ -3,12 +3,6 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:id="@+id/action_refresh"
-        android:title="@string/menu_refresh"
-        android:orderInCategory="1"
-        app:showAsAction="never"/>
-
-    <item
         android:id="@+id/action_settings"
         android:title="@string/menu_settings"
         android:orderInCategory="2"

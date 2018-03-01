@@ -2,26 +2,25 @@ package com.future.bestmovies.data;
 
 import android.content.AsyncTaskLoader;
 import android.content.Context;
+import android.util.Log;
+
 import com.future.bestmovies.utils.NetworkUtils;
 import java.net.URL;
 
 public class MovieLoader extends AsyncTaskLoader<Movie[]> {
-    private URL mUrl;
 
-    public MovieLoader(Context context, URL url) {
+    public MovieLoader(Context context) {
         super(context);
-        mUrl = url;
     }
 
     @Override
     protected void onStartLoading() {
+        //Log.v("MOVIE LOADER", "onStartLoading... again!");
         forceLoad();
     }
 
     @Override
     public Movie[] loadInBackground() {
-        if (mUrl == null) return null;
-
-        return NetworkUtils.fetchMovieData(mUrl);
+        return NetworkUtils.fetchMovieData(getContext());
     }
 }

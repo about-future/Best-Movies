@@ -2,7 +2,6 @@ package com.future.bestmovies.utils;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.res.Configuration;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -10,7 +9,7 @@ import android.util.Log;
 import com.future.bestmovies.data.MoviePreferences;
 
 public class ImageUtils {
-    private static final String TAG = NetworkUtils.class.getSimpleName();
+    private static final String TAG = ImageUtils.class.getSimpleName();
     private static final String IMAGES_BASE_URL = "http://image.tmdb.org/t/p/";
     public static final String IMAGE_SIZE45 = "w45";
     public static final String IMAGE_SIZE92 = "w92";
@@ -24,15 +23,13 @@ public class ImageUtils {
     public static final String BACKDROP = "backdrop";
     public static final String POSTER = "poster";
 
-    public static boolean wasScreenMeasured = false;
-
     // This method will build and return the image URL used by our RecyclerView. The image size
     // will be extracted from our preferences that were created on the first run of the app
     public static String buildImageUrlForRecyclerView(Context context, String imagePath) {
         String imageSizeWidth = MoviePreferences.getImageSizeForRecyclerView(context);
         String imageUrl = IMAGES_BASE_URL.concat(imageSizeWidth).concat(imagePath);
 
-        Log.v(TAG, "URL: " + imageUrl);
+        //Log.v(TAG, "URL: " + imageUrl);
         return imageUrl;
     }
 
@@ -52,7 +49,7 @@ public class ImageUtils {
 
         // Create the image URL and return it
         String imageUrl = IMAGES_BASE_URL.concat(imageSize).concat(imagePath);
-        Log.v(TAG, "URL: " + imageUrl);
+        //Log.v(TAG, "Image URL: " + imageUrl);
 
         return imageUrl;
     }
@@ -63,7 +60,7 @@ public class ImageUtils {
         ((Activity)context).getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         int width = displayMetrics.widthPixels;
         int height = displayMetrics.heightPixels;
-        Log.v(TAG, "Width:" + width + ", Height: " + height);
+        //Log.v(TAG, "Width:" + width + ", Height: " + height);
 
         return new int[]{width, height};
     }
@@ -82,9 +79,6 @@ public class ImageUtils {
     // This method will use the screen size of the device (getScreenSize), generate the string
     // representation of that image size and store it in a preference.
     public static void createScreenSizePreference(Context context) {
-//        if (wasScreenMeasured) return;
-//
-//        wasScreenMeasured = true;
         // We store the width and height of the device in a int array
         int[] screenSize = getScreenSize(context);
 
@@ -107,7 +101,7 @@ public class ImageUtils {
         // string representation for the poster size, which is stored in imageSizeAsString[1].
         // After we generate the optimal size as a string, we store it in a preference, so it can be used
         // by our RecyclerView.
-        MoviePreferences.saveImageSizeForRecyclerView(context, imageSizeAsString[1]);
+        MoviePreferences.setImageSizeForRecyclerView(context, imageSizeAsString[1]);
     }
 
 
@@ -143,7 +137,7 @@ public class ImageUtils {
             posterWidth = IMAGE_SIZE45;
         }
 
-        Log.v(TAG, "Backdrop:" + backdropWidth + ", Poster: " + posterWidth);
+        //Log.v(TAG, "Backdrop:" + backdropWidth + ", Poster: " + posterWidth);
 
         return new String[]{backdropWidth, posterWidth};
     }

@@ -18,6 +18,7 @@ public class JsonUtils {
     private static final String RESULT_OVERVIEW = "overview";
     private static final String RESULT_VOTE_AVERAGE = "vote_average";
     private static final String RESULT_RELESE_DATE = "release_date";
+    private static final String RESULT_GENRE_IDS = "genre_ids";
 
     public static Movie[] parseMoviesJson(String moviesJsonStr) throws JSONException {
         int id;
@@ -26,13 +27,13 @@ public class JsonUtils {
         String posterPath;
         String backdropPath;
         String overview;
-        String releseDate;
+        String releaseDate;
+        int[] genreIds;
 
         // Instantiate a JSON object so we can get data.
-        JSONObject moviesJson = new JSONObject(moviesJsonStr);
-        //TODO: get page, total results, total pages from moviesJson object
+        JSONObject allMoviesJson = new JSONObject(moviesJsonStr);
 
-        JSONArray jsonResultsArray = moviesJson.getJSONArray(RESULTS);
+        JSONArray jsonResultsArray = allMoviesJson.getJSONArray(RESULTS);
         Movie[] movies = new Movie[jsonResultsArray.length()];
         for (int i = 0; i < jsonResultsArray.length(); i++) {
             JSONObject movieJson = jsonResultsArray.getJSONObject(i);
@@ -43,11 +44,28 @@ public class JsonUtils {
             posterPath = movieJson.getString(RESULT_POSTER_PATH);
             backdropPath = movieJson.getString(RESULT_BACKDROP_PATH);
             overview = movieJson.getString(RESULT_OVERVIEW);
-            releseDate = movieJson.getString(RESULT_RELESE_DATE);
+            releaseDate = movieJson.getString(RESULT_RELESE_DATE);
 
-            movies[i] = new Movie(id, voteAverage, title, posterPath, backdropPath, overview, releseDate);
+            JSONArray genreArray = movieJson.getJSONArray(RESULT_GENRE_IDS);
+            genreIds = new int[genreArray.length()];
+            for (int j = 0; j < genreArray.length(); j++) {
+                genreIds[j] = genreArray.getInt(j);
+            }
+
+            movies[i] = new Movie(id, voteAverage, title, posterPath, backdropPath, overview, releaseDate, genreIds);
         }
 
         return movies;
+    }
+
+    // Parses the JSON response for page number, total results and total pages
+    public static int[] parsePagesJson(String moviesJsonStr) throws JSONException {
+        // Instantiate a JSON object so we can get data.
+        JSONObject allMoviesJson = new JSONObject(moviesJsonStr);
+
+        // Get each value, store it in the array and return them
+        return new int[]{allMoviesJson.getInt(PAGE),
+                allMoviesJson.getInt(TOTAL_RESULTS),
+                allMoviesJson.getInt(TOTAL_PAGES)};
     }
 }

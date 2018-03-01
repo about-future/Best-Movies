@@ -15,6 +15,7 @@ import android.widget.Toast;
 
 import com.future.bestmovies.data.Movie;
 import com.future.bestmovies.utils.ImageUtils;
+import com.future.bestmovies.utils.MovieUtils;
 import com.future.bestmovies.utils.NetworkUtils;
 import com.squareup.picasso.Picasso;
 
@@ -36,6 +37,7 @@ public class DetailsActivity extends AppCompatActivity {
         TextView moviePlotTextView = findViewById(R.id.details_plot_tv);
         TextView movieRatingTextView = findViewById(R.id.details_ratings_tv);
         TextView movieReleaseDateTextView = findViewById(R.id.details_release_date_tv);
+        TextView movieGenreTextView = findViewById(R.id.details_genre_tv);
 
         if (savedInstanceState != null && savedInstanceState.containsKey(MOVIE_OBJECT)) {
             mSelectedMovie = savedInstanceState.getParcelable(MOVIE_OBJECT);
@@ -81,6 +83,12 @@ public class DetailsActivity extends AppCompatActivity {
         }
 
         moviePlotTextView.setText(mSelectedMovie.getOverview());
+
+        String[] movieGenre = new String[mSelectedMovie.getGenreIds().length];
+        for (int i = 0; i < mSelectedMovie.getGenreIds().length; i++) {
+            movieGenre[i] = MovieUtils.getStringMovieGenre(this, mSelectedMovie.getGenreIds()[i]);
+        }
+        movieGenreTextView.setText(TextUtils.join(", ", movieGenre));
     }
 
     @Override

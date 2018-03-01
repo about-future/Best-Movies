@@ -11,8 +11,9 @@ public class Movie implements Parcelable {
     private String backdropPath;
     private String overview;
     private String releaseDate;
+    private int[] genreIds;
 
-    public Movie(int id, double voteAverage, String title, String posterPath, String backdropPath, String overview, String releaseDate) {
+    public Movie(int id, double voteAverage, String title, String posterPath, String backdropPath, String overview, String releaseDate, int[] genreIds) {
         this.id = id;
         this.voteAverage = voteAverage;
         this.title = title;
@@ -20,6 +21,7 @@ public class Movie implements Parcelable {
         this.backdropPath = backdropPath;
         this.overview = overview;
         this.releaseDate = releaseDate;
+        this.genreIds = genreIds;
     }
 
     private Movie(Parcel in) {
@@ -30,6 +32,7 @@ public class Movie implements Parcelable {
         backdropPath = in.readString();
         overview = in.readString();
         releaseDate = in.readString();
+        genreIds = in.createIntArray();
     }
 
     @Override
@@ -41,6 +44,7 @@ public class Movie implements Parcelable {
         parcel.writeString(backdropPath);
         parcel.writeString(overview);
         parcel.writeString(releaseDate);
+        parcel.writeIntArray(genreIds);
     }
 
     @Override
@@ -105,5 +109,12 @@ public class Movie implements Parcelable {
     }
     public void setReleaseDate(String releaseDate) {
         this.releaseDate = releaseDate;
+    }
+
+    public int[] getGenreIds() {
+        return genreIds;
+    }
+    public void setGenreIds(int[] genreIds) {
+        this.genreIds = genreIds;
     }
 }

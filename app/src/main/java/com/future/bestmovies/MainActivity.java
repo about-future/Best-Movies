@@ -5,6 +5,8 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.support.design.widget.AppBarLayout;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.app.LoaderManager;
 import android.content.Loader;
@@ -26,6 +28,8 @@ import com.future.bestmovies.data.Movie;
 import com.future.bestmovies.data.MovieLoader;
 import com.future.bestmovies.data.MoviePreferences;
 import com.future.bestmovies.utils.ImageUtils;
+import com.future.bestmovies.utils.NetworkUtils;
+import com.future.bestmovies.utils.ScreenUtils;
 
 public class MainActivity extends AppCompatActivity implements
         MovieAdapter.GridItemClickListener,
@@ -44,20 +48,24 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        // Set a different theme for our layout, if the device's orientation is in landscape mode
-        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            setTheme(R.style.AppTheme);
-        }
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        // Number of columns for our RecyclerView
+        int numberOfColumns;
 
         // The number of columns in our RecyclerView is determined by the orientation of the device
-        int numberOfColumns;
-        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+        if (ScreenUtils.isLandscapeMode(this)) {
+            // Set a different theme for our layout, if the device's orientation is in landscape mode
+            setTheme(R.style.AppTheme);
+
+            super.onCreate(savedInstanceState);
+            setContentView(R.layout.activity_main);
+
             // In landscape mode, we'll have three columns and no toolbar as the ActionBar
             // our ActionBar will be the default one, provided by AppTheme
             numberOfColumns = 3;
         } else {
+            super.onCreate(savedInstanceState);
+            setContentView(R.layout.activity_main);
+
             // If in portrait mode we have two columns
             numberOfColumns = 2;
 
@@ -105,17 +113,19 @@ public class MainActivity extends AppCompatActivity implements
 
         showLoading();
 
-        // Get a reference to the ConnectivityManager to check state of network connectivity
-        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        // Get details on the currently active default data network
-        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
-        //activeNetwork.isConnectedOrConnecting();
         // If there is a network connection, fetch data
-        if (activeNetwork != null && activeNetwork.isConnectedOrConnecting()) {
-            //Loader init
+        if(NetworkUtils.isConnected(this)){
             showMovies();
+            //Loader init
             getLoaderManager().restartLoader(MOVIES_LOADER_ID, null, this);
         } else {
+            // Otherwise, if there is no network connection, in portrait mode, we will get a
+            // reference for our collapsing bar and set it collapsed
+            if (!ScreenUtils.isLandscapeMode(this)) {
+                AppBarLayout myAppBar = findViewById(R.id.app_bar);
+                myAppBar.setExpanded(false);
+            }
+
             // Otherwise, hide loading indicator, hide data and display connection error message
             showError();
             // Update message TextView with no connection error message
@@ -123,10 +133,10 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
     // TODO: Explain everything for others
-    // TODO: Create a method for the connection, include it to details activity too
     // TODO: See if you can monitor the connection and load the movies when connection is available again
-    // TODO: Use the image size preferences and methods
     // TODO: Create layout for Tablets, create Settings layout for landscape mode
+    // TODO: Modify the Settings layout (image, text and landscape mode)
+    // TODO: Create a page selector for the results
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -205,7 +215,7 @@ public class MainActivity extends AppCompatActivity implements
 
         if (data != null && data.length != 0) {
             // If new data is available, create a subtitle with our new movie category
-            mMovieCategory.setText(createCategoryTitle(this));
+            mMovieCategory.setText(ScreenUtils.createCategoryTitle(this));
             // Show results
             showMovies();
         }
@@ -215,22 +225,5 @@ public class MainActivity extends AppCompatActivity implements
     public void onLoaderReset(Loader<Movie[]> loader) {
         // If the loader is reset, swap old data with null ones
         mAdapter.swapMovies(null);
-    }
-
-    // Create a category title, depending on the selected category and set the resulting text
-    // to the mMovieCategory object. The title is selected and saved in Settings
-    public String createCategoryTitle(Context context) {
-        String queryType = MoviePreferences.getPreferredQueryType(context);
-        // Log.v(TAG, "Set title");
-        switch (queryType) {
-            case "top_rated":
-                 return context.getString(R.string.pref_category_label_top_rated);
-            case "upcoming":
-                return context.getString(R.string.pref_category_label_upcoming);
-            case "now_playing":
-                return context.getString(R.string.pref_category_label_now_playing);
-            default:
-                return context.getString(R.string.pref_category_label_popular);
-        }
     }
 }

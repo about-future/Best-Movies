@@ -31,7 +31,7 @@ public class MoviePreferences {
     public static String getImageSizeForRecyclerView(Context context) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         String optimalImageWidthKey = context.getString(R.string.pref_screen_width_key);
-        //Log.v(TAG, "getImageSizeForRecyclerView: " + sp.getString(optimalImageWidthKey, ImageUtils.IMAGE_SIZE500));
+        Log.v(TAG, "getImageSizeForRecyclerView: " + sp.getString(optimalImageWidthKey, ImageUtils.IMAGE_SIZE500));
         return sp.getString(optimalImageWidthKey, ImageUtils.IMAGE_SIZE500);
     }
 
@@ -39,16 +39,16 @@ public class MoviePreferences {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         String preferredImageSizeKey = context.getString(R.string.pref_image_size_key);
         String defaultImageSize = context.getString(R.string.pref_image_size_optimal);
-        //Log.v(TAG, "getPreferredImageSize: " + sp.getString(preferredImageSizeKey, defaultImageSize));
+        Log.v(TAG, "getPreferredImageSize: " + sp.getString(preferredImageSizeKey, defaultImageSize));
         return sp.getString(preferredImageSizeKey, defaultImageSize);
     }
 
-    public static void setPreferredImageSize(Context context, String preferredImageSize) {
+    public static void setPreferredImageSize(Context context, int preferredImageSize) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = sp.edit();
         String preferredImageSizeKey = context.getString(R.string.pref_image_size_key);
         //Log.v(TAG, "setPreferredImageSize: " + preferredImageSize);
-        editor.putString(preferredImageSizeKey, preferredImageSize);
+        editor.putInt(preferredImageSizeKey, preferredImageSize);
         editor.apply();
     }
 

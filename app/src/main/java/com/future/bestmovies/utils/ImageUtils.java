@@ -2,6 +2,7 @@ package com.future.bestmovies.utils;
 
 import android.app.Activity;
 import android.content.Context;
+import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -22,6 +23,9 @@ public class ImageUtils {
     public static final String IMAGE_SIZE_ORIGINAL = "original";
     public static final String BACKDROP = "backdrop";
     public static final String POSTER = "poster";
+    public static final String OPTIMAL = "optimal";
+    public static final String MEDIUM = "medium";
+    public static final String SMALL = "small";
 
     // This method will build and return the image URL used by our RecyclerView. The image size
     // will be extracted from our preferences that were created on the first run of the app
@@ -34,22 +38,23 @@ public class ImageUtils {
     }
 
     // This method will build and return the image URL, based on the imagePath (i.e. "/nBNZadXqJSdt05SHLqgT0HuC5Gm.jpg")
-    // and on the imageType that is expected (i.e. backdrop or poster)
+    // and on the expected imageType (i.e. backdrop or poster)
     public static String buildImageUrlWithImageType(Context context, String imagePath, String imageType) {
-        // Get optimal image size for the device screen
-        String[] optimalImageSize = getOptimalImageSize(context);
-        String imageSize;
+        // Get image size as a string, so we can build our image URL
+        String[] imageSizeAsString = getImageSize(context);
 
-        // Check what imageType is expected
+        String imageSize;
+        // Depending on what type of image is expected we will select the appropriate result and
+        // store it in imageSize
         if (TextUtils.equals(imageType, BACKDROP)) {
-            imageSize = optimalImageSize[0];
+            imageSize = imageSizeAsString[0];
         } else {
-            imageSize = optimalImageSize[1];
+            imageSize = imageSizeAsString[1];
         }
 
         // Create the image URL and return it
         String imageUrl = IMAGES_BASE_URL.concat(imageSize).concat(imagePath);
-        //Log.v(TAG, "Image URL: " + imageUrl);
+        Log.v(TAG, "Image URL: " + imageUrl);
 
         return imageUrl;
     }
@@ -57,7 +62,7 @@ public class ImageUtils {
     // This method will return the width and height of the screen in pixels (i.e. {720, 1280})
     private static int[] getScreenSize(Context context) {
         DisplayMetrics displayMetrics = new DisplayMetrics();
-        ((Activity)context).getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        ((Activity) context).getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         int width = displayMetrics.widthPixels;
         int height = displayMetrics.heightPixels;
         //Log.v(TAG, "Width:" + width + ", Height: " + height);
@@ -66,13 +71,28 @@ public class ImageUtils {
     }
 
     // This method will return a string array, based on the width of the screen size (i.e. "w780")
-    private static String[] getOptimalImageSize (Context context) {
-        // Get the width and height of screen and store it in an int array
+    private static String[] getImageSize(Context context) {
+        // Get the preferred image size (optimal, medium or small)
+        String preferredImageSize = MoviePreferences.getPreferredImageSize(context);
+
+        // Get the width and height of screen in pixels
         int[] screenSize = getScreenSize(context);
 
-        // Use the width of the screen and based on that, generate the string representation of
-        // this size and return it.
-        return getImageSizeAsString(screenSize[0]);
+        // Always use the current width of the screen and based on that, generate the string
+        // representation in each case and return it
+        switch (preferredImageSize) {
+            case MEDIUM:
+                // Divide the screen size to 2 and generate the string values for poster and backdrop
+                return getImageSizeAsString((int) (screenSize[0] / 2));
+            case SMALL:
+                // Divide the screen size to 3 and generate the string values for poster and backdrop
+                return getImageSizeAsString((int) (screenSize[0] / 3));
+            default:
+                // Generate the string values for poster and backdrop using the full size value of
+                // the screen. This option will get best visual results for the user, but will
+                // download the most amount of data.
+                return getImageSizeAsString(screenSize[0]);
+        }
     }
 
 
@@ -99,8 +119,8 @@ public class ImageUtils {
         // This string representation will be part of the URL that is used to fetch each image in
         // our RecyclerView. Because our RecyclerView will load only posters, we will use only the
         // string representation for the poster size, which is stored in imageSizeAsString[1].
-        // After we generate the optimal size as a string, we store it in a preference, so it can be used
-        // by our RecyclerView.
+        // After we generate the optimal size as a string, we store it in a preference, so it can
+        // be used by our RecyclerView.
         MoviePreferences.setImageSizeForRecyclerView(context, imageSizeAsString[1]);
     }
 
@@ -110,17 +130,17 @@ public class ImageUtils {
     // on the available width dimensions provided by image.tmdb.org. The selectedScreenSize
     // represents the width of the image in pixels and the returned value could be something like
     // this: {"w780", "w342"} or {"w500", "w185"}
-    private static String[] getImageSizeAsString (int selectedScreenSize) {
+    private static String[] getImageSizeAsString(int selectedScreenSize) {
         String backdropWidth;
         String posterWidth;
 
-        if (selectedScreenSize > 1280 && selectedScreenSize <= 3360) {
+        if (selectedScreenSize > 1600) {
             backdropWidth = IMAGE_SIZE_ORIGINAL;
             posterWidth = IMAGE_SIZE780;
-        } else if (selectedScreenSize > 780 && selectedScreenSize <= 1280) {
+        } else if (selectedScreenSize > 1000 && selectedScreenSize <= 1600) {
             backdropWidth = IMAGE_SIZE1280;
             posterWidth = IMAGE_SIZE500;
-        } else if (selectedScreenSize > 500 && selectedScreenSize <= 780) {
+        } else if (selectedScreenSize > 500 && selectedScreenSize <= 1000) {
             backdropWidth = IMAGE_SIZE780;
             posterWidth = IMAGE_SIZE342;
         } else if (selectedScreenSize > 342 && selectedScreenSize <= 500) {
@@ -129,7 +149,7 @@ public class ImageUtils {
         } else if (selectedScreenSize > 185 && selectedScreenSize <= 342) {
             backdropWidth = IMAGE_SIZE342;
             posterWidth = IMAGE_SIZE154;
-        } else if (selectedScreenSize > 154 && selectedScreenSize <= 185){
+        } else if (selectedScreenSize > 154 && selectedScreenSize <= 185) {
             backdropWidth = IMAGE_SIZE185;
             posterWidth = IMAGE_SIZE92;
         } else {

@@ -22,14 +22,7 @@ public class NetworkUtils {
     private static final String MOVIE = "movie";
     private static final String PAGE_NUMBER = "page";
     private static final String API_KEY = "api_key";
-    private static final String DEFAULT_ID = "2e40dce982635fd7c13175c8b1cb1f54";
-
-    private static final int TYPE_WIFI = 1;
-    private static final int TYPE_MOBILE = 2;
-    private static final int TYPE_NOT_CONNECTED = 0;
-    public static final int NETWORK_STATUS_NOT_CONNECTED = 0;
-    private static final int NETWORK_STAUS_WIFI = 1;
-    private static final int NETWORK_STATUS_MOBILE = 2;
+    private static final String DEFAULT_ID = "xxx";
 
     public static URL getUrl(Context context) {
         String queryType = MoviePreferences.getPreferredQueryType(context);
@@ -99,29 +92,13 @@ public class NetworkUtils {
         return movieResults;
     }
 
-    public static int getConnectivityStatus(Context context) {
+    public static boolean isConnected(Context context) {
+        // Get a reference to the ConnectivityManager to check state of network connectivity
         ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        // Get details on the currently active default data network
         NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
-        if (null != activeNetwork) {
-            if(activeNetwork.getType() == ConnectivityManager.TYPE_WIFI)
-                return TYPE_WIFI;
-
-            if(activeNetwork.getType() == ConnectivityManager.TYPE_MOBILE)
-                return TYPE_MOBILE;
-        }
-        return TYPE_NOT_CONNECTED;
-    }
-
-    public static int getConnectivityStatusString(Context context) {
-        int conn = getConnectivityStatus(context);
-        int status = 0;
-        if (conn == TYPE_WIFI) {
-            status = NETWORK_STAUS_WIFI;
-        } else if (conn == TYPE_MOBILE) {
-            status =NETWORK_STATUS_MOBILE;
-        } else if (conn == TYPE_NOT_CONNECTED) {
-            status = NETWORK_STATUS_NOT_CONNECTED;
-        }
-        return status;
+        // Return true if there is an active network and  if the device is connected or connecting
+        // to the active network, otherwise return false
+        return activeNetwork != null && activeNetwork.isConnectedOrConnecting();
     }
 }

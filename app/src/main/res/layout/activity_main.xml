@@ -31,6 +31,7 @@
                 android:id="@+id/main_backdrop"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:contentDescription="@string/main_backdrop"
                 android:fitsSystemWindows="true"
                 android:scaleType="centerCrop"
                 android:src="@drawable/background"
@@ -72,6 +73,51 @@
         android:layout_margin="@dimen/fab_margin"
         app:layout_anchor="@id/app_bar"
         app:layout_anchorGravity="bottom|end"
-        app:srcCompat="@drawable/ic_local_movies_white_18dp" />
+        app:srcCompat="@drawable/ic_local_movies" />
+
+    <LinearLayout
+        android:id="@+id/navigation"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:orientation="horizontal"
+        android:visibility="visible"
+        android:layout_gravity="bottom"
+        android:background="@color/colorTransparentBlack">
+
+        <ImageView
+            android:id="@+id/previous_page_icon"
+            android:layout_width="56dp"
+            android:layout_height="32dp"
+            android:layout_gravity="center"
+            android:contentDescription="@string/previous_page"
+            android:onClick="previousPage"
+            app:srcCompat="@drawable/ic_arrow_left" />
+
+        <TextView
+            android:id="@+id/page_number_tv"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:textColor="@color/colorWhite"
+            android:shadowColor="@color/colorPrimaryDark"
+            android:shadowDx="1"
+            android:shadowDy="1"
+            android:shadowRadius="2"
+            android:layout_gravity="center"
+            android:fontFamily="sans-serif-condensed"
+            android:textSize="@dimen/details_font_size"
+            tools:text="1"/>
+
+        <ImageView
+            android:id="@+id/next_page_icon"
+            android:layout_width="56dp"
+            android:layout_height="32dp"
+            android:layout_gravity="center"
+            android:contentDescription="@string/next_page"
+            android:onClick="nextPage"
+            app:srcCompat="@drawable/ic_arrow_right" />
+
+    </LinearLayout>
 
 </android.support.design.widget.CoordinatorLayout>

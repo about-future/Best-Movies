@@ -16,11 +16,14 @@ import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -44,6 +47,8 @@ public class MainActivity extends AppCompatActivity implements
     private ImageView mCloudImageView;
     private ProgressBar mLoading;
     private TextView mMovieCategory;
+    private LinearLayout mNavigationLayout;
+    private TextView mPageNumber;
     private int mPosition = RecyclerView.NO_POSITION;
 
     @Override
@@ -94,6 +99,9 @@ public class MainActivity extends AppCompatActivity implements
         mCloudImageView = findViewById(R.id.no_connection_cloud_iv);
         mMessagesTextView = findViewById(R.id.messages_tv);
         mMessagesTextView.setText(R.string.loading);
+        mNavigationLayout = findViewById(R.id.navigation);
+        mPageNumber = findViewById(R.id.page_number_tv);
+
 
         // The layout manager for our RecyclerView will be a GridLayout, so we can display
         // our movies on columns. The number of columns is dictated by the orientation of the device
@@ -114,14 +122,22 @@ public class MainActivity extends AppCompatActivity implements
         showLoading();
 
         // If there is a network connection, fetch data
-        if(NetworkUtils.isConnected(this)){
+        fetchDataIfConnected(this);
+    }
+    // TODO: Explain everything for others
+    // TODO: See if you can monitor the connection and load the movies when connection is available again
+    // TODO: Create layout for Tablets, create Settings layout for landscape mode
+
+    private void fetchDataIfConnected(Context context){
+        // If there is a network connection, fetch data
+        if(NetworkUtils.isConnected(context)){
             showMovies();
             //Loader init
             getLoaderManager().restartLoader(MOVIES_LOADER_ID, null, this);
         } else {
             // Otherwise, if there is no network connection, in portrait mode, we will get a
             // reference for our collapsing bar and set it collapsed
-            if (!ScreenUtils.isLandscapeMode(this)) {
+            if (!ScreenUtils.isLandscapeMode(context)) {
                 AppBarLayout myAppBar = findViewById(R.id.app_bar);
                 myAppBar.setExpanded(false);
             }
@@ -132,11 +148,7 @@ public class MainActivity extends AppCompatActivity implements
             mMessagesTextView.setText(R.string.no_internet);
         }
     }
-    // TODO: Explain everything for others
-    // TODO: See if you can monitor the connection and load the movies when connection is available again
-    // TODO: Create layout for Tablets, create Settings layout for landscape mode
-    // TODO: Modify the Settings layout (image, text and landscape mode)
-    // TODO: Create a page selector for the results
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -166,30 +178,6 @@ public class MainActivity extends AppCompatActivity implements
         startActivity(movieDetailsIntent);
     }
 
-    // Hide the text and loading indicator and show movie data
-    private void showMovies() {
-        mMoviesRecyclerView.setVisibility(View.VISIBLE);
-        mCloudImageView.setVisibility(View.INVISIBLE);
-        mMessagesTextView.setVisibility(View.INVISIBLE);
-        mLoading.setVisibility(View.INVISIBLE);
-    }
-
-    // Hide the movie data and show loading indicator and text
-    private void showLoading() {
-        mMoviesRecyclerView.setVisibility(View.INVISIBLE);
-        mCloudImageView.setVisibility(View.INVISIBLE);
-        mMessagesTextView.setVisibility(View.VISIBLE);
-        mLoading.setVisibility(View.VISIBLE);
-    }
-
-    // Hide the movie data and loading indicator and show error message
-    private void showError() {
-        mMoviesRecyclerView.setVisibility(View.INVISIBLE);
-        mCloudImageView.setVisibility(View.VISIBLE);
-        mMessagesTextView.setVisibility(View.VISIBLE);
-        mLoading.setVisibility(View.INVISIBLE);
-    }
-
     @Override
     public Loader<Movie[]> onCreateLoader(int loaderId, Bundle args) {
         switch (loaderId) {
@@ -213,11 +201,12 @@ public class MainActivity extends AppCompatActivity implements
             mMoviesRecyclerView.smoothScrollToPosition(mPosition);
         }
 
-        if (data != null && data.length != 0) {
-            // If new data is available, create a subtitle with our new movie category
-            mMovieCategory.setText(ScreenUtils.createCategoryTitle(this));
+        if (data.length != 0) {
             // Show results
             showMovies();
+            // If new data is available, create a subtitle with our new movie category
+            mMovieCategory.setText(ScreenUtils.createCategoryTitle(this));
+            mPageNumber.setText(MoviePreferences.getLastPageNumber(this));
         }
     }
 
@@ -225,5 +214,53 @@ public class MainActivity extends AppCompatActivity implements
     public void onLoaderReset(Loader<Movie[]> loader) {
         // If the loader is reset, swap old data with null ones
         mAdapter.swapMovies(null);
+    }
+
+    // Hide the text and loading indicator and show movie data
+    private void showMovies() {
+        mMoviesRecyclerView.setVisibility(View.VISIBLE);
+        mNavigationLayout.setVisibility(View.VISIBLE);
+        mCloudImageView.setVisibility(View.INVISIBLE);
+        mMessagesTextView.setVisibility(View.INVISIBLE);
+        mLoading.setVisibility(View.INVISIBLE);
+    }
+
+    // Hide the movie data and show loading indicator and text
+    private void showLoading() {
+        mMoviesRecyclerView.setVisibility(View.INVISIBLE);
+        mNavigationLayout.setVisibility(View.INVISIBLE);
+        mCloudImageView.setVisibility(View.INVISIBLE);
+        mMessagesTextView.setVisibility(View.VISIBLE);
+        mLoading.setVisibility(View.VISIBLE);
+    }
+
+    // Hide the movie data and loading indicator and show error message
+    private void showError() {
+        mMoviesRecyclerView.setVisibility(View.INVISIBLE);
+        mNavigationLayout.setVisibility(View.INVISIBLE);
+        mCloudImageView.setVisibility(View.VISIBLE);
+        mMessagesTextView.setVisibility(View.VISIBLE);
+        mLoading.setVisibility(View.INVISIBLE);
+    }
+
+    public void nextPage(View v) {
+        Context context = getApplicationContext();
+        String currentPage = MoviePreferences.getLastPageNumber(context);
+        int nextPage = Integer.parseInt(currentPage) + 1;
+        MoviePreferences.setLastPageNumber(getApplicationContext(), String.valueOf(nextPage));
+        fetchDataIfConnected(context);
+    }
+
+    public void previousPage(View v) {
+        Context context = getApplicationContext();
+        String currentPage = MoviePreferences.getLastPageNumber(context);
+        int nextPage;
+        if (TextUtils.equals(currentPage, "1")) {
+            nextPage = 1;
+        } else {
+            nextPage = Integer.parseInt(currentPage) - 1;
+        }
+        MoviePreferences.setLastPageNumber(getApplicationContext(), String.valueOf(nextPage));
+        fetchDataIfConnected(context);
     }
 }

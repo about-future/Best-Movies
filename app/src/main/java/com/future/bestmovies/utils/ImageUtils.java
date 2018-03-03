@@ -27,18 +27,9 @@ public class ImageUtils {
     public static final String MEDIUM = "medium";
     public static final String SMALL = "small";
 
-    // This method will build and return the image URL used by our RecyclerView. The image size
-    // will be extracted from our preferences that were created on the first run of the app
-    public static String buildImageUrlForRecyclerView(Context context, String imagePath) {
-        String imageSizeWidth = MoviePreferences.getImageSizeForRecyclerView(context);
-        String imageUrl = IMAGES_BASE_URL.concat(imageSizeWidth).concat(imagePath);
-
-        //Log.v(TAG, "URL: " + imageUrl);
-        return imageUrl;
-    }
 
     // This method will build and return the image URL, based on the imagePath (i.e. "/nBNZadXqJSdt05SHLqgT0HuC5Gm.jpg")
-    // and on the expected imageType (i.e. backdrop or poster)
+    // and on the expected imageType (i.e. backdrop or poster) with the preferred size (optimal, medium or small)
     public static String buildImageUrlWithImageType(Context context, String imagePath, String imageType) {
         // Get image size as a string, so we can build our image URL
         String[] imageSizeAsString = getImageSize(context);
@@ -49,12 +40,13 @@ public class ImageUtils {
         if (TextUtils.equals(imageType, BACKDROP)) {
             imageSize = imageSizeAsString[0];
         } else {
+            // If imageType is POSTER
             imageSize = imageSizeAsString[1];
         }
 
         // Create the image URL and return it
         String imageUrl = IMAGES_BASE_URL.concat(imageSize).concat(imagePath);
-        Log.v(TAG, "Image URL: " + imageUrl);
+        //Log.v(TAG, "Image URL: " + imageUrl);
 
         return imageUrl;
     }
@@ -70,7 +62,7 @@ public class ImageUtils {
         return new int[]{width, height};
     }
 
-    // This method will return a string array, based on the width of the screen size (i.e. "w780")
+    // This method will return a string array, based on the width of the screen size (i.e. TODO: "w780")
     private static String[] getImageSize(Context context) {
         // Get the preferred image size (optimal, medium or small)
         String preferredImageSize = MoviePreferences.getPreferredImageSize(context);
@@ -85,8 +77,8 @@ public class ImageUtils {
                 // Divide the screen size to 2 and generate the string values for poster and backdrop
                 return getImageSizeAsString((int) (screenSize[0] / 2));
             case SMALL:
-                // Divide the screen size to 3 and generate the string values for poster and backdrop
-                return getImageSizeAsString((int) (screenSize[0] / 3));
+                // Divide the screen size to 4 and generate the string values for poster and backdrop
+                return getImageSizeAsString((int) (screenSize[0] / 4));
             default:
                 // Generate the string values for poster and backdrop using the full size value of
                 // the screen. This option will get best visual results for the user, but will

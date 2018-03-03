@@ -6,4 +6,7 @@
     <color name="transparent_black">#70000000</color>
     <color name="background_box">#303030</color>
     <color name="colorPrimaryBlue">#1976D2</color>
+    <color name="colorWhite">#FFFFFF</color>
+    <color name="colorTransparentWhite">#80FFFFFF</color>
+    <color name="colorTransparentBlack">#80000000</color>
 </resources>

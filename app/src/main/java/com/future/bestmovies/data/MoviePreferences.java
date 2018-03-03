@@ -19,6 +19,21 @@ public class MoviePreferences {
         return sp.getString(movieCategoryKey, defaultCategory);
     }
 
+    public static String getLastPageNumber(Context context) {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        String pageNumberKey = context.getString(R.string.pref_page_number_key);
+        String defaultPageNumber = context.getString(R.string.pref_page_number_default);
+        return sp.getString(pageNumberKey, defaultPageNumber);
+    }
+
+    public static void setLastPageNumber(Context context, String pageNumber) {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor editor = sp.edit();
+        String pageNumberKey = context.getString(R.string.pref_page_number_key);
+        editor.putString(pageNumberKey, pageNumber);
+        editor.apply();
+    }
+
     public static void setImageSizeForRecyclerView(Context context, String optimalImageWidth) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = sp.edit();
@@ -39,7 +54,7 @@ public class MoviePreferences {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         String preferredImageSizeKey = context.getString(R.string.pref_image_size_key);
         String defaultImageSize = context.getString(R.string.pref_image_size_optimal);
-        Log.v(TAG, "getPreferredImageSize: " + sp.getString(preferredImageSizeKey, defaultImageSize));
+        //Log.v(TAG, "getPreferredImageSize: " + sp.getString(preferredImageSizeKey, defaultImageSize));
         return sp.getString(preferredImageSizeKey, defaultImageSize);
     }
 

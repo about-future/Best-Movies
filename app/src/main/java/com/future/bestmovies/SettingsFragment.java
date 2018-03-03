@@ -10,11 +10,13 @@ import android.support.v7.preference.PreferenceScreen;
 import android.util.Log;
 
 import com.future.bestmovies.data.Movie;
+import com.future.bestmovies.data.MoviePreferences;
 
 
 public class SettingsFragment extends PreferenceFragmentCompat implements
         SharedPreferences.OnSharedPreferenceChangeListener {
     private static final String TAG = SettingsFragment.class.getSimpleName();
+    private static final String ONE = "1";
 
     @Override
     public void onCreatePreferences(Bundle bundle, String s) {
@@ -52,8 +54,8 @@ public class SettingsFragment extends PreferenceFragmentCompat implements
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         if (key.equals(getString(R.string.pref_category_key))) {
-            // Desired category has changed, update lists of movie entries accordingly
-            //getLoaderManager().restartLoader(MainActivity.MOVIES_LOADER_ID, null, null);
+            // Desired category has changed, reset the last page number to "1"
+            MoviePreferences.setLastPageNumber(this.getContext(), ONE);
         }
 
         Preference preference = findPreference(key);

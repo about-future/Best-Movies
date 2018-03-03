@@ -193,12 +193,12 @@
 
     <ImageView
         android:id="@+id/no_connection_cloud_iv"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
         android:layout_gravity="center"
         android:layout_marginBottom="@dimen/details_vertical_spacing"
         android:contentDescription="@string/no_connection"
-        android:src="@drawable/ic_cloud_off_white_48dp"
+        app:srcCompat="@drawable/ic_cloud_off"
         android:visibility="invisible" />
 
     <TextView

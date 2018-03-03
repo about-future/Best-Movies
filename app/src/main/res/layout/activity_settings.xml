@@ -1,72 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<fragment xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/weather_settings_fragment"
+    android:name="com.future.bestmovies.SettingsFragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.future.bestmovies.SettingsActivity">
-
-    <android.support.constraint.ConstraintLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
-
-        <ImageView
-            android:id="@+id/details_backdrop_iv"
-            android:layout_width="match_parent"
-            android:layout_height="281dp"
-            android:adjustViewBounds="true"
-            android:contentDescription="@string/movie_backdrop"
-            android:scaleType="centerCrop"
-            android:src="@drawable/background"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="200dp"
-            android:background="@drawable/gradient_grey"
-            app:layout_constraintBottom_toBottomOf="@id/details_backdrop_iv"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
-
-        <TextView
-            android:id="@+id/details_title_tv"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="@dimen/details_horizontal_spacing"
-            android:layout_marginStart="@dimen/details_horizontal_spacing"
-            android:fontFamily="sans-serif-condensed"
-            android:textColor="@android:color/white"
-            android:textSize="34sp"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/details_backdrop_iv"
-            android:text="Settings" />
-
-        <TextView
-            android:id="@+id/original_title_label"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/original_title_label"
-            android:textColor="@color/colorAccent"
-            android:textSize="@dimen/details_font_size"
-            app:layout_constraintLeft_toLeftOf="@id/details_title_tv"
-            app:layout_constraintStart_toStartOf="@id/details_title_tv"
-            app:layout_constraintTop_toBottomOf="@id/details_title_tv" />
-
-        <fragment
-            android:name="com.future.bestmovies.SettingsFragment"
-            android:id="@+id/weather_settings_fragment"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/details_horizontal_spacing"
-            android:layout_marginEnd="@dimen/details_horizontal_spacing"
-            android:layout_marginTop="@dimen/details_vertical_spacing"
-            app:layout_constraintTop_toBottomOf="@+id/original_title_label"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"/>
-
-    </android.support.constraint.ConstraintLayout>
-
-</ScrollView>
+    tools:context="com.future.bestmovies.SettingsActivity" />

@@ -45,10 +45,10 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
 
         if (!TextUtils.isEmpty(mMovies[position].getPosterPath())) {
             Picasso.with(mContext)
-                    .load(ImageUtils.buildImageUrlForRecyclerView(
+                    .load(ImageUtils.buildImageUrlWithImageType(
                             mContext,
-                            mMovies[position].getPosterPath()
-                            ))
+                            mMovies[position].getPosterPath(),
+                            ImageUtils.POSTER))
                     .into(holder.moviePosterImageView);
             description = mMovies[position].
                     getMovieTitle().
@@ -75,7 +75,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
     class MovieViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         ImageView moviePosterImageView;
 
-        public MovieViewHolder(View itemView) {
+        MovieViewHolder(View itemView) {
             super(itemView);
             moviePosterImageView = itemView.findViewById(R.id.movie_poster_iv);
             itemView.setOnClickListener(this);

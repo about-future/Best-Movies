@@ -9,10 +9,13 @@
     <string name="menu_settings">Settings</string>
 
     <!-- Content descriptions -->
-    <string name="movie_poster">Movie Poster</string>
-    <string name="movie_backdrop">Movie Backdrop</string>
+    <string name="movie_poster">Movie poster</string>
+    <string name="movie_backdrop">Movie backdrop</string>
+    <string name="main_backdrop">Main backdrop</string>
     <string name="poster"> poster</string>
     <string name="no_connection">No connection icon</string>
+    <string name="next_page">Next page</string>
+    <string name="previous_page">Previous page</string>
 
     <!-- Main and Details Activity Labels -->
     <string name="best_result_label">Which one is your favourite?</string>
@@ -58,11 +61,9 @@
     <string name="pref_category_upcoming" translatable="false">upcoming</string>
     <string name="pref_category_now_playing" translatable="false">now_playing</string>
 
-    <!-- Strings related to High Quality Enabled preference -->
-    <string name="pref_enable_image_quality_label">High Quality Images</string>
-    <string name="pref_enable_image_quality_key" translatable="false">image_quality</string>
-    <string name="pref_enable_image_quality_true">Enabled</string>
-    <string name="pref_enable_image_quality_false">Not Enabled</string>
+    <!-- Page number preference -->
+    <string name="pref_page_number_key" translatable="false">page_number</string>
+    <string name="pref_page_number_default" translatable="false">1</string>
 
     <!-- Screen size width preference -->
     <string name="pref_screen_width_key" translatable="false">screen_width</string>
@@ -79,7 +80,7 @@
     <string name="pref_image_size_medium" translatable="false">medium</string>
     <string name="pref_image_size_small" translatable="false">small</string>
 
-
+    <!-- GENRES -->
     <!-- Movie Genres (From themoviedb.org) -->
     <string name="genre_28">Action</string>
     <string name="genre_12">Adventure</string>

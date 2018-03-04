@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:xliff="http://schemas.android.com/apk/res-auto">
     <!-- Activity titles -->
     <string name="app_name">Best Movies</string>
     <string name="activity_title_main">Best Movies</string>
@@ -35,6 +35,7 @@
     <string name="details_error_message">Movie details not available</string>
     <string name="no_poster">Movie has no poster</string>
     <string name="no_backdrop">Movie has no backdrop</string>
+    <string name="no_profile_picture">Actor has no profile picture</string>
 
     <!-- Image Sizes -->
     <string name="image_size92">w92</string>

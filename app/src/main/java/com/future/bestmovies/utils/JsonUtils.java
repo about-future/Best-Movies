@@ -5,7 +5,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.future.bestmovies.data.Movie;
-import com.future.bestmovies.data.MovieCast;
+import com.future.bestmovies.data.Cast;
 
 public class JsonUtils {
     //Movie labels
@@ -79,7 +79,7 @@ public class JsonUtils {
     }
 
     // Parses the JSON response for entire list of actors from selected movie
-    public static MovieCast[] parseMovieCastJson(String movieCastStr) throws JSONException {
+    public static Cast[] parseMovieCastJson(String movieCastStr) throws JSONException {
         String character;
         int id;
         String name;
@@ -89,7 +89,7 @@ public class JsonUtils {
         JSONObject fullMovieCastJson = new JSONObject(movieCastStr);
 
         JSONArray jsonResultsArray = fullMovieCastJson.getJSONArray(CAST);
-        MovieCast[] movieCast = new MovieCast[jsonResultsArray.length()];
+        Cast[] movieCast = new Cast[jsonResultsArray.length()];
         for (int i = 0; i < jsonResultsArray.length(); i++) {
             JSONObject actorJson = jsonResultsArray.getJSONObject(i);
 
@@ -98,7 +98,7 @@ public class JsonUtils {
             name = actorJson.getString(NAME);
             profilePath = actorJson.getString(PROFILE_PATH);
 
-            movieCast[i] = new MovieCast(character, id, name, profilePath);
+            movieCast[i] = new Cast(character, id, name, profilePath);
         }
 
         return movieCast;

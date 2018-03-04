@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="details_horizontal_spacing">24dp</dimen>
+    <dimen name="details_vertical_spacing">24dp</dimen>
+    <dimen name="details_overview_top_spacing">20dp</dimen>
+    <dimen name="details_recycle_view_spacing">12dp</dimen>
+
+    <dimen name="fab_margin">24dp</dimen>
+</resources>

@@ -8,6 +8,7 @@
 
     <dimen name="details_font_size">18sp</dimen>
     <dimen name="details_overview_font_size">16sp</dimen>
+    <dimen name="details_recycle_view_spacing">8dp</dimen>
 
     <dimen name="fab_margin">16dp</dimen>
 </resources>

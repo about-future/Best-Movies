@@ -46,7 +46,7 @@ public class ImageUtils {
 
         // Create the image URL and return it
         String imageUrl = IMAGES_BASE_URL.concat(imageSize).concat(imagePath);
-        //Log.v(TAG, "Image URL: " + imageUrl);
+        Log.v(TAG, "Image URL: " + imageUrl);
 
         return imageUrl;
     }

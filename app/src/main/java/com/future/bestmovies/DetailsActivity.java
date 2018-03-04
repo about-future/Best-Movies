@@ -1,10 +1,15 @@
 package com.future.bestmovies;
 
+import android.app.LoaderManager;
 import android.content.Intent;
+import android.content.Loader;
 import android.graphics.Color;
 import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
@@ -14,20 +19,31 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.future.bestmovies.data.Cast;
+import com.future.bestmovies.data.CastLoader;
 import com.future.bestmovies.data.Movie;
+import com.future.bestmovies.data.MovieLoader;
+import com.future.bestmovies.data.MoviePreferences;
 import com.future.bestmovies.utils.ImageUtils;
 import com.future.bestmovies.utils.MovieUtils;
 import com.future.bestmovies.utils.NetworkUtils;
+import com.future.bestmovies.utils.ScreenUtils;
 import com.squareup.picasso.Picasso;
 
 import java.net.URL;
 
-public class DetailsActivity extends AppCompatActivity {
+public class DetailsActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cast[]> {
+    public static final int CAST_LOADER_ID = 34;
     public static final String MOVIE_OBJECT = "movie";
     private Movie mSelectedMovie;
     private ConstraintLayout mMovieDetailsLayout;
     private TextView mMessagesTextView;
     private ImageView mCloudImageView;
+
+    private TextView castTextView;
+    private int mPosition = RecyclerView.NO_POSITION;
+    private CastAdapter mAdapter;
+    private RecyclerView mCastRecyclerView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -107,6 +123,23 @@ public class DetailsActivity extends AppCompatActivity {
             movieGenre[i] = MovieUtils.getStringMovieGenre(this, mSelectedMovie.getGenreIds()[i]);
         }
         movieGenreTextView.setText(TextUtils.join(", ", movieGenre));
+
+        // Movie Cast
+        mCastRecyclerView = findViewById(R.id.cast_rv);
+
+        // The layout manager for our Cast RecyclerView will be a LinerLayout, so we can display
+        // our cast horizontally
+        LinearLayoutManager layoutManager =
+                new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
+        mCastRecyclerView.setLayoutManager(layoutManager);
+        mCastRecyclerView.setHasFixedSize(true);
+
+        mAdapter = new CastAdapter(this, new Cast[]{});
+        mCastRecyclerView.setAdapter(mAdapter);
+
+        hideCast();
+
+        getLoaderManager().initLoader(CAST_LOADER_ID, null, this);
     }
 
     @Override
@@ -143,5 +176,55 @@ public class DetailsActivity extends AppCompatActivity {
         mMovieDetailsLayout.setVisibility(View.INVISIBLE);
         mCloudImageView.setVisibility(View.VISIBLE);
         mMessagesTextView.setVisibility(View.VISIBLE);
+    }
+
+    private void showCast() {
+        mCastRecyclerView.setVisibility(View.VISIBLE);
+    }
+
+    private void hideCast() {
+        mCastRecyclerView.setVisibility(View.INVISIBLE);
+    }
+
+    @Override
+    public Loader<Cast[]> onCreateLoader(int loaderId, Bundle bundle) {
+        switch (loaderId) {
+            case CAST_LOADER_ID:
+                // If the loaded id matches ours, return a new cast movie loader
+                return new CastLoader(this, String.valueOf(mSelectedMovie.getMovieId()));
+            default:
+                throw new RuntimeException("Loader Not Implemented: " + loaderId);
+        }
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cast[]> loader, Cast[] movieCast) {
+        mAdapter.swapCast(movieCast);
+
+//        if (cast.length != 0) {
+//            String[] movieCast = new String[cast.length];
+//            for (int i = 0; i < cast.length; i++) {
+//                movieCast[i] = cast[i].getActorName();
+//            }
+//
+//            castTextView.setText(TextUtils.join(", ", movieCast));
+//        }
+
+        // If our RecyclerView has is not position, we assume the first position in the list
+        // and set the RecyclerView a the beginning of our results
+        if (mPosition == RecyclerView.NO_POSITION) {
+            mPosition = 0;
+            mCastRecyclerView.smoothScrollToPosition(mPosition);
+        }
+
+        if (movieCast.length != 0) {
+            // Show movie cast
+            showCast();
+        }
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cast[]> loader) {
+        mAdapter.swapCast(null);
     }
 }

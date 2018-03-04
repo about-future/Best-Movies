@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <View
+        android:id="@+id/separation_line"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginEnd="@dimen/details_horizontal_spacing"
+        android:layout_marginStart="@dimen/details_horizontal_spacing"
+        android:background="@color/colorPrimary"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/ratings_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/details_horizontal_spacing"
+        android:layout_marginTop="@dimen/details_vertical_spacing"
+        android:text="@string/ratings_label"
+        android:textColor="@color/colorAccent"
+        android:textSize="@dimen/details_font_size"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/separation_line" />
+
+    <TextView
+        android:id="@+id/details_ratings_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
+        android:textSize="@dimen/details_font_size"
+        app:layout_constraintLeft_toRightOf="@id/ratings_label"
+        app:layout_constraintStart_toEndOf="@id/ratings_label"
+        app:layout_constraintTop_toTopOf="@id/ratings_label"
+        tools:text="8.2" />
+
+    <TextView
+        android:id="@+id/release_date_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="4dp"
+        android:text="@string/release_date_label"
+        android:textColor="@color/colorAccent"
+        android:textSize="@dimen/details_font_size"
+        app:layout_constraintEnd_toStartOf="@id/details_release_date_tv"
+        app:layout_constraintRight_toLeftOf="@+id/details_release_date_tv"
+        app:layout_constraintTop_toTopOf="@id/details_ratings_tv" />
+
+    <TextView
+        android:id="@+id/details_release_date_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/details_horizontal_spacing"
+        android:textSize="@dimen/details_font_size"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="@id/details_ratings_tv"
+        tools:text="2018-02-20" />
+
+    <View
+        android:id="@+id/separation_line2"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginEnd="@dimen/details_horizontal_spacing"
+        android:layout_marginStart="@dimen/details_horizontal_spacing"
+        android:layout_marginTop="@dimen/details_vertical_spacing"
+        android:background="@color/colorPrimary"
+        app:layout_constraintTop_toBottomOf="@id/details_ratings_tv" />
+
+</android.support.constraint.ConstraintLayout>

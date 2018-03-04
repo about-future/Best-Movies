@@ -7,7 +7,7 @@ import android.net.Uri;
 import android.util.Log;
 
 import com.future.bestmovies.data.Movie;
-import com.future.bestmovies.data.MovieCast;
+import com.future.bestmovies.data.Cast;
 import com.future.bestmovies.data.MoviePreferences;
 
 import org.json.JSONException;
@@ -54,6 +54,7 @@ public class NetworkUtils {
         }
     }
 
+    // This method will build the API Url for movie cast(credits) based on the movie id
     private static URL buildCastMovieApiUrl(String movieId) {
         Uri movieQueryUri = Uri.parse(API_MOVIE_BASE_URL).buildUpon()
                 .appendPath(MOVIE)
@@ -115,9 +116,8 @@ public class NetworkUtils {
         return movieResults;
     }
 
-    public static MovieCast[] fetchMovieCast(Context context) {
-        //TODO: this method
-        URL url = getUrl(context);
+    public static Cast[] fetchMovieCast(String movieId) {
+        URL url = buildCastMovieApiUrl(movieId);
 
         String jsonMovieCastResponse = null;
         try {
@@ -128,12 +128,12 @@ public class NetworkUtils {
             Log.e(TAG, "Error accessing the Server:", e);
         }
 
-        MovieCast[] movieCast = null;
+        Cast[] movieCast = null;
         try {
             // Parse the JSON into an array of Movie objects
             movieCast = JsonUtils.parseMovieCastJson(jsonMovieCastResponse);
         } catch (JSONException e) {
-            Log.e(TAG, "Error parsing Movies JSON: ", e);
+            Log.e(TAG, "Error parsing movie Cast JSON: ", e);
         }
 
         return movieCast;

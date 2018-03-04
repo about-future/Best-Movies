@@ -2,11 +2,7 @@ package com.future.bestmovies;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.Configuration;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.support.design.widget.AppBarLayout;
-import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.app.LoaderManager;
 import android.content.Loader;
@@ -17,11 +13,9 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -148,7 +142,6 @@ public class MainActivity extends AppCompatActivity implements
             mMessagesTextView.setText(R.string.no_internet);
         }
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

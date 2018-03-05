@@ -120,12 +120,10 @@ public class MainActivity extends AppCompatActivity implements
     }
     // TODO: Explain everything for others
     // TODO: See if you can monitor the connection and load the movies when connection is available again
-    // TODO: Create layout for Tablets, create Settings layout for landscape mode
 
     private void fetchDataIfConnected(Context context){
         // If there is a network connection, fetch data
         if(NetworkUtils.isConnected(context)){
-            showMovies();
             //Loader init
             getLoaderManager().restartLoader(MOVIES_LOADER_ID, null, this);
         } else {

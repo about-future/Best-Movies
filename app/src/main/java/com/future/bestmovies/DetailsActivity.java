@@ -3,34 +3,30 @@ package com.future.bestmovies;
 import android.app.LoaderManager;
 import android.content.Intent;
 import android.content.Loader;
-import android.graphics.Color;
 import android.support.constraint.ConstraintLayout;
+import android.support.design.widget.AppBarLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
-import android.util.DisplayMetrics;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.future.bestmovies.data.Cast;
 import com.future.bestmovies.data.CastLoader;
 import com.future.bestmovies.data.Movie;
-import com.future.bestmovies.data.MovieLoader;
-import com.future.bestmovies.data.MoviePreferences;
 import com.future.bestmovies.utils.ImageUtils;
 import com.future.bestmovies.utils.MovieUtils;
 import com.future.bestmovies.utils.NetworkUtils;
 import com.future.bestmovies.utils.ScreenUtils;
 import com.squareup.picasso.Picasso;
 
-import java.net.URL;
 
 public class DetailsActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cast[]> {
     public static final int CAST_LOADER_ID = 34;
@@ -40,106 +36,153 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
     private TextView mMessagesTextView;
     private ImageView mCloudImageView;
 
-    private TextView castTextView;
     private int mPosition = RecyclerView.NO_POSITION;
     private CastAdapter mAdapter;
     private RecyclerView mCastRecyclerView;
+    private ProgressBar mCastProgressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_details);
+
+        // We initialize and set the toolbar
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         mMovieDetailsLayout = findViewById(R.id.movie_details_layout);
         mCloudImageView = findViewById(R.id.no_connection_cloud_iv);
         mMessagesTextView = findViewById(R.id.messages_tv);
-
-        // If there is a network connection, fetch data
-        if(NetworkUtils.isConnected(this)){
-            showMovieDetails();
-        } else {
-            // Otherwise, hide data and display connection error message
-            showError();
-            // Update message TextView with no connection error message
-            mMessagesTextView.setText(R.string.no_internet);
-        }
-
         ImageView movieBackdropImageView = findViewById(R.id.details_backdrop_iv);
-        TextView movieTitleTextView = findViewById(R.id.details_title_tv);
         ImageView moviePosterImageView = findViewById(R.id.details_poster_iv);
         TextView moviePlotTextView = findViewById(R.id.details_plot_tv);
-        TextView movieRatingTextView = findViewById(R.id.details_ratings_tv);
-        TextView movieReleaseDateTextView = findViewById(R.id.details_release_date_tv);
         TextView movieGenreTextView = findViewById(R.id.details_genre_tv);
+        mCastRecyclerView = findViewById(R.id.cast_rv);
+        mCastProgressBar = findViewById(R.id.loading_cast_pb);
 
+        // The layout manager for our Cast RecyclerView will be a LinerLayout, so we can display
+        // our cast on a single line, horizontally
+        LinearLayoutManager layoutManager =
+                new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
+        mCastRecyclerView.setLayoutManager(layoutManager);
+        mCastRecyclerView.setHasFixedSize(true);
+        mAdapter = new CastAdapter(this, new Cast[]{});
+        mCastRecyclerView.setAdapter(mAdapter);
+
+        // If we have an instance saved and contains our movie object, we use it to populate our UI
         if (savedInstanceState != null && savedInstanceState.containsKey(MOVIE_OBJECT)) {
             mSelectedMovie = savedInstanceState.getParcelable(MOVIE_OBJECT);
         } else {
+            // Otherwise, we check our intent and see if there is a Movie object passed from
+            // MainActivity, so we can populate our UI. If there isn't we close this activity and
+            // display a toast message.
             Intent intent = getIntent();
             if (intent == null || !intent.hasExtra(MOVIE_OBJECT)) {
                 closeOnError();
             }
-
             mSelectedMovie = intent.getParcelableExtra(MOVIE_OBJECT);
         }
 
+        // If the Movie object contains no data, we cloase this activity and display a toast message
         if (mSelectedMovie == null) {
             // Movies data unavailable
             closeOnError();
             return;
         }
 
-        if (!TextUtils.isEmpty(mSelectedMovie.getBackdropPath())) {
-            Picasso.with(this)
-                    .load(ImageUtils.buildImageUrlWithImageType(
-                            this,
-                            mSelectedMovie.getBackdropPath(),
-                            ImageUtils.BACKDROP))
-                    .into(movieBackdropImageView);
-        } else {
-            movieBackdropImageView.setImageResource(R.drawable.backdrop);
-        }
-
-        movieTitleTextView.setText(mSelectedMovie.getMovieTitle());
-        movieRatingTextView.setText(String.valueOf(mSelectedMovie.getVoteAverage()));
-        movieReleaseDateTextView.setText(mSelectedMovie.getReleaseDate());
-
-        if (!TextUtils.isEmpty(mSelectedMovie.getPosterPath())) {
-            Picasso.with(this)
-                    .load(ImageUtils.buildImageUrlWithImageType(
-                            this,
-                            mSelectedMovie.getPosterPath(),
-                            ImageUtils.POSTER))
-                    .into(moviePosterImageView);
-        } else {
-            moviePosterImageView.setImageResource(R.drawable.poster);
-        }
-
-        moviePlotTextView.setText(mSelectedMovie.getOverview());
-
+        // Populating UI with information
+        // Set the title of our activity as the movie title
+        setTitle(mSelectedMovie.getMovieTitle());
+        // Generate and set movie genres
         String[] movieGenre = new String[mSelectedMovie.getGenreIds().length];
         for (int i = 0; i < mSelectedMovie.getGenreIds().length; i++) {
             movieGenre[i] = MovieUtils.getStringMovieGenre(this, mSelectedMovie.getGenreIds()[i]);
         }
         movieGenreTextView.setText(TextUtils.join(", ", movieGenre));
+        // Set the movie plot
+        moviePlotTextView.setText(mSelectedMovie.getOverview());
 
-        // Movie Cast
-        mCastRecyclerView = findViewById(R.id.cast_rv);
+        // If the user has the device in landscape mode, show the ratings and release date from
+        // layout ratings_landscape (placed inside the poster_and_plot layout)
+        // AND hide the ratings_portrait
+        ConstraintLayout ratingsLandscape = findViewById(R.id.ratings_landscape);
+        ConstraintLayout ratingsPortrait = findViewById(R.id.ratings_portrait);
+        TextView movieRatingTextView;
+        TextView movieReleaseDateTextView;
+        if (ScreenUtils.isLandscapeMode(this)) {
+            movieRatingTextView = findViewById(R.id.details_ratings_landscape_tv);
+            movieReleaseDateTextView = findViewById(R.id.details_release_date_landscape_tv);
+            ratingsLandscape.setVisibility(View.VISIBLE);
+            ratingsPortrait.setVisibility(View.GONE);
+        } else {
+            // Otherwise, show ratings_portrait and hide ratings_landscape
+            movieRatingTextView = findViewById(R.id.details_ratings_portrait_tv);
+            movieReleaseDateTextView = findViewById(R.id.details_release_date_portrait_tv);
+            ratingsPortrait.setVisibility(View.VISIBLE);
+            ratingsLandscape.setVisibility(View.GONE);
+        }
+        // Populate the allocated rating and release date TextViews
+        movieRatingTextView.setText(String.valueOf(mSelectedMovie.getVoteAverage()));
+        movieReleaseDateTextView.setText(mSelectedMovie.getReleaseDate());
 
-        // The layout manager for our Cast RecyclerView will be a LinerLayout, so we can display
-        // our cast horizontally
-        LinearLayoutManager layoutManager =
-                new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
-        mCastRecyclerView.setLayoutManager(layoutManager);
-        mCastRecyclerView.setHasFixedSize(true);
+        // Because all the information so far was provided by the Movie object and no internet
+        // connection was necessary, the next 3 areas of our UI will be populated if and only if we
+        // have an internet connection
+        // The movie backdrop, poster and cast depend on it
 
-        mAdapter = new CastAdapter(this, new Cast[]{});
-        mCastRecyclerView.setAdapter(mAdapter);
-
+        // First we show the progress bar and hide the Cast RecyclerView
         hideCast();
 
-        getLoaderManager().initLoader(CAST_LOADER_ID, null, this);
+        // If there is a network connection, we show all the movie details and fetch cast data
+        if (NetworkUtils.isConnected(this)) {
+            // Show movie details
+            showMovieDetails();
+
+            // Fetch movie backdrop if it's available
+            if (!mSelectedMovie.getBackdropPath().equals("null")) {
+                Picasso.with(this)
+                        .load(ImageUtils.buildImageUrlWithImageType(
+                                this,
+                                mSelectedMovie.getBackdropPath(),
+                                ImageUtils.BACKDROP))
+                        .into(movieBackdropImageView);
+            } else {
+                // Otherwise, set the default backdrop and chance the content description
+                movieBackdropImageView.setImageResource(R.drawable.ic_landscape);
+                movieBackdropImageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
+                movieBackdropImageView.setContentDescription(getString(R.string.no_backdrop));
+            }
+
+            // Fetch movie poster, if it's available
+            if (!mSelectedMovie.getPosterPath().equals("null")) {
+                if (ScreenUtils.isLandscapeMode(this)) {
+                    moviePosterImageView.getLayoutParams().width = (int) getResources().getDimension(R.dimen.poster_width);
+                }
+                Picasso.with(this)
+                        .load(ImageUtils.buildImageUrlWithImageType(
+                                this,
+                                mSelectedMovie.getPosterPath(),
+                                ImageUtils.POSTER))
+                        .into(moviePosterImageView);
+            } else {
+                // Otherwise, set the default poster and chance the content description
+                moviePosterImageView.setImageResource(R.drawable.ic_local_movies);
+                moviePosterImageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
+                moviePosterImageView.setContentDescription(getString(R.string.no_poster));
+            }
+            // Fetch movie cast
+            getLoaderManager().initLoader(CAST_LOADER_ID, null, this);
+        } else {
+                hideCast();
+            // Otherwise, hide data and display connection error message
+            showError();
+            // Update message TextView with no connection error message
+            mMessagesTextView.setText(R.string.no_internet);
+            // And set collapsing toolbar as collapsed (not expanded)
+            AppBarLayout myAppBar = findViewById(R.id.app_bar);
+            myAppBar.setExpanded(false);
+        }
     }
 
     @Override
@@ -178,12 +221,16 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
         mMessagesTextView.setVisibility(View.VISIBLE);
     }
 
+    // Hide the progress bar and show cast
     private void showCast() {
         mCastRecyclerView.setVisibility(View.VISIBLE);
+        mCastProgressBar.setVisibility(View.INVISIBLE);
     }
 
+    // Show progress bar and hide cast
     private void hideCast() {
         mCastRecyclerView.setVisibility(View.INVISIBLE);
+        mCastProgressBar.setVisibility(View.VISIBLE);
     }
 
     @Override
@@ -201,15 +248,6 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
     public void onLoadFinished(Loader<Cast[]> loader, Cast[] movieCast) {
         mAdapter.swapCast(movieCast);
 
-//        if (cast.length != 0) {
-//            String[] movieCast = new String[cast.length];
-//            for (int i = 0; i < cast.length; i++) {
-//                movieCast[i] = cast[i].getActorName();
-//            }
-//
-//            castTextView.setText(TextUtils.join(", ", movieCast));
-//        }
-
         // If our RecyclerView has is not position, we assume the first position in the list
         // and set the RecyclerView a the beginning of our results
         if (mPosition == RecyclerView.NO_POSITION) {
@@ -225,6 +263,6 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
 
     @Override
     public void onLoaderReset(Loader<Cast[]> loader) {
-        mAdapter.swapCast(null);
+        mAdapter.swapCast(new Cast[]{});
     }
 }

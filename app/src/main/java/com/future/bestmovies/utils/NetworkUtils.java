@@ -10,8 +10,6 @@ import com.future.bestmovies.data.Movie;
 import com.future.bestmovies.data.Cast;
 import com.future.bestmovies.data.MoviePreferences;
 
-import org.json.JSONException;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -29,14 +27,22 @@ public class NetworkUtils {
     private static final String CREDITS = "credits";
     private static final String DEFAULT_ID = "xxx";
 
-    public static URL getUrl(Context context) {
+    /* This method prepares the build of our main API URL, using two stored preferences and by
+     * calling a more complex method that builds the actual URL
+     * @param context is used for fetching the users preferences or default preferences if the app
+     * is run for the first time. In this case, the queryType = "popular" and pageNumber = "1"
+     */
+    private static URL getUrl(Context context) {
         String queryType = MoviePreferences.getPreferredQueryType(context);
         String pageNumber = MoviePreferences.getLastPageNumber(context);
-        return buildMovieApiUrlWithQueryTypeAndPageNumber(queryType, pageNumber);
+        return buildMovieApiUrl(queryType, pageNumber);
     }
 
-    // This method will build the API Url based on the selected category and selected page number
-    private static URL buildMovieApiUrlWithQueryTypeAndPageNumber(String queryType, String pageNumber) {
+    /* This method will build and return the API Url for a chategory of movies
+     * @param queryType is used to query a certain category of movies
+     * @pram pageNumber is used to select the page with results
+     */
+    private static URL buildMovieApiUrl(String queryType, String pageNumber) {
         Uri movieQueryUri = Uri.parse(API_MOVIE_BASE_URL).buildUpon()
                 .appendPath(MOVIE)
                 .appendPath(queryType)
@@ -54,7 +60,9 @@ public class NetworkUtils {
         }
     }
 
-    // This method will build the API Url for movie cast(credits) based on the movie id
+    /* This method will build and return the API URL for movie cast(credits)
+     * @param movieId is used to build the url
+     */
     private static URL buildCastMovieApiUrl(String movieId) {
         Uri movieQueryUri = Uri.parse(API_MOVIE_BASE_URL).buildUpon()
                 .appendPath(MOVIE)
@@ -73,6 +81,11 @@ public class NetworkUtils {
         }
     }
 
+    /* This method opens a HTTP connection, returns the content of the HTTP response or null if there
+     * is no response and closes the connection
+     * @param url is the source where we fetch the HTTP response from
+     * @throws IOException related to network and stream reading
+     */
     private static String getResponseFromHttpUrl(URL url) throws IOException {
         HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
         try {
@@ -93,52 +106,49 @@ public class NetworkUtils {
         }
     }
 
+    /* This method performs a network request using a URL, parses the JSON from that request and
+     * returns an array of Movie objects
+     * @param context is used to access getUrl utility method
+     */
     public static Movie[] fetchMovieData(Context context) {
-        URL url = getUrl(context);
-
-        String jsonMovieResponse = null;
         try {
+            // Create and return Api url
+            URL url = getUrl(context);
             // Use the URL to retrieve the JSON response from Movie API
-            jsonMovieResponse = NetworkUtils.getResponseFromHttpUrl(url);
-
+            String jsonMovieResponse = NetworkUtils.getResponseFromHttpUrl(url);
+            // Parse JSON response and return array of Movie objects
+            return JsonUtils.parseMoviesJson(jsonMovieResponse);
         } catch (Exception e) {
             Log.e(TAG, "Error accessing the Server:", e);
         }
 
-        Movie[] movieResults = null;
-        try {
-            // Parse the JSON into an array of Movie objects
-            movieResults = JsonUtils.parseMoviesJson(jsonMovieResponse);
-        } catch (JSONException e) {
-            Log.e(TAG, "Error parsing Movies JSON: ", e);
-        }
-
-        return movieResults;
+        // If something went wrong, we return an empty array of Movie objects
+        return new Movie[]{};
     }
 
+    /* This method performs a network request using a URL, parses the JSON from that request and
+     * returns an array of Cast objects
+     * @param movieId is used to access buildCastMovieApiUrl utility method
+     */
     public static Cast[] fetchMovieCast(String movieId) {
-        URL url = buildCastMovieApiUrl(movieId);
-
-        String jsonMovieCastResponse = null;
         try {
+            // Create and return the Api URL for movie cast, based on movie id
+            URL url = buildCastMovieApiUrl(movieId);
             // Use the URL to retrieve the JSON response from Movie API
-            jsonMovieCastResponse = NetworkUtils.getResponseFromHttpUrl(url);
-
+            String jsonMovieCastResponse = NetworkUtils.getResponseFromHttpUrl(url);
+            // Parse the JSON into an array of Cast objects
+            return JsonUtils.parseMovieCastJson(jsonMovieCastResponse);
         } catch (Exception e) {
             Log.e(TAG, "Error accessing the Server:", e);
         }
 
-        Cast[] movieCast = null;
-        try {
-            // Parse the JSON into an array of Movie objects
-            movieCast = JsonUtils.parseMovieCastJson(jsonMovieCastResponse);
-        } catch (JSONException e) {
-            Log.e(TAG, "Error parsing movie Cast JSON: ", e);
-        }
-
-        return movieCast;
+        // If something went wrong, we return an empty array of Cast objects
+        return new Cast[]{};
     }
 
+    /* This method performs a state of network connectivity test and returns true or false
+     * @param context is used to create a reference to the ConnectivityManager
+     */
     public static boolean isConnected(Context context) {
         // Get a reference to the ConnectivityManager to check state of network connectivity
         ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);

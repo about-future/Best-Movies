@@ -32,10 +32,10 @@
     <string name="loading">Loading&#8230;</string>
     <string name="no_movies">No movies found</string>
     <string name="no_internet">No internet connection.\nNo movies, right?</string>
-    <string name="details_error_message">Movie details not available</string>
-    <string name="no_poster">Movie has no poster</string>
-    <string name="no_backdrop">Movie has no backdrop</string>
-    <string name="no_profile_picture">Actor has no profile picture</string>
+    <string name="details_error_message">No movie details available</string>
+    <string name="no_poster">No movie poster available</string>
+    <string name="no_backdrop">No backdrop available</string>
+    <string name="no_profile_picture">No picture available</string>
 
     <!-- Image Sizes -->
     <string name="image_size92">w92</string>

@@ -35,7 +35,7 @@ public class CastAdapter extends RecyclerView.Adapter<CastAdapter.CastViewHolder
     public void onBindViewHolder(CastAdapter.CastViewHolder holder, int position) {
         String description;
 
-        if (!TextUtils.isEmpty(mCast[position].getProfilePath())) {
+        if (!mCast[position].getProfilePath().equals("null")) {
             Picasso.with(mContext)
                     .load(ImageUtils.buildImageUrlWithImageType(
                             mContext,
@@ -43,8 +43,10 @@ public class CastAdapter extends RecyclerView.Adapter<CastAdapter.CastViewHolder
                             ImageUtils.POSTER))
                     .into(holder.actorProfileImageView);
             description = mCast[position].getActorName();
-        } else {
-            holder.actorProfileImageView.setImageResource(R.drawable.default_poster);
+        }
+        else {
+            holder.actorProfileImageView.setImageResource(R.drawable.ic_person);
+            holder.actorProfileImageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
             description = mContext.getString(R.string.no_profile_picture);
         }
 

@@ -1,188 +1,70 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.design.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
     tools:context="com.future.bestmovies.DetailsActivity">
 
-    <ScrollView
+    <android.support.design.widget.AppBarLayout
+        android:id="@+id/app_bar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="@dimen/details_vertical_spacing">
+        android:layout_height="281dp"
+        android:fitsSystemWindows="true"
+        android:theme="@style/AppTheme.AppBarOverlay">
 
-        <android.support.constraint.ConstraintLayout
-            android:id="@+id/movie_details_layout"
+        <android.support.design.widget.CollapsingToolbarLayout
+            android:id="@+id/toolbar_layout"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:descendantFocusability="blocksDescendants"
-            android:visibility="visible">
+            android:layout_height="match_parent"
+            app:collapsedTitleTextAppearance="@style/TextAppearance.Condensed.Small"
+            app:contentScrim="?attr/colorPrimary"
+            app:expandedTitleMarginBottom="24dp"
+            app:expandedTitleMarginStart="16dp"
+            app:expandedTitleTextAppearance="@style/TextAppearance.Condensed.Big"
+            app:layout_scrollFlags="scroll|exitUntilCollapsed"
+            app:toolbarId="@+id/toolbar">
 
             <ImageView
                 android:id="@+id/details_backdrop_iv"
                 android:layout_width="match_parent"
-                android:layout_height="300dp"
-                android:adjustViewBounds="true"
+                android:layout_height="match_parent"
                 android:contentDescription="@string/movie_backdrop"
+                android:fitsSystemWindows="true"
                 android:scaleType="centerCrop"
-                android:src="@drawable/backdrop"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintStart_toStartOf="parent"/>
+                app:srcCompat="@drawable/ic_landscape"
+                app:layout_collapseMode="parallax" />
 
             <View
                 android:layout_width="match_parent"
                 android:layout_height="200dp"
-                android:background="@drawable/gradient_grey"
-                app:layout_constraintBottom_toBottomOf="@id/details_backdrop_iv"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintStart_toStartOf="parent" />
+                android:layout_gravity="bottom"
+                android:background="@drawable/gradient_grey" />
 
-            <android.support.constraint.ConstraintLayout
-                android:id="@+id/middle_layout"
-                android:layout_width="0dp"
+            <TextView
+                android:id="@+id/details_genre_tv"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="@dimen/details_horizontal_spacing"
-                android:layout_marginStart="@dimen/details_horizontal_spacing"
-                android:layout_marginTop="@dimen/details_vertical_spacing"
-                app:layout_constraintTop_toBottomOf="@id/details_backdrop_iv"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent">
+                android:layout_gravity="bottom"
+                android:layout_marginStart="17dp"
+                android:fontFamily="sans-serif-condensed"
+                android:text="@string/original_title_label"
+                android:textColor="@color/colorAccent"
+                android:textSize="15sp" />
 
-                <ImageView
-                    android:id="@+id/details_poster_iv"
-                    android:layout_width="200dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
-                    android:adjustViewBounds="true"
-                    android:contentDescription="@string/movie_poster"
-                    android:scaleType="centerCrop"
-                    app:layout_constraintLeft_toLeftOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    tools:src="@drawable/poster" />
+            <android.support.v7.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                app:layout_collapseMode="pin"
+                app:popupTheme="@style/AppTheme.PopupOverlay" />
 
-                <TextView
-                    android:id="@+id/details_title_tv"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="@dimen/details_horizontal_spacing"
-                    android:layout_marginStart="@dimen/details_horizontal_spacing"
-                    android:fontFamily="sans-serif-condensed"
-                    android:text="@string/original_title_label"
-                    android:textColor="@android:color/white"
-                    android:textSize="34sp"
-                    app:layout_constraintLeft_toRightOf="@id/details_poster_iv"
-                    app:layout_constraintStart_toEndOf="@id/details_poster_iv"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    tools:text="Movie Title" />
+        </android.support.design.widget.CollapsingToolbarLayout>
 
-                <TextView
-                    android:id="@+id/details_genre_tv"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="@dimen/details_horizontal_spacing"
-                    android:layout_marginStart="0dp"
-                    android:text="@string/genre_label"
-                    android:textColor="@color/colorAccent"
-                    android:textSize="@dimen/details_font_size"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintLeft_toLeftOf="@id/details_title_tv"
-                    app:layout_constraintStart_toStartOf="@id/details_title_tv"
-                    app:layout_constraintTop_toBottomOf="@id/details_title_tv" />
+    </android.support.design.widget.AppBarLayout>
 
-                <View
-                    android:id="@+id/separation_line1"
-                    android:layout_width="0dp"
-                    android:layout_height="1dp"
-                    android:layout_marginLeft="@dimen/details_horizontal_spacing"
-                    android:layout_marginStart="@dimen/details_horizontal_spacing"
-                    android:layout_marginTop="@dimen/details_vertical_spacing"
-                    android:background="@color/colorPrimary"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintLeft_toRightOf="@id/details_poster_iv"
-                    app:layout_constraintRight_toRightOf="parent"
-                    app:layout_constraintStart_toEndOf="@id/details_poster_iv"
-                    app:layout_constraintTop_toBottomOf="@id/details_genre_tv" />
+    <include layout="@layout/details_scrolling" />
 
-                <TextView
-                    android:id="@+id/details_plot_tv"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="@dimen/details_horizontal_spacing"
-                    android:layout_marginStart="@dimen/details_horizontal_spacing"
-                    android:layout_marginTop="@dimen/details_vertical_spacing"
-                    android:text="@string/ratings_label"
-                    android:textSize="@dimen/details_font_size"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toEndOf="@id/details_poster_iv"
-                    app:layout_constraintTop_toBottomOf="@id/separation_line1"
-                    tools:text="Plot" />
-
-            </android.support.constraint.ConstraintLayout>
-
-            <View
-                android:id="@+id/separation_line4"
-                android:layout_width="0dp"
-                android:layout_height="1dp"
-                android:background="@color/colorPrimary"
-                android:layout_marginEnd="@dimen/details_horizontal_spacing"
-                android:layout_marginStart="@dimen/details_horizontal_spacing"
-                android:layout_marginTop="@dimen/details_vertical_spacing"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/middle_layout" />
-
-            <android.support.v7.widget.RecyclerView
-                android:id="@+id/cast_rv"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="@dimen/details_vertical_spacing"
-                android:layout_marginEnd="@dimen/details_recycle_view_spacing"
-                android:layout_marginStart="@dimen/details_recycle_view_spacing"
-                android:layout_marginTop="@dimen/details_vertical_spacing"
-                android:visibility="visible"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/separation_line4" />
-
-            <include
-                layout="@layout/ratings_release_date"
-                android:id="@+id/ratings_and_data"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/details_vertical_spacing"
-                android:layout_marginStart="0dp"
-                android:layout_marginEnd="0dp"
-                app:layout_constraintTop_toBottomOf="@id/cast_rv"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"/>
-
-        </android.support.constraint.ConstraintLayout>
-
-    </ScrollView>
-
-    <ImageView
-        android:id="@+id/no_connection_cloud_iv"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_gravity="center"
-        android:layout_marginBottom="@dimen/details_vertical_spacing"
-        android:contentDescription="@string/no_connection"
-        android:visibility="invisible"
-        app:srcCompat="@drawable/ic_cloud_off" />
-
-    <TextView
-        android:id="@+id/messages_tv"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_marginTop="40dp"
-        android:fontFamily="sans-serif-condensed"
-        android:gravity="center"
-        android:text="@string/no_internet"
-        android:textSize="@dimen/details_font_size"
-        android:visibility="invisible" />
-
-</FrameLayout>
+</android.support.design.widget.CoordinatorLayout>

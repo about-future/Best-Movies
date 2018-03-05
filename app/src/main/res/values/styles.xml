@@ -67,7 +67,7 @@
 
     <style name="TextAppearance.Condensed.Big" parent="Theme.AppCompat">
         <item name="android:fontFamily">sans-serif-condensed</item>
-        <item name="android:windowTitleSize">34sp</item>
+        <item name="android:textSize">32sp</item>
     </style>
 
     <style name="TextAppearance.Condensed.Small" parent="Theme.AppCompat">

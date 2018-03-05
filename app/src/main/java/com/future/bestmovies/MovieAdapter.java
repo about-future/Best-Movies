@@ -43,7 +43,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
     public void onBindViewHolder(MovieViewHolder holder, int position) {
         String description;
 
-        if (!TextUtils.isEmpty(mMovies[position].getPosterPath())) {
+        if (!mMovies[position].getPosterPath().equals("null")) {
             Picasso.with(mContext)
                     .load(ImageUtils.buildImageUrlWithImageType(
                             mContext,
@@ -55,7 +55,8 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
                     concat(mContext.getString(R.string.poster));
 
         } else {
-            holder.moviePosterImageView.setImageResource(R.drawable.default_poster);
+            holder.moviePosterImageView.setImageResource(R.drawable.ic_local_movies);
+            holder.moviePosterImageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
             description = mContext.getString(R.string.no_poster);
         }
 

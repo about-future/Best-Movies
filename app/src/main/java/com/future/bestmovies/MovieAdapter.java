@@ -2,6 +2,7 @@ package com.future.bestmovies;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.support.v4.content.res.TypedArrayUtils;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -14,7 +15,9 @@ import com.future.bestmovies.utils.ImageUtils;
 import com.future.bestmovies.utils.NetworkUtils;
 import com.squareup.picasso.Picasso;
 
+import java.lang.reflect.Array;
 import java.net.URL;
+import java.util.Arrays;
 
 public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHolder> {
 
@@ -68,9 +71,26 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
         return mMovies.length;
     }
 
+    // This method swaps the old movie result with the newly loaded ones
     void swapMovies(Movie[] newMovies) {
         mMovies = newMovies;
         notifyDataSetChanged();
+    }
+
+    // Merge the existing movie with the new Movies, creating a new Movie array
+    void mergeMovies(Movie[] newMovies) {
+        // To generate a merged Array with the correct length, we have to add the existing
+        // length array to the new one.
+        Movie[] mergedMovies = new Movie[mMovies.length + newMovies.length];
+
+        // To provide content for our merged array, we copy the entire content of our existing array
+        // into the mergedMovies array and than add the content of the newMovies array to the
+        // mergedArray.
+        System.arraycopy(mMovies, 0, mergedMovies, 0, mMovies.length);
+        System.arraycopy(newMovies, 0, mergedMovies, mMovies.length, newMovies.length);
+
+        // After that, we simply swap the arrays and notify the adapter about the change
+        swapMovies(mergedMovies);
     }
 
     class MovieViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {

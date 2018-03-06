@@ -2,6 +2,9 @@ package com.future.bestmovies;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.PorterDuff;
+import android.os.Build;
+import android.os.Handler;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.app.LoaderManager;
@@ -13,9 +16,11 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AbsListView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -34,74 +39,85 @@ public class MainActivity extends AppCompatActivity implements
 
     private static final String TAG = MainActivity.class.getSimpleName();
     public static final int MOVIES_LOADER_ID = 24;
-    private static final String ACTION = "Action";
     private MovieAdapter mAdapter;
     private RecyclerView mMoviesRecyclerView;
     private TextView mMessagesTextView;
     private ImageView mCloudImageView;
     private ProgressBar mLoading;
     private TextView mMovieCategory;
-    private LinearLayout mNavigationLayout;
-    private TextView mPageNumber;
     private int mPosition = RecyclerView.NO_POSITION;
+    private boolean isScrolling = false;
+    private int visibleItems;
+    private int totalItems;
+    private int scrolledOutItems;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
         // Number of columns for our RecyclerView
         int numberOfColumns;
-
         // The number of columns in our RecyclerView is determined by the orientation of the device
         if (ScreenUtils.isLandscapeMode(this)) {
-            // Set a different theme for our layout, if the device's orientation is in landscape mode
-            setTheme(R.style.AppTheme);
-
-            super.onCreate(savedInstanceState);
-            setContentView(R.layout.activity_main);
-
-            // In landscape mode, we'll have three columns and no toolbar as the ActionBar
-            // our ActionBar will be the default one, provided by AppTheme
+            // In landscape mode, we'll have three columns
             numberOfColumns = 3;
         } else {
-            super.onCreate(savedInstanceState);
-            setContentView(R.layout.activity_main);
-
             // If in portrait mode we have two columns
             numberOfColumns = 2;
-
-            // We initialize and set the toolbar
-            Toolbar toolbar = findViewById(R.id.toolbar);
-            setSupportActionBar(toolbar);
-
-            // This FAB will be used later on, to allow users to see the trailer of the best movie
-            // in the selected category... or maybe something else
-            FloatingActionButton fab = findViewById(R.id.fab);
-            fab.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Snackbar.make(view, getString(R.string.fab_message), Snackbar.LENGTH_LONG)
-                            .setAction(ACTION, null).show();
-                }
-            });
         }
 
         // This TextView will be used to display the movie category we are in, but we use it
         // only in portrait mode, in landscape mode we always keep it hidden
         mMovieCategory = findViewById(R.id.movie_category_tv);
 
-        mMoviesRecyclerView = findViewById(R.id.movies_rv);
         mLoading = findViewById(R.id.loading_pb);
         mCloudImageView = findViewById(R.id.no_connection_cloud_iv);
         mMessagesTextView = findViewById(R.id.messages_tv);
         mMessagesTextView.setText(R.string.loading);
-        mNavigationLayout = findViewById(R.id.navigation);
-        mPageNumber = findViewById(R.id.page_number_tv);
 
-
+        mMoviesRecyclerView = findViewById(R.id.movies_rv);
         // The layout manager for our RecyclerView will be a GridLayout, so we can display
         // our movies on columns. The number of columns is dictated by the orientation of the device
-        GridLayoutManager gridLayoutManager = new GridLayoutManager(this, numberOfColumns);
+        final GridLayoutManager gridLayoutManager = new GridLayoutManager(this, numberOfColumns);
         mMoviesRecyclerView.setLayoutManager(gridLayoutManager);
         mMoviesRecyclerView.setHasFixedSize(true);
+        mAdapter = new MovieAdapter(this, new Movie[]{}, this);
+        mMoviesRecyclerView.setAdapter(mAdapter);
+
+        // To create an infinite scrolling effect, we add an OnScrollListener to our RecyclerView
+        mMoviesRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+                if (newState == AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL) {
+                    isScrolling = true;
+                }
+            }
+
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+
+                // To be able to load data in advance, before the user gets to the bottom of our
+                // present results, we have to know how many items are visible on the screen, how
+                // many items are in total and how many items are already scrolled out of the screen
+                visibleItems = gridLayoutManager.getChildCount();
+                totalItems = gridLayoutManager.getItemCount();
+                scrolledOutItems = gridLayoutManager.findFirstVisibleItemPosition();
+
+                // We set a threshold, to help us know that the use is about to get to the end of
+                // the list.
+                int threshold = 5;
+
+                // If the user is still scrolling and the the Threshold is bigger or equal with the
+                // totalItems - visibleItems - scrolledOutItems, we know we have to load new Movies
+                if (isScrolling && ( threshold >= totalItems - visibleItems - scrolledOutItems)) {
+                    isScrolling = false;
+                    loadNewMovies();
+                }
+            }
+        });
 
         // Check if preference "screen width" was create before, if not proceed with the measurement
         // This preference is very useful to our RecyclerView, so we can download all the images for
@@ -110,34 +126,46 @@ public class MainActivity extends AppCompatActivity implements
             ImageUtils.createScreenSizePreference(this);
         }
 
-        mAdapter = new MovieAdapter(this, new Movie[]{}, this);
-        mMoviesRecyclerView.setAdapter(mAdapter);
+        // Every time we create this activity we set the page number of our results to be "1"
+        MoviePreferences.setLastPageNumber(this, "0");
 
-        showLoading();
+        //showLoading();
+        mLoading.setVisibility(View.VISIBLE);
 
         // If there is a network connection, fetch data
         fetchDataIfConnected(this);
     }
-    // TODO: Explain everything for others
-    // TODO: See if you can monitor the connection and load the movies when connection is available again
 
+    private void loadNewMovies(){
+        mLoading.setVisibility(View.VISIBLE);
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                fetchDataIfConnected(getApplicationContext());
+                mLoading.setVisibility(View.GONE);
+            }
+        }, 1500);
+    }
+
+    // TODO: Explain everything for others
+
+    // If there is a network connection, fetch data
     private void fetchDataIfConnected(Context context){
         // If there is a network connection, fetch data
         if(NetworkUtils.isConnected(context)){
-            //Loader init
+            String currentPage = MoviePreferences.getLastPageNumber(context);
+            int nextPage = Integer.parseInt(currentPage) + 1;
+            MoviePreferences.setLastPageNumber(getApplicationContext(), String.valueOf(nextPage));
+            //Init or restart loader
             getLoaderManager().restartLoader(MOVIES_LOADER_ID, null, this);
         } else {
-            // Otherwise, if there is no network connection, in portrait mode, we will get a
-            // reference for our collapsing bar and set it collapsed
-            if (!ScreenUtils.isLandscapeMode(context)) {
-                AppBarLayout myAppBar = findViewById(R.id.app_bar);
-                myAppBar.setExpanded(false);
-            }
-
             // Otherwise, hide loading indicator, hide data and display connection error message
             showError();
             // Update message TextView with no connection error message
             mMessagesTextView.setText(R.string.no_internet);
+
+            // Every time we have a connection error, we set the page number of our results to be "1"
+            MoviePreferences.setLastPageNumber(this, "0");
         }
     }
 
@@ -159,9 +187,9 @@ public class MainActivity extends AppCompatActivity implements
         return super.onOptionsItemSelected(item);
     }
 
-    // Every time we click a poster, we create an intent and pass a Movie object along with it,
+    // Every time we click a movie poster, we create an intent and pass a Movie object along with it,
     // so we can display all the information that we received about it, without heaving to fetch
-    // data from movie Api server
+    // more data from movie API server
     @Override
     public void onGridItemClick(Movie movieClicked) {
         Intent movieDetailsIntent = new Intent(MainActivity.this, DetailsActivity.class);
@@ -182,8 +210,16 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public void onLoadFinished(Loader<Movie[]> loader, Movie[] data) {
-        // Every time we get new results we swap the old ones with the new ones
-        mAdapter.swapMovies(data);
+        // Every time we get new results we have 2 possibilities
+        String currentPage = MoviePreferences.getLastPageNumber(getApplicationContext());
+        // If currentPage is "1", we know that the user has changed the movie category or uses the
+        // app for the first time. In this situation we swap the empty Movie array with the new data
+        if (TextUtils.equals( currentPage,"1")) {
+            mAdapter.swapMovies(data);
+        } else {
+            // Otherwise, we add the new data to the old data, creating an infinite scrolling effect
+            mAdapter.mergeMovies(data);
+        }
 
         // If our RecyclerView has is not position, we assume the first position in the list
         // and set the RecyclerView a the beginning of our results
@@ -194,23 +230,22 @@ public class MainActivity extends AppCompatActivity implements
 
         if (data.length != 0) {
             // Show results
-            showMovies();
+            //showMovies();
+            mLoading.setVisibility(View.GONE);
             // If new data is available, create a subtitle with our new movie category
             mMovieCategory.setText(ScreenUtils.createCategoryTitle(this));
-            mPageNumber.setText(MoviePreferences.getLastPageNumber(this));
         }
     }
 
     @Override
     public void onLoaderReset(Loader<Movie[]> loader) {
         // If the loader is reset, swap old data with null ones
-        mAdapter.swapMovies(null);
+        mAdapter.swapMovies(new Movie[]{});
     }
 
     // Hide the text and loading indicator and show movie data
     private void showMovies() {
         mMoviesRecyclerView.setVisibility(View.VISIBLE);
-        mNavigationLayout.setVisibility(View.VISIBLE);
         mCloudImageView.setVisibility(View.INVISIBLE);
         mMessagesTextView.setVisibility(View.INVISIBLE);
         mLoading.setVisibility(View.INVISIBLE);
@@ -219,7 +254,6 @@ public class MainActivity extends AppCompatActivity implements
     // Hide the movie data and show loading indicator and text
     private void showLoading() {
         mMoviesRecyclerView.setVisibility(View.INVISIBLE);
-        mNavigationLayout.setVisibility(View.INVISIBLE);
         mCloudImageView.setVisibility(View.INVISIBLE);
         mMessagesTextView.setVisibility(View.VISIBLE);
         mLoading.setVisibility(View.VISIBLE);
@@ -228,30 +262,8 @@ public class MainActivity extends AppCompatActivity implements
     // Hide the movie data and loading indicator and show error message
     private void showError() {
         mMoviesRecyclerView.setVisibility(View.INVISIBLE);
-        mNavigationLayout.setVisibility(View.INVISIBLE);
         mCloudImageView.setVisibility(View.VISIBLE);
         mMessagesTextView.setVisibility(View.VISIBLE);
         mLoading.setVisibility(View.INVISIBLE);
-    }
-
-    public void nextPage(View v) {
-        Context context = getApplicationContext();
-        String currentPage = MoviePreferences.getLastPageNumber(context);
-        int nextPage = Integer.parseInt(currentPage) + 1;
-        MoviePreferences.setLastPageNumber(getApplicationContext(), String.valueOf(nextPage));
-        fetchDataIfConnected(context);
-    }
-
-    public void previousPage(View v) {
-        Context context = getApplicationContext();
-        String currentPage = MoviePreferences.getLastPageNumber(context);
-        int nextPage;
-        if (TextUtils.equals(currentPage, "1")) {
-            nextPage = 1;
-        } else {
-            nextPage = Integer.parseInt(currentPage) - 1;
-        }
-        MoviePreferences.setLastPageNumber(getApplicationContext(), String.valueOf(nextPage));
-        fetchDataIfConnected(context);
     }
 }

@@ -36,6 +36,7 @@
     <string name="no_poster">No movie poster available</string>
     <string name="no_backdrop">No backdrop available</string>
     <string name="no_profile_picture">No picture available</string>
+    <string name="no_cast">No cast available</string>
 
     <!-- Image Sizes -->
     <string name="image_size92">w92</string>

@@ -153,7 +153,11 @@ public class NetworkUtils {
         // Get a reference to the ConnectivityManager to check state of network connectivity
         ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         // Get details on the currently active default data network
-        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        NetworkInfo activeNetwork = null;
+        if(cm != null){
+            activeNetwork = cm.getActiveNetworkInfo();
+        }
+
         // Return true if there is an active network and  if the device is connected or connecting
         // to the active network, otherwise return false
         return activeNetwork != null && activeNetwork.isConnectedOrConnecting();

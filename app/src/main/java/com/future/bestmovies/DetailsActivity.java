@@ -3,6 +3,8 @@ package com.future.bestmovies;
 import android.app.LoaderManager;
 import android.content.Intent;
 import android.content.Loader;
+import android.graphics.PorterDuff;
+import android.os.Build;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.AppBarLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -34,6 +36,7 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
     private Movie mSelectedMovie;
     private ConstraintLayout mMovieDetailsLayout;
     private TextView mMessagesTextView;
+    private TextView mCastMessagesTextView;
     private ImageView mCloudImageView;
 
     private int mPosition = RecyclerView.NO_POSITION;
@@ -49,17 +52,27 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
         // We initialize and set the toolbar
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        if(getSupportActionBar() != null){
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
 
         mMovieDetailsLayout = findViewById(R.id.movie_details_layout);
         mCloudImageView = findViewById(R.id.no_connection_cloud_iv);
         mMessagesTextView = findViewById(R.id.messages_tv);
+        mCastMessagesTextView = findViewById(R.id.cast_messages_tv);
+        mCastMessagesTextView.setText(R.string.loading);
         ImageView movieBackdropImageView = findViewById(R.id.details_backdrop_iv);
         ImageView moviePosterImageView = findViewById(R.id.details_poster_iv);
         TextView moviePlotTextView = findViewById(R.id.details_plot_tv);
         TextView movieGenreTextView = findViewById(R.id.details_genre_tv);
         mCastRecyclerView = findViewById(R.id.cast_rv);
+
         mCastProgressBar = findViewById(R.id.loading_cast_pb);
+        // Set the progress bar color to colorAccent, if SDK is lower than API21
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+            mCastProgressBar.getIndeterminateDrawable().setColorFilter(getResources()
+                    .getColor(R.color.colorAccent), PorterDuff.Mode.SRC_IN);
+        }
 
         // The layout manager for our Cast RecyclerView will be a LinerLayout, so we can display
         // our cast on a single line, horizontally
@@ -78,13 +91,14 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
             // MainActivity, so we can populate our UI. If there isn't we close this activity and
             // display a toast message.
             Intent intent = getIntent();
-            if (intent == null || !intent.hasExtra(MOVIE_OBJECT)) {
+            if (intent != null && intent.hasExtra(MOVIE_OBJECT)) {
+                mSelectedMovie = intent.getParcelableExtra(MOVIE_OBJECT);
+            } else {
                 closeOnError();
             }
-            mSelectedMovie = intent.getParcelableExtra(MOVIE_OBJECT);
         }
 
-        // If the Movie object contains no data, we cloase this activity and display a toast message
+        // If the Movie object contains no data, we close this activity and display a toast message
         if (mSelectedMovie == null) {
             // Movies data unavailable
             closeOnError();
@@ -174,7 +188,7 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
             // Fetch movie cast
             getLoaderManager().initLoader(CAST_LOADER_ID, null, this);
         } else {
-                hideCast();
+            hideCast();
             // Otherwise, hide data and display connection error message
             showError();
             // Update message TextView with no connection error message
@@ -225,12 +239,14 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
     private void showCast() {
         mCastRecyclerView.setVisibility(View.VISIBLE);
         mCastProgressBar.setVisibility(View.INVISIBLE);
+        mCastMessagesTextView.setVisibility(View.INVISIBLE);
     }
 
     // Show progress bar and hide cast
     private void hideCast() {
         mCastRecyclerView.setVisibility(View.INVISIBLE);
         mCastProgressBar.setVisibility(View.VISIBLE);
+        mCastMessagesTextView.setVisibility(View.VISIBLE);
     }
 
     @Override
@@ -258,6 +274,10 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
         if (movieCast.length != 0) {
             // Show movie cast
             showCast();
+        } else {
+            mCastMessagesTextView.setVisibility(View.VISIBLE);
+            mCastMessagesTextView.setText(R.string.no_cast);
+            mCastProgressBar.setVisibility(View.INVISIBLE);
         }
     }
 

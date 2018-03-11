@@ -52,7 +52,7 @@ public class NetworkUtils {
 
         try {
             URL movieQueryUrl = new URL(movieQueryUri.toString());
-            Log.v(TAG, "URL: " + movieQueryUrl);
+            //Log.v(TAG, "URL: " + movieQueryUrl);
             return movieQueryUrl;
         } catch (MalformedURLException e) {
             e.printStackTrace();
@@ -73,7 +73,7 @@ public class NetworkUtils {
 
         try {
             URL movieQueryUrl = new URL(movieQueryUri.toString());
-            Log.v(TAG, "CAST URL: " + movieQueryUrl);
+            //Log.v(TAG, "CAST URL: " + movieQueryUrl);
             return movieQueryUrl;
         } catch (MalformedURLException e) {
             e.printStackTrace();

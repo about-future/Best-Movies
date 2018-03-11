@@ -49,23 +49,13 @@ public class MainActivity extends AppCompatActivity implements
     private boolean isScrolling = false;
     private int visibleItems;
     private int totalItems;
-    private int scrolledOutItems;
+    private int scrolledUpItems;
+    private int scrolledDownItems;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        // Number of columns for our RecyclerView
-        int numberOfColumns;
-        // The number of columns in our RecyclerView is determined by the orientation of the device
-        if (ScreenUtils.isLandscapeMode(this)) {
-            // In landscape mode, we'll have three columns
-            numberOfColumns = 3;
-        } else {
-            // If in portrait mode we have two columns
-            numberOfColumns = 2;
-        }
 
         // This TextView will be used to display the movie category we are in, but we use it
         // only in portrait mode, in landscape mode we always keep it hidden
@@ -77,9 +67,12 @@ public class MainActivity extends AppCompatActivity implements
         mMessagesTextView.setText(R.string.loading);
 
         mMoviesRecyclerView = findViewById(R.id.movies_rv);
-        // The layout manager for our RecyclerView will be a GridLayout, so we can display
-        // our movies on columns. The number of columns is dictated by the orientation of the device
-        final GridLayoutManager gridLayoutManager = new GridLayoutManager(this, numberOfColumns);
+        // The layout manager for our RecyclerView will be a GridLayout, so we can display our movies
+        // on columns. The number of columns is dictated by the orientation and size of the device
+        final GridLayoutManager gridLayoutManager = new GridLayoutManager(
+                this,
+                ScreenUtils.getNumberOfColumns(this));
+
         mMoviesRecyclerView.setLayoutManager(gridLayoutManager);
         mMoviesRecyclerView.setHasFixedSize(true);
         mAdapter = new MovieAdapter(this, new Movie[]{}, this);
@@ -104,29 +97,23 @@ public class MainActivity extends AppCompatActivity implements
                 // many items are in total and how many items are already scrolled out of the screen
                 visibleItems = gridLayoutManager.getChildCount();
                 totalItems = gridLayoutManager.getItemCount();
-                scrolledOutItems = gridLayoutManager.findFirstVisibleItemPosition();
+                scrolledUpItems = gridLayoutManager.findFirstVisibleItemPosition();
+                scrolledDownItems = gridLayoutManager.findLastVisibleItemPosition();
 
                 // We set a threshold, to help us know that the use is about to get to the end of
                 // the list.
                 int threshold = 5;
 
                 // If the user is still scrolling and the the Threshold is bigger or equal with the
-                // totalItems - visibleItems - scrolledOutItems, we know we have to load new Movies
-                if (isScrolling && ( threshold >= totalItems - visibleItems - scrolledOutItems)) {
+                // totalItems - visibleItems - scrolledUpItems, we know we have to load new Movies
+                if (isScrolling && ( threshold >= totalItems - visibleItems - scrolledUpItems)) {
                     isScrolling = false;
                     loadNewMovies();
                 }
             }
         });
 
-        // Check if preference "screen width" was create before, if not proceed with the measurement
-        // This preference is very useful to our RecyclerView, so we can download all the images for
-        // the RecyclerView heaving the same width. We measure once and use it as many times we want.
-        if (!MoviePreferences.isImageSizeAvailable(this)) {
-            ImageUtils.createScreenSizePreference(this);
-        }
-
-        // Every time we create this activity we set the page number of our results to be "1"
+        // Every time we create this activity we set the page number of our results to be "0"
         MoviePreferences.setLastPageNumber(this, "0");
 
         //showLoading();
@@ -147,12 +134,12 @@ public class MainActivity extends AppCompatActivity implements
         }, 1500);
     }
 
-    // TODO: Explain everything for others
-
-    // If there is a network connection, fetch data
+    // Fetch data if connection is available
     private void fetchDataIfConnected(Context context){
         // If there is a network connection, fetch data
         if(NetworkUtils.isConnected(context)){
+            // Before we fetch data, we need the last page number that was loaded in our RecyclerView,
+            // increment it by 1 and save it in a preference for next data fetching
             String currentPage = MoviePreferences.getLastPageNumber(context);
             int nextPage = Integer.parseInt(currentPage) + 1;
             MoviePreferences.setLastPageNumber(getApplicationContext(), String.valueOf(nextPage));
@@ -228,11 +215,11 @@ public class MainActivity extends AppCompatActivity implements
             mMoviesRecyclerView.smoothScrollToPosition(mPosition);
         }
 
+        // If new data is available
         if (data.length != 0) {
-            // Show results
-            //showMovies();
+            // Hide progress bar
             mLoading.setVisibility(View.GONE);
-            // If new data is available, create a subtitle with our new movie category
+            // Set the text for mMovieCaterogory as the selected category
             mMovieCategory.setText(ScreenUtils.createCategoryTitle(this));
         }
     }

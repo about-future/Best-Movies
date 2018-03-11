@@ -52,7 +52,7 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
         // We initialize and set the toolbar
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        if(getSupportActionBar() != null){
+        if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
 
@@ -117,32 +117,35 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
         // Set the movie plot
         moviePlotTextView.setText(mSelectedMovie.getOverview());
 
-        // If the user has the device in landscape mode, show the ratings and release date from
-        // layout ratings_landscape (placed inside the poster_and_plot layout)
-        // AND hide the ratings_portrait
+        // Set the ratings and release date
         ConstraintLayout ratingsLandscape = findViewById(R.id.ratings_landscape);
         ConstraintLayout ratingsPortrait = findViewById(R.id.ratings_portrait);
         TextView movieRatingTextView;
         TextView movieReleaseDateTextView;
-        if (ScreenUtils.isLandscapeMode(this)) {
+        // If the user has a tablet or user uses the device in landscape mode, always show the
+        // ratings and release date from layout ratings_landscape (placed inside the poster_and_plot layout)
+        // AND hide the ratings_portrait
+        if (ScreenUtils.getSmallestScreenWidthInDps(this) >= 600 || ScreenUtils.isLandscapeMode(this)) {
             movieRatingTextView = findViewById(R.id.details_ratings_landscape_tv);
             movieReleaseDateTextView = findViewById(R.id.details_release_date_landscape_tv);
             ratingsLandscape.setVisibility(View.VISIBLE);
             ratingsPortrait.setVisibility(View.GONE);
         } else {
-            // Otherwise, show ratings_portrait and hide ratings_landscape
+            // Otherwise, the user has a phone (width < 600DPs) and uses it in portrait mode.
+            // In this case, show ratings_portrait and hide ratings_landscape
             movieRatingTextView = findViewById(R.id.details_ratings_portrait_tv);
             movieReleaseDateTextView = findViewById(R.id.details_release_date_portrait_tv);
             ratingsPortrait.setVisibility(View.VISIBLE);
             ratingsLandscape.setVisibility(View.GONE);
         }
+
         // Populate the allocated rating and release date TextViews
         movieRatingTextView.setText(String.valueOf(mSelectedMovie.getVoteAverage()));
         movieReleaseDateTextView.setText(mSelectedMovie.getReleaseDate());
 
         // Because all the information so far was provided by the Movie object and no internet
         // connection was necessary, the next 3 areas of our UI will be populated if and only if we
-        // have an internet connection
+        // have an internet connection.
         // The movie backdrop, poster and cast depend on it
 
         // First we show the progress bar and hide the Cast RecyclerView
@@ -271,10 +274,12 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
             mCastRecyclerView.smoothScrollToPosition(mPosition);
         }
 
+        // If the movieCast has data
         if (movieCast.length != 0) {
             // Show movie cast
             showCast();
         } else {
+            // Otherwise, hide progress bar and show "No cast available" message
             mCastMessagesTextView.setVisibility(View.VISIBLE);
             mCastMessagesTextView.setText(R.string.no_cast);
             mCastProgressBar.setVisibility(View.INVISIBLE);

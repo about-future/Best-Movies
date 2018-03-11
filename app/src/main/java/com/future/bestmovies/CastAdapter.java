@@ -40,7 +40,7 @@ public class CastAdapter extends RecyclerView.Adapter<CastAdapter.CastViewHolder
                     .load(ImageUtils.buildImageUrlWithImageType(
                             mContext,
                             mCast[position].getProfilePath(),
-                            ImageUtils.POSTER))
+                            ImageUtils.CAST))
                     .into(holder.actorProfileImageView);
             description = mCast[position].getActorName();
         }

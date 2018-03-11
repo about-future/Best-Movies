@@ -14,16 +14,16 @@
         <item>@string/pref_category_now_playing</item>
     </string-array>
 
-    <string-array name="pref_image_size_options">
-        <item>@string/pref_image_size_label_optimal</item>
-        <item>@string/pref_image_size_label_medium</item>
-        <item>@string/pref_image_size_label_small</item>
+    <string-array name="pref_image_quality_options">
+        <item>@string/pref_image_quality_label_optimal</item>
+        <item>@string/pref_image_quality_label_medium</item>
+        <item>@string/pref_image_quality_label_small</item>
     </string-array>
 
-    <string-array name="pref_image_size_values">
-        <item>@string/pref_image_size_optimal</item>
-        <item>@string/pref_image_size_medium</item>
-        <item>@string/pref_image_size_small</item>
+    <string-array name="pref_image_quality_values">
+        <item>@string/pref_image_quality_optimal</item>
+        <item>@string/pref_image_quality_medium</item>
+        <item>@string/pref_image_quality_small</item>
     </string-array>
 
 </resources>

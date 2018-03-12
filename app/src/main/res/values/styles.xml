@@ -11,17 +11,6 @@
     </style>
 
     <!-- Main activity action bar styles -->
-    <style name="AppTheme.WithLogo" parent="@style/AppTheme">
-        <item name="actionBarStyle">@style/ActionBar.WithLogo</item>
-        <item name="titleMarginStart">22dp</item>
-    </style>
-
-    <!-- Actionbar with logo -->
-    <style name="ActionBar.WithLogo" parent="@style/Widget.AppCompat.ActionBar.Solid">
-        <item name="displayOptions">useLogo|showTitle|showHome</item>
-        <item name="logo">@drawable/ic_logo</item>
-        <item name="titleTextStyle">@style/TextAppearance.Condensed.Big</item>
-    </style>
 
     <!-- Details activity Theme and Action Bar styles -->
     <!-- Transparent Style -->
@@ -60,11 +49,6 @@
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Dark" />
 
     <!-- TextStyle used by ActionBars -->
-    <style name="TextAppearance.Condensed" parent="AppTheme.WithLogo">
-        <item name="android:fontFamily">sans-serif-condensed</item>
-        <item name="android:textSize">24sp</item>
-    </style>
-
     <style name="TextAppearance.Condensed.Big" parent="Theme.AppCompat">
         <item name="android:fontFamily">sans-serif-condensed</item>
         <item name="android:textSize">32sp</item>

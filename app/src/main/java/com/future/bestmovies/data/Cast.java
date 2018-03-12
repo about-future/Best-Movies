@@ -5,10 +5,10 @@ import android.os.Parcelable;
 
 
 public class Cast implements Parcelable {
-    private String character;
-    private int id;
-    private String name;
-    private String profilePath;
+    private final String character;
+    private final int id;
+    private final String name;
+    private final String profilePath;
 
     public Cast(String character, int id, String name, String profilePath) {
         this.character = character;
@@ -47,29 +47,8 @@ public class Cast implements Parcelable {
         public Cast[] newArray(int size) {return new Cast[size];}
     };
 
-    public String getCharacter() {
-        return character;
-    }
-    public void setCharacter(String character) { this.character = character; }
-
-    public int getActorId() {
-        return id;
-    }
-    public void setActorId(int id) {
-        this.id = id;
-    }
-
     public String getActorName() {
         return name;
     }
-    public void setActorName(String name) {
-        this.name = name;
-    }
-
-    public String getProfilePath() {
-        return profilePath;
-    }
-    public void setProfilePath(String profilePath) {
-        this.profilePath = profilePath;
-    }
+    public String getProfilePath() { return profilePath; }
 }

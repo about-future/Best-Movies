@@ -1,7 +1,6 @@
-<resources xmlns:xliff="http://schemas.android.com/apk/res-auto">
+<resources>
     <!-- Activity titles -->
     <string name="app_name">Best Movies</string>
-    <string name="activity_title_main">Best Movies</string>
     <string name="activity_title_details">Movie Details</string>
     <string name="activity_title_settings">Settings</string>
 
@@ -11,42 +10,25 @@
     <!-- Content descriptions -->
     <string name="movie_poster">Movie poster</string>
     <string name="movie_backdrop">Movie backdrop</string>
-    <string name="main_backdrop">Main backdrop</string>
     <string name="poster"> poster</string>
     <string name="no_connection">No connection icon</string>
-    <string name="next_page">Next page</string>
-    <string name="previous_page">Previous page</string>
+    <string name="powered_by">Powered by The Movie Database</string>
 
     <!-- Main and Details Activity Labels -->
     <string name="best_result_label">Which one is your favourite?</string>
     <string name="original_title_label">Original Title</string>
-    <string name="genre_label">Genre</string>
     <string name="release_date_label">Release Date:</string>
     <string name="ratings_label">Ratings:</string>
     <string name="movies_label">\ Movies</string>
 
-    <!-- FAB message -->
-    <string name="fab_message">Watch trailer of best movie in this category?</string>
-
     <!-- Messages and Error messages -->
     <string name="loading">Loading&#8230;</string>
-    <string name="no_movies">No movies found</string>
     <string name="no_internet">No internet connection.\nNo movies, right?</string>
     <string name="details_error_message">No movie details available</string>
     <string name="no_poster">No movie poster available</string>
     <string name="no_backdrop">No backdrop available</string>
     <string name="no_profile_picture">No picture available</string>
     <string name="no_cast">No cast available</string>
-
-    <!-- Image Sizes -->
-    <string name="image_size92">w92</string>
-    <string name="image_size154">w154</string>
-    <string name="image_size185">w185</string>
-    <string name="image_size342">w342</string>
-    <string name="image_size500">w500</string>
-    <string name="image_size780">w780</string>
-    <string name="image_size_original">original</string>
-
 
     <!-- PREFERENCES -->
     <!-- Labels for category option in Movie Category preference -->

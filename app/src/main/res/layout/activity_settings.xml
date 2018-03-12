@@ -1,8 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<fragment xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/weather_settings_fragment"
-    android:name="com.future.bestmovies.SettingsFragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.future.bestmovies.SettingsActivity" />
+    tools:context="com.future.bestmovies.SettingsActivity">
+
+    <fragment
+        android:id="@+id/weather_settings_fragment"
+        android:name="com.future.bestmovies.SettingsFragment"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <ImageView
+        android:layout_width="@dimen/logo"
+        android:layout_height="@dimen/logo"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginBottom="@dimen/details_vertical_spacing"
+        android:layout_marginEnd="@dimen/details_horizontal_spacing"
+        android:contentDescription="@string/powered_by"
+        app:srcCompat="@drawable/ic_powered_by_movie_db" />
+
+</RelativeLayout>

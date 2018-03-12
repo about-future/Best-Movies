@@ -14,7 +14,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/ratings_label"
+        android:id="@+id/ratings_label_landscape"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/details_vertical_spacing"
@@ -33,13 +33,13 @@
         android:fontFamily="sans-serif-condensed"
         android:textColor="@color/colorWhite"
         android:textSize="@dimen/details_font_size"
-        app:layout_constraintLeft_toRightOf="@id/ratings_label"
-        app:layout_constraintStart_toEndOf="@id/ratings_label"
-        app:layout_constraintTop_toTopOf="@id/ratings_label"
+        app:layout_constraintLeft_toRightOf="@id/ratings_label_landscape"
+        app:layout_constraintStart_toEndOf="@id/ratings_label_landscape"
+        app:layout_constraintTop_toTopOf="@id/ratings_label_landscape"
         tools:text="8.2" />
 
     <TextView
-        android:id="@+id/release_date_label"
+        android:id="@+id/release_date_label_landscape"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="4dp"
@@ -48,7 +48,7 @@
         android:textSize="@dimen/details_font_size"
         app:layout_constraintEnd_toStartOf="@id/details_release_date_landscape_tv"
         app:layout_constraintRight_toLeftOf="@+id/details_release_date_landscape_tv"
-        app:layout_constraintTop_toTopOf="@id/ratings_label" />
+        app:layout_constraintTop_toTopOf="@id/ratings_label_landscape" />
 
     <TextView
         android:id="@+id/details_release_date_landscape_tv"
@@ -59,7 +59,7 @@
         android:textSize="@dimen/details_font_size"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="@id/ratings_label"
+        app:layout_constraintTop_toTopOf="@id/ratings_label_landscape"
         tools:text="2018-02-20" />
 
 </android.support.constraint.ConstraintLayout>

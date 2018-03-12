@@ -7,7 +7,7 @@ import com.future.bestmovies.utils.NetworkUtils;
 
 
 public class CastLoader extends AsyncTaskLoader<Cast[]> {
-    private String movieId;
+    private final String movieId;
 
     public CastLoader(Context context, String movieId) {
         super(context);

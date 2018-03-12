@@ -31,7 +31,7 @@ public class MainActivity extends AppCompatActivity implements
         LoaderManager.LoaderCallbacks<Movie[]> {
 
     private static final String TAG = MainActivity.class.getSimpleName();
-    public static final int MOVIES_LOADER_ID = 24;
+    private static final int MOVIES_LOADER_ID = 24;
     private MovieAdapter mAdapter;
     private RecyclerView mMoviesRecyclerView;
     private TextView mMessagesTextView;
@@ -221,7 +221,7 @@ public class MainActivity extends AppCompatActivity implements
         if (data.length != 0) {
             // Hide progress bar
             mLoading.setVisibility(View.GONE);
-            // Set the text for mMovieCaterogory as the selected category
+            // Set the text for mMovieCategory as the selected category
             mMovieCategory.setText(ScreenUtils.createCategoryTitle(this));
         }
     }

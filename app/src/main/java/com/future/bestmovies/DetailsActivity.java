@@ -31,7 +31,7 @@ import com.squareup.picasso.Picasso;
 
 
 public class DetailsActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cast[]> {
-    public static final int CAST_LOADER_ID = 34;
+    private static final int CAST_LOADER_ID = 34;
     public static final String MOVIE_OBJECT = "movie";
     private Movie mSelectedMovie;
     private ConstraintLayout mMovieDetailsLayout;

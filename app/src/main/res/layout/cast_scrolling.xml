@@ -17,7 +17,7 @@
         android:layout_gravity="center"
         android:indeterminateTint="@color/colorAccent"
         android:indeterminateTintMode="src_in"
-        android:visibility="visible" />
+        android:visibility="invisible" />
 
     <TextView
         android:id="@+id/cast_messages_tv"
@@ -29,6 +29,6 @@
         android:text="@string/loading"
         android:fontFamily="sans-serif-condensed"
         android:textSize="@dimen/details_font_size"
-        android:visibility="visible" />
+        android:visibility="invisible" />
 
 </FrameLayout>

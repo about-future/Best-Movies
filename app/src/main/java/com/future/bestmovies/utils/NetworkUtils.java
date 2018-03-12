@@ -23,36 +23,36 @@ public class NetworkUtils {
     private static final String API_MOVIE_BASE_URL = "https://api.themoviedb.org/3";
     private static final String MOVIE = "movie";
     private static final String PAGE_NUMBER = "page";
-    private static final String API_KEY = "api_key";
     private static final String CREDITS = "credits";
-    private static final String DEFAULT_ID = "xxx";
+    private static final String API_KEY = "api_key";
+    private static final String API_ID = "xxx";
 
-    /* This method prepares the build of our main API URL, using two stored preferences and by
-     * calling a more complex method that builds the actual URL
-     * @param context is used for fetching the users preferences or default preferences if the app
-     * is run for the first time. In this case, the queryType = "popular" and pageNumber = "1"
+    /* This method returns the main API URL.
+     * Using two preferences as parameters, calls a more complex method that builds the actual URL.
+     * @param context is used for fetching the users preferences or default preferences, if the app
+     * is run for the first time. In default case, the queryType is "popular" and pageNumber is "1"
      */
     private static URL getUrl(Context context) {
         String queryType = MoviePreferences.getPreferredQueryType(context);
-        String pageNumber = MoviePreferences.getLastPageNumber(context);
+        int pageNumber = MoviePreferences.getLastPageNumber(context);
         return buildMovieApiUrl(queryType, pageNumber);
     }
 
-    /* This method will build and return the API Url for a chategory of movies
+    /* Build and return the API Url for a category of movies
      * @param queryType is used to query a certain category of movies
      * @pram pageNumber is used to select the page with results
      */
-    private static URL buildMovieApiUrl(String queryType, String pageNumber) {
+    private static URL buildMovieApiUrl(String queryType, int pageNumber) {
         Uri movieQueryUri = Uri.parse(API_MOVIE_BASE_URL).buildUpon()
                 .appendPath(MOVIE)
                 .appendPath(queryType)
-                .appendQueryParameter(PAGE_NUMBER, pageNumber)
-                .appendQueryParameter(API_KEY, DEFAULT_ID)
+                .appendQueryParameter(PAGE_NUMBER, String.valueOf(pageNumber))
+                .appendQueryParameter(API_KEY, API_ID)
                 .build();
 
         try {
             URL movieQueryUrl = new URL(movieQueryUri.toString());
-            //Log.v(TAG, "URL: " + movieQueryUrl);
+            Log.v(TAG, "URL: " + movieQueryUrl);
             return movieQueryUrl;
         } catch (MalformedURLException e) {
             e.printStackTrace();
@@ -60,7 +60,7 @@ public class NetworkUtils {
         }
     }
 
-    /* This method will build and return the API URL for movie cast(credits)
+    /* Build and return the API URL for movie cast(credits)
      * @param movieId is used to build the url
      */
     private static URL buildCastMovieApiUrl(String movieId) {
@@ -68,21 +68,19 @@ public class NetworkUtils {
                 .appendPath(MOVIE)
                 .appendPath(movieId)
                 .appendPath(CREDITS)
-                .appendQueryParameter(API_KEY, DEFAULT_ID)
+                .appendQueryParameter(API_KEY, API_ID)
                 .build();
 
         try {
-            URL movieQueryUrl = new URL(movieQueryUri.toString());
-            //Log.v(TAG, "CAST URL: " + movieQueryUrl);
-            return movieQueryUrl;
+            return new URL(movieQueryUri.toString());
         } catch (MalformedURLException e) {
             e.printStackTrace();
             return null;
         }
     }
 
-    /* This method opens a HTTP connection, returns the content of the HTTP response or null if there
-     * is no response and closes the connection
+    /* Open a HTTP connection, return the content of the HTTP response or null if there is no
+     * response and close the connection.
      * @param url is the source where we fetch the HTTP response from
      * @throws IOException related to network and stream reading
      */
@@ -106,8 +104,8 @@ public class NetworkUtils {
         }
     }
 
-    /* This method performs a network request using a URL, parses the JSON from that request and
-     * returns an array of Movie objects
+    /* Perform a network request using a URL, parse the JSON from that request and return an array
+     * of Movie objects.
      * @param context is used to access getUrl utility method
      */
     public static Movie[] fetchMovieData(Context context) {
@@ -126,8 +124,8 @@ public class NetworkUtils {
         return new Movie[]{};
     }
 
-    /* This method performs a network request using a URL, parses the JSON from that request and
-     * returns an array of Cast objects
+    /* Perform a network request using a URL, parse the JSON from that request and return an array
+     * of Cast objects.
      * @param movieId is used to access buildCastMovieApiUrl utility method
      */
     public static Cast[] fetchMovieCast(String movieId) {
@@ -146,7 +144,7 @@ public class NetworkUtils {
         return new Cast[]{};
     }
 
-    /* This method performs a state of network connectivity test and returns true or false
+    /* Perform a state of network connectivity test and return true or false.
      * @param context is used to create a reference to the ConnectivityManager
      */
     public static boolean isConnected(Context context) {

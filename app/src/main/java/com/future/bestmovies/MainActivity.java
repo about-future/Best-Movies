@@ -2,27 +2,19 @@ package com.future.bestmovies;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.PorterDuff;
-import android.os.Build;
 import android.os.Handler;
-import android.support.design.widget.AppBarLayout;
-import android.support.design.widget.FloatingActionButton;
 import android.app.LoaderManager;
 import android.content.Loader;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AbsListView;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -32,6 +24,7 @@ import com.future.bestmovies.data.MoviePreferences;
 import com.future.bestmovies.utils.ImageUtils;
 import com.future.bestmovies.utils.NetworkUtils;
 import com.future.bestmovies.utils.ScreenUtils;
+
 
 public class MainActivity extends AppCompatActivity implements
         MovieAdapter.GridItemClickListener,
@@ -50,7 +43,6 @@ public class MainActivity extends AppCompatActivity implements
     private int visibleItems;
     private int totalItems;
     private int scrolledUpItems;
-    private int scrolledDownItems;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -98,7 +90,6 @@ public class MainActivity extends AppCompatActivity implements
                 visibleItems = gridLayoutManager.getChildCount();
                 totalItems = gridLayoutManager.getItemCount();
                 scrolledUpItems = gridLayoutManager.findFirstVisibleItemPosition();
-                scrolledDownItems = gridLayoutManager.findLastVisibleItemPosition();
 
                 // We set a threshold, to help us know that the use is about to get to the end of
                 // the list.
@@ -106,24 +97,36 @@ public class MainActivity extends AppCompatActivity implements
 
                 // If the user is still scrolling and the the Threshold is bigger or equal with the
                 // totalItems - visibleItems - scrolledUpItems, we know we have to load new Movies
-                if (isScrolling && ( threshold >= totalItems - visibleItems - scrolledUpItems)) {
+                if (isScrolling && (threshold >= totalItems - visibleItems - scrolledUpItems)) {
                     isScrolling = false;
+                    Log.v(TAG, "Load new movies!");
                     loadNewMovies();
                 }
             }
         });
 
-        // Every time we create this activity we set the page number of our results to be "0"
-        MoviePreferences.setLastPageNumber(this, "0");
+        // Check if preference "image_width" was create before, if not, proceed.
+        if (!MoviePreferences.isImageWidthAvailable(this)) {
+            // Create an image width preference for our RecyclerView
+            // This preference is very useful to our RecyclerView, so we can download all the images
+            // for the RecyclerView heaving the same width, perfect for the device we are using.
+            // We measure once and use it as many times we want.
+            MoviePreferences.setImageWidthForRecyclerView(
+                    this,
+                    ImageUtils.getImageWidth(this, ImageUtils.POSTER));
+        }
 
-        //showLoading();
+        // Every time we create this activity we set the page number of our results to be 0
+        MoviePreferences.setLastPageNumber(this, 0);
+
+        // Show progress bar
         mLoading.setVisibility(View.VISIBLE);
 
         // If there is a network connection, fetch data
         fetchDataIfConnected(this);
     }
 
-    private void loadNewMovies(){
+    private void loadNewMovies() {
         mLoading.setVisibility(View.VISIBLE);
         new Handler().postDelayed(new Runnable() {
             @Override
@@ -131,18 +134,17 @@ public class MainActivity extends AppCompatActivity implements
                 fetchDataIfConnected(getApplicationContext());
                 mLoading.setVisibility(View.GONE);
             }
-        }, 1500);
+        }, 1000);
     }
 
     // Fetch data if connection is available
-    private void fetchDataIfConnected(Context context){
+    private void fetchDataIfConnected(Context context) {
         // If there is a network connection, fetch data
-        if(NetworkUtils.isConnected(context)){
+        if (NetworkUtils.isConnected(context)) {
             // Before we fetch data, we need the last page number that was loaded in our RecyclerView,
             // increment it by 1 and save it in a preference for next data fetching
-            String currentPage = MoviePreferences.getLastPageNumber(context);
-            int nextPage = Integer.parseInt(currentPage) + 1;
-            MoviePreferences.setLastPageNumber(getApplicationContext(), String.valueOf(nextPage));
+            int nextPage = MoviePreferences.getLastPageNumber(context) + 1;
+            MoviePreferences.setLastPageNumber(getApplicationContext(), nextPage);
             //Init or restart loader
             getLoaderManager().restartLoader(MOVIES_LOADER_ID, null, this);
         } else {
@@ -151,8 +153,8 @@ public class MainActivity extends AppCompatActivity implements
             // Update message TextView with no connection error message
             mMessagesTextView.setText(R.string.no_internet);
 
-            // Every time we have a connection error, we set the page number of our results to be "1"
-            MoviePreferences.setLastPageNumber(this, "0");
+            // Every time we have a connection error, we set the page number of our results to be 0
+            MoviePreferences.setLastPageNumber(this, 0);
         }
     }
 
@@ -198,10 +200,10 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void onLoadFinished(Loader<Movie[]> loader, Movie[] data) {
         // Every time we get new results we have 2 possibilities
-        String currentPage = MoviePreferences.getLastPageNumber(getApplicationContext());
+        int currentPage = MoviePreferences.getLastPageNumber(getApplicationContext());
         // If currentPage is "1", we know that the user has changed the movie category or uses the
-        // app for the first time. In this situation we swap the empty Movie array with the new data
-        if (TextUtils.equals( currentPage,"1")) {
+        // app for the first time. In this situation we swap the Movie array with the new data
+        if (currentPage == 1) {
             mAdapter.swapMovies(data);
         } else {
             // Otherwise, we add the new data to the old data, creating an infinite scrolling effect
@@ -228,22 +230,6 @@ public class MainActivity extends AppCompatActivity implements
     public void onLoaderReset(Loader<Movie[]> loader) {
         // If the loader is reset, swap old data with null ones
         mAdapter.swapMovies(new Movie[]{});
-    }
-
-    // Hide the text and loading indicator and show movie data
-    private void showMovies() {
-        mMoviesRecyclerView.setVisibility(View.VISIBLE);
-        mCloudImageView.setVisibility(View.INVISIBLE);
-        mMessagesTextView.setVisibility(View.INVISIBLE);
-        mLoading.setVisibility(View.INVISIBLE);
-    }
-
-    // Hide the movie data and show loading indicator and text
-    private void showLoading() {
-        mMoviesRecyclerView.setVisibility(View.INVISIBLE);
-        mCloudImageView.setVisibility(View.INVISIBLE);
-        mMessagesTextView.setVisibility(View.VISIBLE);
-        mLoading.setVisibility(View.VISIBLE);
     }
 
     // Hide the movie data and loading indicator and show error message

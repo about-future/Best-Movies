@@ -3,6 +3,7 @@ package com.future.bestmovies.data;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+
 public class Movie implements Parcelable {
     private int id;
     private double voteAverage;

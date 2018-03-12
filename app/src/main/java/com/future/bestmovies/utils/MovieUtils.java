@@ -1,13 +1,15 @@
 package com.future.bestmovies.utils;
 
 import android.content.Context;
-
 import com.future.bestmovies.R;
 
 
 public class MovieUtils {
-    private static final String TAG = MovieUtils.class.getSimpleName();
 
+    /* Return the string format of a movie genre
+     * @param context is used to access resources
+     * @param genreId is an int code assigned to a movie genre
+     */
     public static String getStringMovieGenre(Context context, int genreId) {
         int stringId;
         switch (genreId) {

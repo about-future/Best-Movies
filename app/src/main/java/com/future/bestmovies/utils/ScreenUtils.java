@@ -8,15 +8,22 @@ import android.view.WindowManager;
 import com.future.bestmovies.R;
 import com.future.bestmovies.data.MoviePreferences;
 
-public class ScreenUtils {
-    private static final String TAG = ScreenUtils.class.getSimpleName();
 
-    // Check the screen orientation and return true if it's landscape or false if it's portrait
+public class ScreenUtils {
+
+    /* Check the screen orientation and return true if it's landscape or false if it's portrait
+     * @param context is used to access resources
+     */
     public static boolean isLandscapeMode(Context context) {
         return context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
     }
 
-    // Return the movie category title. The category title is selected and saved in Settings.
+    /* Return the movie category title. The category title is selected and saved in Settings.
+     * @param context is used to access movie preferences method
+     *
+     * This method is used, but in a hidden state, with no visible results for the user. It's purpose
+     * is to make the UI more complete and let the user know what category of movies is browsing.
+     */
     public static String createCategoryTitle(Context context) {
         String queryType = MoviePreferences.getPreferredQueryType(context);
         switch (queryType) {
@@ -31,8 +38,9 @@ public class ScreenUtils {
         }
     }
 
-    // Return the width, height of the screen in pixels and the screen density
-    // (i.e. {720.0, 1280.0, 2.0})
+    /* Return the width, height of the screen in pixels and the screen density (i.e. {720.0, 1280.0, 2.0})
+     * @param context is used to create a windowManager, so we can get the screen metrics
+     */
     private static float[] getScreenSize(Context context) {
         DisplayMetrics displayMetrics = new DisplayMetrics();
         WindowManager windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
@@ -44,9 +52,12 @@ public class ScreenUtils {
                 displayMetrics.density};
     }
 
-    // Return the current width of the screen in DPs.
-    // For a phone the width in portrait mode can be 360dp and in landscape mode 640dp.
-    // For a tablet the width in portrait mode can be 800dp and in landscape mode 1280dp
+    /* Return the current width of the screen in DPs.
+     * @param context is used to call getScreenSize method
+     *
+     * For a phone the width in portrait mode can be 360dp and in landscape mode 640dp.
+     * For a tablet the width in portrait mode can be 800dp and in landscape mode 1280dp
+     */
     public static int getScreenWidthInDps (Context context) {
         // Get the screen sizes and density
         float[] screenSize = getScreenSize(context);
@@ -55,7 +66,9 @@ public class ScreenUtils {
         return Math.round(screenSize[0] / screenSize[2]);
     }
 
-    // Return the smallest width of the screen in DPs (i.e. 360 or 800)
+    /* Return the smallest width of the screen in DPs (i.e. 360 or 800)
+     * @param context is used to call getScreenSize method
+     */
     public static int getSmallestScreenWidthInDps (Context context) {
         // Get screen sizes
         float[] screenSize = getScreenSize(context);
@@ -68,8 +81,10 @@ public class ScreenUtils {
         }
     }
 
-    // Return the number of columns the will be used for our MainActivity RecyclerView, based on the
-    // smallest screen width and the orientation of the device.
+    /* Return the number of columns that will be used for our MainActivity RecyclerView.
+     * The return value is based on the smallest screen width and the orientation of the device.
+     * @param context is used to call getSmallestScreenWidthInDps method
+     */
     public static int getNumberOfColumns (Context context) {
         // If the user has a phone
         if (getSmallestScreenWidthInDps(context) < 600) {

@@ -1,10 +1,10 @@
 package com.future.bestmovies.data;
 
-
 import android.content.AsyncTaskLoader;
 import android.content.Context;
 
 import com.future.bestmovies.utils.NetworkUtils;
+
 
 public class CastLoader extends AsyncTaskLoader<Cast[]> {
     private String movieId;

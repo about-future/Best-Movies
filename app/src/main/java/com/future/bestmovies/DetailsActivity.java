@@ -131,7 +131,7 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
             ratingsLandscape.setVisibility(View.VISIBLE);
             ratingsPortrait.setVisibility(View.GONE);
         } else {
-            // Otherwise, the user has a phone (width < 600DPs) and uses it in portrait mode.
+            // Otherwise, the user has a phone (smallest width < 600DPs) and uses it in portrait mode.
             // In this case, show ratings_portrait and hide ratings_landscape
             movieRatingTextView = findViewById(R.id.details_ratings_portrait_tv);
             movieReleaseDateTextView = findViewById(R.id.details_release_date_portrait_tv);
@@ -148,7 +148,7 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
         // have an internet connection.
         // The movie backdrop, poster and cast depend on it
 
-        // First we show the progress bar and hide the Cast RecyclerView
+        // First, show the Cast progress bar and hide the Cast RecyclerView
         hideCast();
 
         // If there is a network connection, we show all the movie details and fetch cast data
@@ -159,7 +159,7 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
             // Fetch movie backdrop if it's available
             if (!mSelectedMovie.getBackdropPath().equals("null")) {
                 Picasso.with(this)
-                        .load(ImageUtils.buildImageUrlWithImageType(
+                        .load(ImageUtils.buildImageUrl(
                                 this,
                                 mSelectedMovie.getBackdropPath(),
                                 ImageUtils.BACKDROP))
@@ -177,7 +177,7 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
                     moviePosterImageView.getLayoutParams().width = (int) getResources().getDimension(R.dimen.poster_width);
                 }
                 Picasso.with(this)
-                        .load(ImageUtils.buildImageUrlWithImageType(
+                        .load(ImageUtils.buildImageUrl(
                                 this,
                                 mSelectedMovie.getPosterPath(),
                                 ImageUtils.POSTER))
@@ -191,7 +191,6 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
             // Fetch movie cast
             getLoaderManager().initLoader(CAST_LOADER_ID, null, this);
         } else {
-            hideCast();
             // Otherwise, hide data and display connection error message
             showError();
             // Update message TextView with no connection error message

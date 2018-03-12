@@ -7,6 +7,7 @@ import org.json.JSONObject;
 import com.future.bestmovies.data.Movie;
 import com.future.bestmovies.data.Cast;
 
+
 public class JsonUtils {
     //Movie labels
     private static final String PAGE = "page";
@@ -29,6 +30,7 @@ public class JsonUtils {
     private static final String NAME = "name";
     private static final String PROFILE_PATH = "profile_path";
 
+    // Parses the JSON response for the list of movies and their details
     public static Movie[] parseMoviesJson(String moviesJsonStr) throws JSONException {
         int id;
         double voteAverage;
@@ -68,6 +70,7 @@ public class JsonUtils {
     }
 
     // Parses the JSON response for page number, total results and total pages
+    // This method might be used in the near future
     public static int[] parsePagesJson(String moviesJsonStr) throws JSONException {
         // Instantiate a JSON object so we can get data.
         JSONObject allMoviesJson = new JSONObject(moviesJsonStr);

@@ -1,10 +1,7 @@
 package com.future.bestmovies;
 
 import android.content.Context;
-import android.database.Cursor;
-import android.support.v4.content.res.TypedArrayUtils;
 import android.support.v7.widget.RecyclerView;
-import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,12 +9,8 @@ import android.widget.ImageView;
 
 import com.future.bestmovies.data.Movie;
 import com.future.bestmovies.utils.ImageUtils;
-import com.future.bestmovies.utils.NetworkUtils;
 import com.squareup.picasso.Picasso;
 
-import java.lang.reflect.Array;
-import java.net.URL;
-import java.util.Arrays;
 
 public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHolder> {
 
@@ -48,10 +41,9 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
 
         if (!mMovies[position].getPosterPath().equals("null")) {
             Picasso.with(mContext)
-                    .load(ImageUtils.buildImageUrlWithImageType(
+                    .load(ImageUtils.buildImageUrlForRecyclerView(
                             mContext,
-                            mMovies[position].getPosterPath(),
-                            ImageUtils.POSTER))
+                            mMovies[position].getPosterPath()))
                     .into(holder.moviePosterImageView);
             description = mMovies[position].
                     getMovieTitle().

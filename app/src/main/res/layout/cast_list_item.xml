@@ -5,8 +5,8 @@
     android:background="@drawable/touch_selector"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:paddingEnd="@dimen/details_recycle_view_spacing"
-    android:paddingStart="@dimen/details_recycle_view_spacing">
+    android:paddingEnd="@dimen/details_horizontal_spacing"
+    android:paddingStart="@dimen/activity_horizontal_margin">
 
     <ImageView
         android:id="@+id/actor_profile_iv"

@@ -1,124 +1,122 @@
 package com.future.bestmovies.utils;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.future.bestmovies.data.MoviePreferences;
 
+
 public class ImageUtils {
     private static final String TAG = ImageUtils.class.getSimpleName();
-    private static final String IMAGES_BASE_URL = "http://image.tmdb.org/t/p/";
-    private static final String IMAGE_SIZE45 = "w45";
-    private static final String IMAGE_SIZE92 = "w92";
-    private static final String IMAGE_SIZE154 = "w154";
-    public static final String IMAGE_SIZE185 = "w185";
-    private static final String IMAGE_SIZE342 = "w342";
-    private static final String IMAGE_SIZE500 = "w500";
-    private static final String IMAGE_SIZE780 = "w780";
-    private static final String IMAGE_SIZE1280 = "w1280";
-    private static final String IMAGE_SIZE_ORIGINAL = "original";
-    public static final String BACKDROP = "backdrop";
-    public static final String POSTER = "poster";
-    public static final String CAST = "cast";
+    private static final String IMAGES_BASE_URL = "http://image.tmdb.org/t/p/w";
+    public static final int BACKDROP = 1;
+    public static final int POSTER = 2;
+    public static final int CAST = 3;
     private static final String OPTIMAL = "optimal";
     private static final String MEDIUM = "medium";
 
-
-    // This method will build and return the image URL, based on the imagePath (i.e. "/nBNZadXqJSdt05SHLqgT0HuC5Gm.jpg")
-    // and on the expected imageType (i.e. backdrop, poster or cast) with the preferred size (optimal, medium or small)
-    public static String buildImageUrlWithImageType(Context context, String imagePath, String imageType) {
-        // Get image size as a string, so we can build our image URL (i.e. "w185", "w342", "w500" and so on)
-        String[] imageSizeAsString = getImageSize(context);
-
-        String imageSize;
-        // Depending on what type of image is expected we will select the appropriate result and
-        // store it in imageSize
-        switch (imageType) {
-            case BACKDROP:
-                imageSize = imageSizeAsString[0];
-                break;
-            case POSTER:
-                imageSize = imageSizeAsString[1];
-                break;
-            default:
-                // CAST:
-                imageSize = imageSizeAsString[2];
-                break;
-        }
-
+    /* Return an image URL used in DetailsActivity
+     * @param context is used to access getImageWidth method
+     * @param imagePath (i.e. "/nBNZadXqJSdt05SHLqgT0HuC5Gm.jpg")
+     * @pram imageType (i.e. backdrop, poster or cast)
+     */
+    public static String buildImageUrl(Context context, String imagePath, int imageType) {
+        // Get the image width, so we can build our image URL (i.e. 1280 or 500 or 342)
+        int imageWidth = getImageWidth(context, imageType);
         // Create the image URL and return it
-        return IMAGES_BASE_URL.concat(imageSize).concat(imagePath);
+        String imageUrl = IMAGES_BASE_URL.concat(String.valueOf(imageWidth)).concat(imagePath);
+        Log.v(TAG, "Image URL: " + imageUrl);
+        return imageUrl;
     }
 
+    /* Return an image URL for each poster used in MainActivity's RecyclerView
+     * @param context is used to access a movie preference method
+     * @param imagePath (i.e. "/nBNZadXqJSdt05SHLqgT0HuC5Gm.jpg")
+     */
+    public static String buildImageUrlForRecyclerView(Context context, String imagePath) {
+        // Get the image width, so we can build our image URL (i.e. 500 or 342 or 185)
+        int imageWidth = MoviePreferences.getImageWidthForRecyclerView(context);
+        // Create the image URL and return it
+        return IMAGES_BASE_URL.concat(String.valueOf(imageWidth)).concat(imagePath);
+    }
 
-    // Return a string array for backdrop, poster and cast, based on the width of the screen in DPs
-    // and quality selected. (i.e. "w780", "w342", "w185")
-    private static String[] getImageSize(Context context) {
+    /* Return the image width for backdrop, poster or cast (i.e. 780, 342 or 185)
+     * @param context is used to access a movie preference method
+     * @param imageType: BACKDROP, POSTER or CAST
+     */
+    public static int getImageWidth(Context context, int imageType) {
         // Get the preferred image quality (optimal, medium or small)
         String preferredImageQuality = MoviePreferences.getPreferredImageQuality(context);
 
         // Get the width of screen in DPs
-        int screenSize = ScreenUtils.getScreenWidthInDps(context);
+        int screenWidth = ScreenUtils.getScreenWidthInDps(context);
 
-        // Use the current width of the screen and based on that, generate the string representation
-        // for the preferred quality case and return it.
+        // For each preferred quality case, generate the correct image width.
         switch (preferredImageQuality) {
             case OPTIMAL:
-                // Generate the string values for backdrop, poster and cast, using the full width
-                // of the screen. This option will get best visual results for the user, but will
-                // download the most amount of data. (i.e. "
-                return getImageSizeAsString(screenSize);
+                // Generate the corrected value for backdrop, poster or cast, using the full width
+                // of the screen. This option will get best visual result for the user, but will
+                // download the most amount of data.
+                return getCorrectedImageWidth(screenWidth, imageType);
             case MEDIUM:
-                // Divide the screen width by 2 and generate the string values for backdrop,
-                // poster and cast, reducing by 2 the amount of downloaded data.
-                return getImageSizeAsString(Math.round(screenSize / 2));
+                // Divide the screen width by 2 and generate the corrected value for backdrop,
+                // poster or cast, reducing by 2 the amount of downloaded data.
+                return getCorrectedImageWidth(Math.round(screenWidth / 2), imageType);
             default:
-                // SMALL: Divide the screen width size to 4 and generate the string values for
-                // backdrop, poster and cast, reducing even more the amount of downloaded data.
-                return getImageSizeAsString(Math.round(screenSize / 4));
+                // SMALL: Divide the screen width to 4 and generate the corrected value for backdrop,
+                // poster or cast, reducing even more the amount of downloaded data.
+                return getCorrectedImageWidth(Math.round(screenWidth / 4), imageType);
         }
     }
 
+    /* Compare the given dimension with certain dimension intervals and return the corrected image
+     * width. The intervals are not randomly generated, they are based on the available widths
+     * provided by image.tmdb.org.
+     * The returned value would be something like: 500, 185 or 154, depending on expected imageType
+     *
+     * @param selectedScreenWidth represents the width of the screen in dps (i.e. 360 or 800)
+     * @param imageType: BACKDROP, POSTER or CAST
+     */
+    private static int getCorrectedImageWidth(int selectedScreenWidth, int imageType) {
+        int backdropWidth;
+        int posterWidth;
+        int castWidth;
 
-    // This method will compare the given dimension with certain dimension intervals and generate
-    // the optimal image size as a string. The intervals are not randomly generated, they are based
-    // on the available width dimensions provided by image.tmdb.org. The selectedScreenSize
-    // represents the width of the image in pixels and the returned value could be something like
-    // this: {"w780", "w342"} or {"w500", "w185"}
-    private static String[] getImageSizeAsString(int selectedScreenSize) {
-        String backdropWidth;
-        String posterWidth;
-        String castWidth;
-
-        if (selectedScreenSize > 1600) {
-            backdropWidth = IMAGE_SIZE_ORIGINAL;
-            posterWidth = IMAGE_SIZE780;
-            castWidth = IMAGE_SIZE500;
-        } else if (selectedScreenSize > 1000 && selectedScreenSize <= 1600) {
-            backdropWidth = IMAGE_SIZE1280;
-            posterWidth = IMAGE_SIZE500;
-            castWidth = IMAGE_SIZE342;
-        } else if (selectedScreenSize > 500 && selectedScreenSize <= 1000) {
-            backdropWidth = IMAGE_SIZE780;
-            posterWidth = IMAGE_SIZE342;
-            castWidth = IMAGE_SIZE185;
-        } else if (selectedScreenSize > 342 && selectedScreenSize <= 500) {
-            backdropWidth = IMAGE_SIZE500;
-            posterWidth = IMAGE_SIZE185;
-            castWidth = IMAGE_SIZE154;
-        } else if (selectedScreenSize > 185 && selectedScreenSize <= 342) {
-            backdropWidth = IMAGE_SIZE342;
-            posterWidth = IMAGE_SIZE154;
-            castWidth = IMAGE_SIZE92;
-        } else if (selectedScreenSize > 154 && selectedScreenSize <= 185) {
-            backdropWidth = IMAGE_SIZE185;
-            posterWidth = IMAGE_SIZE92;
-            castWidth = IMAGE_SIZE45;
-        } else {
-            backdropWidth = IMAGE_SIZE154;
-            posterWidth = IMAGE_SIZE45;
-            castWidth = IMAGE_SIZE45;
+        if (selectedScreenWidth > 1600) {
+            backdropWidth = 1280;
+            posterWidth = 780;
+            castWidth = 500;
+        } else if (selectedScreenWidth > 1000 && selectedScreenWidth <= 1600) {
+            backdropWidth = 1280;
+            posterWidth = 500;
+            castWidth = 342;
+        } else if (selectedScreenWidth > 500 && selectedScreenWidth <= 1000) {
+            backdropWidth = 780;
+            posterWidth = 342;
+            castWidth = 185;
+        } else if (selectedScreenWidth > 342 && selectedScreenWidth <= 500) {
+            backdropWidth = 500;
+            posterWidth = 185;
+            castWidth = 154;
+        } else if (selectedScreenWidth > 185 && selectedScreenWidth <= 342) {
+            backdropWidth = 342;
+            posterWidth = 154;
+            castWidth = 92;
+        } else { // if (selectedScreenWidth <= 185)
+            backdropWidth = 185;
+            posterWidth = 92;
+            castWidth = 45;
         }
 
-        return new String[]{backdropWidth, posterWidth, castWidth};
+        // Depending on what type of image is expected we will return the appropriate result
+        switch (imageType) {
+            case BACKDROP:
+                return backdropWidth;
+            case POSTER:
+                return posterWidth;
+            default:
+                // CAST:
+                return castWidth;
+        }
     }
 }

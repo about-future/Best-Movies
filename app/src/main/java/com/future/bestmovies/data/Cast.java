@@ -3,6 +3,7 @@ package com.future.bestmovies.data;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+
 public class Cast implements Parcelable {
     private String character;
     private int id;

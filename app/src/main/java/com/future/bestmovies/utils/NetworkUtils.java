@@ -25,7 +25,7 @@ public class NetworkUtils {
     private static final String PAGE_NUMBER = "page";
     private static final String CREDITS = "credits";
     private static final String API_KEY = "api_key";
-    private static final String API_ID = "xxx";
+    private static final String API_ID = "<need key>";
 
     /* This method returns the main API URL.
      * Using two preferences as parameters, calls a more complex method that builds the actual URL.

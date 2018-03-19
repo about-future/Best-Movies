@@ -5,8 +5,10 @@ import android.content.Context;
 
 import com.future.bestmovies.utils.NetworkUtils;
 
+import java.util.ArrayList;
 
-public class MovieLoader extends AsyncTaskLoader<Movie[]> {
+
+public class MovieLoader extends AsyncTaskLoader<ArrayList<Movie>> {
 
     public MovieLoader(Context context) {
         super(context);
@@ -16,7 +18,7 @@ public class MovieLoader extends AsyncTaskLoader<Movie[]> {
     protected void onStartLoading() { forceLoad(); }
 
     @Override
-    public Movie[] loadInBackground() {
+    public ArrayList<Movie> loadInBackground() {
         return NetworkUtils.fetchMovieData(getContext());
     }
 }

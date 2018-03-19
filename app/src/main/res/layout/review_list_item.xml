@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/touch_selector">
+
+    <TextView
+        android:id="@+id/review_author_tv"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/details_vertical_spacing"
+        android:fontFamily="sans-serif-condensed"
+        android:gravity="top"
+        android:textColor="@color/colorWhite"
+        android:textStyle="bold"
+        android:textSize="@dimen/details_font_size"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="Author" />
+
+    <TextView
+        android:id="@+id/review_content_tv"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:fontFamily="sans-serif-condensed"
+        android:layout_marginTop="@dimen/details_vertical_spacing"
+        android:textSize="@dimen/details_font_size"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/review_author_tv"
+        tools:text="Content of review is used to display to data presented in our data base and from the official website." />
+
+    <View
+        android:id="@+id/separation_line"
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:layout_marginTop="@dimen/details_vertical_spacing"
+        android:background="@color/colorPrimary"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/review_content_tv" />
+
+</android.support.constraint.ConstraintLayout>

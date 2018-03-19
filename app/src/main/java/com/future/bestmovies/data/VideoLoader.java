@@ -8,10 +8,10 @@ import com.future.bestmovies.utils.NetworkUtils;
 import java.util.ArrayList;
 
 
-public class CastLoader extends AsyncTaskLoader<ArrayList<Cast>> {
+public class VideoLoader extends AsyncTaskLoader<ArrayList<Video>> {
     private final String movieId;
 
-    public CastLoader(Context context, String movieId) {
+    public VideoLoader(Context context, String movieId) {
         super(context);
         this.movieId = movieId;
     }
@@ -22,7 +22,7 @@ public class CastLoader extends AsyncTaskLoader<ArrayList<Cast>> {
     }
 
     @Override
-    public ArrayList<Cast> loadInBackground() {
-        return NetworkUtils.fetchMovieCast(movieId);
+    public ArrayList<Video> loadInBackground() {
+        return NetworkUtils.fetchMovieVideos(movieId);
     }
 }

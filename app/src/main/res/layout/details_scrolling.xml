@@ -21,14 +21,14 @@
             android:visibility="visible">
 
             <include
-                layout="@layout/poster_and_plot"
                 android:id="@+id/poster_and_plot"
+                layout="@layout/poster_and_plot"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="@dimen/details_horizontal_spacing"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="parent"/>
+                app:layout_constraintTop_toBottomOf="parent" />
 
             <View
                 android:id="@+id/separation_line2"
@@ -42,6 +42,18 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/poster_and_plot" />
 
+            <TextView
+                android:id="@+id/cast_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/details_vertical_spacing"
+                android:fontFamily="sans-serif-condensed"
+                android:text="Cast"
+                android:textColor="@color/colorWhite"
+                android:textSize="20sp"
+                app:layout_constraintStart_toStartOf="@id/separation_line2"
+                app:layout_constraintTop_toBottomOf="@id/separation_line2" />
+
             <include
                 android:id="@+id/cast_body"
                 layout="@layout/cast_scrolling"
@@ -53,20 +65,57 @@
                 android:layout_marginTop="@dimen/details_vertical_spacing"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/separation_line2" />
+                app:layout_constraintTop_toBottomOf="@id/cast_label" />
+
+            <View
+                android:id="@+id/separation_line4"
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_marginEnd="@dimen/details_horizontal_spacing"
+                android:layout_marginStart="@dimen/details_horizontal_spacing"
+                android:layout_marginTop="@dimen/details_vertical_spacing"
+                android:background="@color/colorPrimary"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/cast_body" />
+
+            <TextView
+                android:id="@+id/reviews_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/details_vertical_spacing"
+                android:fontFamily="sans-serif-condensed"
+                android:text="Reviews"
+                android:textColor="@color/colorWhite"
+                android:textSize="20sp"
+                app:layout_constraintStart_toStartOf="@id/separation_line4"
+                app:layout_constraintTop_toBottomOf="@id/separation_line4" />
+
+            <include
+                android:id="@+id/reviews_body"
+                layout="@layout/reviews"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/details_vertical_spacing"
+                android:layout_marginEnd="@dimen/details_horizontal_spacing"
+                android:layout_marginStart="@dimen/details_horizontal_spacing"
+                android:layout_marginTop="@dimen/details_vertical_spacing"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/reviews_label" />
 
             <include
                 android:id="@+id/ratings_portrait"
                 layout="@layout/ratings_portrait"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/details_vertical_spacing"
                 android:layout_marginEnd="@dimen/details_horizontal_spacing"
                 android:layout_marginStart="@dimen/details_horizontal_spacing"
                 android:layout_marginTop="@dimen/details_vertical_spacing"
-                android:layout_marginBottom="@dimen/details_vertical_spacing"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/cast_body" />
+                app:layout_constraintTop_toBottomOf="@id/reviews_body" />
 
             <View
                 android:id="@+id/separation_line3"

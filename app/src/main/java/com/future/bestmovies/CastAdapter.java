@@ -13,14 +13,16 @@ import com.future.bestmovies.data.Cast;
 import com.future.bestmovies.utils.ImageUtils;
 import com.squareup.picasso.Picasso;
 
+import java.util.ArrayList;
+
 
 public class CastAdapter extends RecyclerView.Adapter<CastAdapter.CastViewHolder> {
     private final Context mContext;
-    private Cast[] mCast;
+    private ArrayList<Cast> mCast;
 
     //No click listener needed yet
 
-    public CastAdapter(Context context, Cast[] cast) {
+    public CastAdapter(Context context, ArrayList<Cast> cast) {
         mContext = context;
         mCast = cast;
     }
@@ -36,14 +38,14 @@ public class CastAdapter extends RecyclerView.Adapter<CastAdapter.CastViewHolder
     public void onBindViewHolder(@NonNull CastAdapter.CastViewHolder holder, int position) {
         String description;
 
-        if (!mCast[position].getProfilePath().equals("null")) {
+        if (!mCast.get(position).getProfilePath().equals("null")) {
             Picasso.with(mContext)
                     .load(ImageUtils.buildImageUrl(
                             mContext,
-                            mCast[position].getProfilePath(),
+                            mCast.get(position).getProfilePath(),
                             ImageUtils.CAST))
                     .into(holder.actorProfileImageView);
-            description = mCast[position].getActorName();
+            description = mCast.get(position).getActorName();
         }
         else {
             holder.actorProfileImageView.setImageResource(R.drawable.ic_person);
@@ -52,13 +54,13 @@ public class CastAdapter extends RecyclerView.Adapter<CastAdapter.CastViewHolder
         }
 
         holder.actorProfileImageView.setContentDescription(description);
-        holder.actorNameTextView.setText(mCast[position].getActorName());
+        holder.actorNameTextView.setText(mCast.get(position).getActorName());
     }
 
     @Override
-    public int getItemCount() { return mCast.length; }
+    public int getItemCount() { return mCast.size(); }
 
-    void swapCast(Cast[] newCast) {
+    public void swapCast(ArrayList<Cast> newCast) {
         mCast = newCast;
         notifyDataSetChanged();
     }

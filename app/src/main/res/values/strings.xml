@@ -29,6 +29,8 @@
     <string name="no_backdrop">No backdrop available</string>
     <string name="no_profile_picture">No picture available</string>
     <string name="no_cast">No cast available</string>
+    <string name="no_reviews">No reviews available</string>
+    <string name="no_videos">No videos available</string>
 
     <!-- PREFERENCES -->
     <!-- Labels for category option in Movie Category preference -->

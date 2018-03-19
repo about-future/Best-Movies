@@ -25,10 +25,12 @@ import com.future.bestmovies.utils.ImageUtils;
 import com.future.bestmovies.utils.NetworkUtils;
 import com.future.bestmovies.utils.ScreenUtils;
 
+import java.util.ArrayList;
+
 
 public class MainActivity extends AppCompatActivity implements
         MovieAdapter.GridItemClickListener,
-        LoaderManager.LoaderCallbacks<Movie[]> {
+        LoaderManager.LoaderCallbacks<ArrayList<Movie>> {
 
     private static final String TAG = MainActivity.class.getSimpleName();
     private static final int MOVIES_LOADER_ID = 24;
@@ -67,7 +69,7 @@ public class MainActivity extends AppCompatActivity implements
 
         mMoviesRecyclerView.setLayoutManager(gridLayoutManager);
         mMoviesRecyclerView.setHasFixedSize(true);
-        mAdapter = new MovieAdapter(this, new Movie[]{}, this);
+        mAdapter = new MovieAdapter(this, new ArrayList<Movie>(){}, this);
         mMoviesRecyclerView.setAdapter(mAdapter);
 
         // To create an infinite scrolling effect, we add an OnScrollListener to our RecyclerView
@@ -187,7 +189,7 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
-    public Loader<Movie[]> onCreateLoader(int loaderId, Bundle args) {
+    public Loader<ArrayList<Movie>> onCreateLoader(int loaderId, Bundle bundle) {
         switch (loaderId) {
             case MOVIES_LOADER_ID:
                 // If the loaded id matches ours, return a new movie loader
@@ -198,16 +200,17 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void onLoadFinished(Loader<Movie[]> loader, Movie[] data) {
+    public void onLoadFinished(Loader<ArrayList<Movie>> loader, ArrayList<Movie> movies) {
         // Every time we get new results we have 2 possibilities
         int currentPage = MoviePreferences.getLastPageNumber(getApplicationContext());
         // If currentPage is "1", we know that the user has changed the movie category or uses the
         // app for the first time. In this situation we swap the Movie array with the new data
         if (currentPage == 1) {
-            mAdapter.swapMovies(data);
-        } else {
+            mAdapter.swapMovies(movies);
+        }
+        else {
             // Otherwise, we add the new data to the old data, creating an infinite scrolling effect
-            mAdapter.mergeMovies(data);
+            mAdapter.addMovies(movies);
         }
 
         // If our RecyclerView has is not position, we assume the first position in the list
@@ -218,7 +221,7 @@ public class MainActivity extends AppCompatActivity implements
         }
 
         // If new data is available
-        if (data.length != 0) {
+        if (movies.size() != 0) {
             // Hide progress bar
             mLoading.setVisibility(View.GONE);
             // Set the text for mMovieCategory as the selected category
@@ -227,9 +230,9 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void onLoaderReset(Loader<Movie[]> loader) {
+    public void onLoaderReset(Loader<ArrayList<Movie>> loader) {
         // If the loader is reset, swap old data with null ones
-        mAdapter.swapMovies(new Movie[]{});
+        mAdapter.swapMovies(new ArrayList<Movie>(){});
     }
 
     // Hide the movie data and loading indicator and show error message

@@ -1,6 +1,7 @@
 package com.future.bestmovies;
 
 import android.app.LoaderManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.Loader;
 import android.graphics.PorterDuff;
@@ -13,14 +14,17 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.future.bestmovies.data.Cast;
+import com.future.bestmovies.data.CastAdapter;
 import com.future.bestmovies.data.CastLoader;
 import com.future.bestmovies.data.Movie;
 import com.future.bestmovies.data.Review;
@@ -41,6 +45,7 @@ public class DetailsActivity extends AppCompatActivity {
     private static final int VIDEOS_LOADER_ID = 594;
 
     public static final String MOVIE_OBJECT = "movie";
+    public static final String MOVIE_ID = "movie_id";
     private Movie mSelectedMovie;
     private ConstraintLayout mMovieDetailsLayout;
     private TextView mMessagesTextView;
@@ -52,12 +57,12 @@ public class DetailsActivity extends AppCompatActivity {
     private RecyclerView mCastRecyclerView;
     private ProgressBar mCastProgressBar;
 
-    private TextView mReviews;
-    private int mReviewPosition = RecyclerView.NO_POSITION;
-    private ReviewAdapter mReviewAdapter;
-    private RecyclerView mReviewsRecyclerView;
-    private ProgressBar mReviewsProgressBar;
-    private TextView mReviewsMessagesTextView;
+    private ConstraintLayout mFirstReviewLayout;
+    private TextView mFirstReviewAuthorTextView;
+    private TextView mFirstReviewContentTextView;
+    private ProgressBar mReviewProgressBar;
+    private TextView mReviewMessagesTextView;
+    private TextView mSeeAllReviewsTextView;
 
 
     @Override
@@ -96,7 +101,7 @@ public class DetailsActivity extends AppCompatActivity {
                 new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
         mCastRecyclerView.setLayoutManager(layoutManager);
         mCastRecyclerView.setHasFixedSize(true);
-        mCastAdapter = new CastAdapter(this, new ArrayList<Cast>(){});
+        mCastAdapter = new CastAdapter(this, new ArrayList<Cast>());
         mCastRecyclerView.setAdapter(mCastAdapter);
 
         // If we have an instance saved and contains our movie object, we use it to populate our UI
@@ -219,19 +224,13 @@ public class DetailsActivity extends AppCompatActivity {
         }
 
         // Reviews
-        //mReviews = findViewById(R.id.reviews);
-        mReviewAdapter = new ReviewAdapter(this, new ArrayList<Review>(){});
-        mReviewsRecyclerView = findViewById(R.id.reviews_rv);
-        mReviewsProgressBar = findViewById(R.id.loading_reviews_pb);
-        // The layout manager for our Cast RecyclerView will be a LinerLayout, so we can display
-        // our cast on a single line, horizontally
-        LinearLayoutManager reviewLayoutManager =
-                new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
-        mReviewsRecyclerView.setLayoutManager(reviewLayoutManager);
-        mReviewsRecyclerView.setHasFixedSize(true);
-        mReviewsRecyclerView.setAdapter(mReviewAdapter);
-        mReviewsMessagesTextView = findViewById(R.id.reviews_messages_tv);
-        mReviewsMessagesTextView.setText(R.string.loading);
+        mFirstReviewLayout = findViewById(R.id.first_review_layout);
+        mFirstReviewAuthorTextView = findViewById(R.id.first_review_author_tv);
+        mFirstReviewContentTextView = findViewById(R.id.first_review_content_tv);
+        mReviewProgressBar = findViewById(R.id.loading_first_review_pb);
+        mReviewMessagesTextView = findViewById(R.id.first_review_messages_tv);
+        mReviewMessagesTextView.setText(R.string.loading);
+        mSeeAllReviewsTextView = findViewById(R.id.see_all_reviews_tv);
     }
 
     @Override
@@ -285,21 +284,22 @@ public class DetailsActivity extends AppCompatActivity {
     }
 
     // Hide the progress bar and show reviews
-    private void showReviews() {
-        mReviewsRecyclerView.setVisibility(View.VISIBLE);
-        mReviewsProgressBar.setVisibility(View.INVISIBLE);
-        mReviewsMessagesTextView.setVisibility(View.INVISIBLE);
+    private void showReview() {
+        mFirstReviewLayout.setVisibility(View.VISIBLE);
+        mReviewProgressBar.setVisibility(View.INVISIBLE);
+        mReviewMessagesTextView.setVisibility(View.INVISIBLE);
     }
 
     // Show progress bar and hide reviews
-    private void hideReviews() {
-        mReviewsRecyclerView.setVisibility(View.INVISIBLE);
-        mReviewsProgressBar.setVisibility(View.VISIBLE);
-        mReviewsMessagesTextView.setVisibility(View.VISIBLE);
+    private void hideReview() {
+        mFirstReviewLayout.setVisibility(View.INVISIBLE);
+        mReviewProgressBar.setVisibility(View.VISIBLE);
+        mReviewMessagesTextView.setVisibility(View.VISIBLE);
+        mSeeAllReviewsTextView.setVisibility(View.INVISIBLE);
     }
 
-
-    private LoaderManager.LoaderCallbacks<ArrayList<Cast>> castResultLoaderListener = new LoaderManager.LoaderCallbacks<ArrayList<Cast>>(){
+    private LoaderManager.LoaderCallbacks<ArrayList<Cast>> castResultLoaderListener =
+            new LoaderManager.LoaderCallbacks<ArrayList<Cast>>(){
         @Override
         public Loader<ArrayList<Cast>> onCreateLoader(int loaderId, Bundle bundle) {
             switch (loaderId) {
@@ -340,12 +340,13 @@ public class DetailsActivity extends AppCompatActivity {
         }
     };
 
-    private LoaderManager.LoaderCallbacks<ArrayList<Review>> reviewsResultLoaderListener = new LoaderManager.LoaderCallbacks<ArrayList<Review>>(){
+    private LoaderManager.LoaderCallbacks<ArrayList<Review>> reviewsResultLoaderListener =
+            new LoaderManager.LoaderCallbacks<ArrayList<Review>>(){
         @Override
         public Loader<ArrayList<Review>> onCreateLoader(int loaderId, Bundle bundle) {
             switch (loaderId) {
                 case REVIEWS_LOADER_ID:
-                    // If the loaded id matches ours, return a new cast movie loader
+                    // If the loaded id matches ours, return a new movie review loader
                     return new ReviewLoader(getApplicationContext(), String.valueOf(mSelectedMovie.getMovieId()));
                 default:
                     throw new RuntimeException("Loader Not Implemented: " + loaderId);
@@ -354,30 +355,42 @@ public class DetailsActivity extends AppCompatActivity {
 
         @Override
         public void onLoadFinished(Loader<ArrayList<Review>> loader, ArrayList<Review> movieReviews) {
-            mReviewAdapter.swapReviews(movieReviews);
+            //Clear TextViews
+            mFirstReviewAuthorTextView.setText(null);
+            mFirstReviewContentTextView.setText(null);
 
-            // If our RecyclerView has is not position, we assume the first position in the list
-            // and set the RecyclerView a the beginning of our results
-            if (mReviewPosition == RecyclerView.NO_POSITION) {
-                mReviewPosition = 0;
-                mReviewsRecyclerView.smoothScrollToPosition(mReviewPosition);
-            }
-
-            // If the movieReviews has data
             if (movieReviews.size() != 0) {
+                if (movieReviews.size() > 1) {
+                    mSeeAllReviewsTextView.setVisibility(View.VISIBLE);
+                    mSeeAllReviewsTextView.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            Intent reviewsIntent = new Intent(getApplicationContext(), ReviewsActivity.class);
+                            reviewsIntent.putExtra(MOVIE_ID, String.valueOf(mSelectedMovie.getMovieId()));
+                            startActivity(reviewsIntent);
+                        }
+                    });
+                } else {
+                    mSeeAllReviewsTextView.setVisibility(View.GONE);
+                }
                 // Show movie reviews
-                showReviews();
+                showReview();
+                mFirstReviewAuthorTextView.setText(movieReviews.get(0).getReviewAuthor());
+                mFirstReviewContentTextView.setText(movieReviews.get(0).getReviewContent());
             } else {
                 // Otherwise, hide progress bar and show "No reviews available" message
-                mReviewsMessagesTextView.setVisibility(View.VISIBLE);
-                mReviewsMessagesTextView.setText(R.string.no_reviews);
-                mReviewsProgressBar.setVisibility(View.INVISIBLE);
+                hideReview();
+                mReviewMessagesTextView.setVisibility(View.VISIBLE);
+                mReviewMessagesTextView.setText(R.string.no_reviews);
+                mReviewProgressBar.setVisibility(View.INVISIBLE);
             }
         }
 
         @Override
         public void onLoaderReset(Loader<ArrayList<Review>> loader) {
-            mReviewAdapter.swapReviews(new ArrayList<Review>(){});
+            // Clear TextViews
+            mFirstReviewAuthorTextView.setText(null);
+            mFirstReviewContentTextView.setText(null);
         }
     };
 }

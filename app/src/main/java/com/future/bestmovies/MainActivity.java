@@ -19,6 +19,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.future.bestmovies.data.Movie;
+import com.future.bestmovies.data.MovieAdapter;
 import com.future.bestmovies.data.MovieLoader;
 import com.future.bestmovies.data.MoviePreferences;
 import com.future.bestmovies.utils.ImageUtils;

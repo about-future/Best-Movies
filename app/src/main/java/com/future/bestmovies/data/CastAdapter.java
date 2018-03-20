@@ -1,4 +1,4 @@
-package com.future.bestmovies;
+package com.future.bestmovies.data;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
@@ -9,7 +9,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.future.bestmovies.data.Cast;
+import com.future.bestmovies.R;
 import com.future.bestmovies.utils.ImageUtils;
 import com.squareup.picasso.Picasso;
 

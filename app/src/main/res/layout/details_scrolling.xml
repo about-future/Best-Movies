@@ -48,7 +48,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/details_vertical_spacing"
                 android:fontFamily="sans-serif-condensed"
-                android:text="Cast"
+                android:text="@string/cast_label"
                 android:textColor="@color/colorWhite"
                 android:textSize="20sp"
                 app:layout_constraintStart_toStartOf="@id/separation_line2"
@@ -85,21 +85,37 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/details_vertical_spacing"
                 android:fontFamily="sans-serif-condensed"
-                android:text="Reviews"
+                android:text="@string/reviews_label"
                 android:textColor="@color/colorWhite"
                 android:textSize="20sp"
                 app:layout_constraintStart_toStartOf="@id/separation_line4"
                 app:layout_constraintTop_toBottomOf="@id/separation_line4" />
 
+            <TextView
+                android:id="@+id/see_all_reviews_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/touch_selector"
+                android:fontFamily="sans-serif-condensed"
+                android:padding="@dimen/details_horizontal_spacing"
+                android:text="@string/see_all"
+                android:textAllCaps="true"
+                android:textStyle="bold"
+                android:textColor="@color/colorAccent"
+                android:textSize="@dimen/details_font_size"
+                android:visibility="invisible"
+                app:layout_constraintEnd_toEndOf="@id/separation_line4"
+                app:layout_constraintTop_toBottomOf="@id/separation_line4" />
+
             <include
-                android:id="@+id/reviews_body"
-                layout="@layout/reviews"
+                android:id="@+id/first_review_body"
+                layout="@layout/first_review"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="@dimen/details_vertical_spacing"
                 android:layout_marginEnd="@dimen/details_horizontal_spacing"
                 android:layout_marginStart="@dimen/details_horizontal_spacing"
-                android:layout_marginTop="@dimen/details_vertical_spacing"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/reviews_label" />
@@ -115,7 +131,7 @@
                 android:layout_marginTop="@dimen/details_vertical_spacing"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/reviews_body" />
+                app:layout_constraintTop_toBottomOf="@id/first_review_body" />
 
             <View
                 android:id="@+id/separation_line3"

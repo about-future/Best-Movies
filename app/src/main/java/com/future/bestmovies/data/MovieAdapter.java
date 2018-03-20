@@ -1,4 +1,4 @@
-package com.future.bestmovies;
+package com.future.bestmovies.data;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
@@ -8,7 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
-import com.future.bestmovies.data.Movie;
+import com.future.bestmovies.R;
 import com.future.bestmovies.utils.ImageUtils;
 import com.squareup.picasso.Picasso;
 
@@ -66,27 +66,14 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
         return mMovies.size();
     }
 
-    // This method swaps the old movie result with the newly loaded ones
-    void swapMovies(ArrayList<Movie> newMovies) {
+    // This method swaps the old movie result with the newly loaded ones and notify the change
+    public void swapMovies(ArrayList<Movie> newMovies) {
         mMovies = newMovies;
         notifyDataSetChanged();
     }
 
-    // Merge the existing movie with the new Movies, creating a new Movie array
-    void addMovies(ArrayList<Movie> newMovies) {
-        // To generate a merged Array with the correct length, we have to add the existing
-        // length array to the new one.
-        //Movie[] mergedMovies = new Movie[mMovies.length + newMovies.length];
-
-        // To provide content for our merged array, we copy the entire content of our existing array
-        // into the mergedMovies array and than add the content of the newMovies array to the
-        // mergedArray.
-        //System.arraycopy(mMovies, 0, mergedMovies, 0, mMovies.length);
-        //System.arraycopy(newMovies, 0, mergedMovies, mMovies.length, newMovies.length);
-
-        // After that, we simply swap the arrays and notify the adapter about the change
-        //swapMovies(mergedMovies);
-
+    // Add to the existing movie list the new movies and notify the change
+    public void addMovies(ArrayList<Movie> newMovies) {
         mMovies.addAll(newMovies);
         notifyDataSetChanged();
     }

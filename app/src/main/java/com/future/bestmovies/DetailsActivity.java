@@ -36,6 +36,7 @@ import com.future.bestmovies.utils.ImageUtils;
 import com.future.bestmovies.utils.MovieUtils;
 import com.future.bestmovies.utils.NetworkUtils;
 import com.future.bestmovies.utils.ScreenUtils;
+import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -52,6 +53,9 @@ public class DetailsActivity extends AppCompatActivity {
     public static final String MOVIE_REVIEWS = "movie_reviews";
     public static final String MOVIE_VIDEOS = "movie_videos";
     public static final String MOVIE_ID = "movie_id";
+    public static final String MOVIE_TITLE = "movie_title";
+    public static final String MOVIE_BACKDROP = "movie_backdrop";
+
     private Movie mSelectedMovie;
     private ConstraintLayout mMovieDetailsLayout;
     private TextView mMessagesTextView;
@@ -93,8 +97,8 @@ public class DetailsActivity extends AppCompatActivity {
         mMessagesTextView = findViewById(R.id.messages_tv);
         mCastMessagesTextView = findViewById(R.id.cast_messages_tv);
         mCastMessagesTextView.setText(R.string.loading);
-        ImageView movieBackdropImageView = findViewById(R.id.details_backdrop_iv);
-        ImageView moviePosterImageView = findViewById(R.id.details_poster_iv);
+        final ImageView movieBackdropImageView = findViewById(R.id.details_backdrop_iv);
+        final ImageView moviePosterImageView = findViewById(R.id.details_poster_iv);
         TextView moviePlotTextView = findViewById(R.id.details_plot_tv);
         TextView movieGenreTextView = findViewById(R.id.details_genre_tv);
         mCastRecyclerView = findViewById(R.id.cast_rv);
@@ -184,81 +188,100 @@ public class DetailsActivity extends AppCompatActivity {
         movieRatingTextView.setText(String.valueOf(mSelectedMovie.getVoteAverage()));
         movieReleaseDateTextView.setText(mSelectedMovie.getReleaseDate());
 
-        // Because all the information so far was provided by the Movie object and no internet
-        // connection was necessary, the next 3 areas of our UI will be populated if and only if we
-        // have an internet connection.
-        // The movie backdrop, poster and cast depend on it
+        final TextView backdropErrorTextView = findViewById(R.id.backdrop_error_tv);
+        final TextView posterErrorTextView = findViewById(R.id.poster_error_tv);
 
-        // First, show the Cast progress bar and hide the Cast RecyclerView
+        // Fetch movie backdrop if it's available
+        Picasso.with(this)
+                .load(ImageUtils.buildImageUrl(
+                        this,
+                        mSelectedMovie.getBackdropPath(),
+                        ImageUtils.BACKDROP))
+                .error(R.drawable.ic_landscape)
+                .into(movieBackdropImageView, new Callback() {
+                    @Override
+                    public void onSuccess() {
+                        backdropErrorTextView.setVisibility(View.GONE);
+                    }
+
+                    @Override
+                    public void onError() {
+                        backdropErrorTextView.setVisibility(View.VISIBLE);
+                        // If there isn't a network connection, we show a "no connection" message
+                        if (!NetworkUtils.isConnected(getApplicationContext())) {
+                            backdropErrorTextView.setText(getString(R.string.no_connection));
+                        } else {
+                            // Otherwise, we show "no_backdrop" message
+                            backdropErrorTextView.setText(getString(R.string.no_backdrop));
+                        }
+                        // Set backdrop content description for error case
+                        movieBackdropImageView.setContentDescription(getString(R.string.no_backdrop));
+                    }
+                });
+
+        // Fetch movie poster, if it's available
+        if (ScreenUtils.isLandscapeMode(this)) {
+            moviePosterImageView.getLayoutParams().width = (int) getResources().getDimension(R.dimen.poster_width);
+        }
+        Picasso.with(this)
+                .load(ImageUtils.buildImageUrl(
+                        this,
+                        mSelectedMovie.getPosterPath(),
+                        ImageUtils.POSTER))
+                .error(R.drawable.ic_local_movies)
+                .into(moviePosterImageView, new Callback() {
+                    @Override
+                    public void onSuccess() {
+                        posterErrorTextView.setVisibility(View.GONE);
+                    }
+
+                    @Override
+                    public void onError() {
+                        posterErrorTextView.setVisibility(View.VISIBLE);
+                        // If there isn't a network connection, we show a "no connection" message
+                        if (!NetworkUtils.isConnected(getApplicationContext())) {
+                            posterErrorTextView.setText(getString(R.string.no_connection));
+                        } else {
+                            // Otherwise, we show "no_poster" message
+                            posterErrorTextView.setText(getString(R.string.no_poster));
+                        }
+                        // Set poster content description for error case
+                        moviePosterImageView.setContentDescription(getString(R.string.no_poster));
+                    }
+                });
+
+        // Show the Cast progress bar and hide the Cast RecyclerView
         hideCast();
 
-        // If there is a network connection, we show all the movie details and fetch cast data
-        if (NetworkUtils.isConnected(this)) {
-            // Show movie details
-            showMovieDetails();
-
-            // Fetch movie backdrop if it's available
-            if (!mSelectedMovie.getBackdropPath().equals("null")) {
-                Picasso.with(this)
-                        .load(ImageUtils.buildImageUrl(
-                                this,
-                                mSelectedMovie.getBackdropPath(),
-                                ImageUtils.BACKDROP))
-                        .into(movieBackdropImageView);
-            } else {
-                // Otherwise, set the default backdrop and chance the content description
-                movieBackdropImageView.setImageResource(R.drawable.ic_landscape);
-                movieBackdropImageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
-                movieBackdropImageView.setContentDescription(getString(R.string.no_backdrop));
+        // Fetch movie cast
+        if (savedInstanceState != null && savedInstanceState.containsKey(MOVIE_CAST)) {
+            mCast = savedInstanceState.getParcelableArrayList(MOVIE_CAST);
+            mCastAdapter = new CastAdapter(this, mCast);
+            mCastRecyclerView.setAdapter(mCastAdapter);
+            if (savedInstanceState.containsKey(CAST_POSITION)) {
+                mCastPosition = savedInstanceState.getInt(CAST_POSITION);
             }
-
-            // Fetch movie poster, if it's available
-            if (!mSelectedMovie.getPosterPath().equals("null")) {
-                if (ScreenUtils.isLandscapeMode(this)) {
-                    moviePosterImageView.getLayoutParams().width = (int) getResources().getDimension(R.dimen.poster_width);
-                }
-                Picasso.with(this)
-                        .load(ImageUtils.buildImageUrl(
-                                this,
-                                mSelectedMovie.getPosterPath(),
-                                ImageUtils.POSTER))
-                        .into(moviePosterImageView);
-            } else {
-                // Otherwise, set the default poster and chance the content description
-                moviePosterImageView.setImageResource(R.drawable.ic_local_movies);
-                moviePosterImageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
-                moviePosterImageView.setContentDescription(getString(R.string.no_poster));
-            }
-
-            // Fetch movie cast
-            if (savedInstanceState != null && savedInstanceState.containsKey(MOVIE_CAST)) {
-                mCast = savedInstanceState.getParcelableArrayList(MOVIE_CAST);
-                mCastAdapter = new CastAdapter(this, mCast);
-                mCastRecyclerView.setAdapter(mCastAdapter);
-                if (savedInstanceState.containsKey(CAST_POSITION)) {
-                    mCastPosition = savedInstanceState.getInt(CAST_POSITION);
-                }
-                populateCast(mCast);
-            } else {
-                getLoaderManager().initLoader(CAST_LOADER_ID, null, castResultLoaderListener);
-            }
-
-            // Fetch movie reviews
-            if (savedInstanceState != null && savedInstanceState.containsKey(MOVIE_REVIEWS)) {
-                mReviews = savedInstanceState.getParcelableArrayList(MOVIE_REVIEWS);
-                populateReviews(mReviews);
-            } else {
-                getLoaderManager().initLoader(REVIEWS_LOADER_ID, null, reviewsResultLoaderListener);
-            }
+            populateCast(mCast);
         } else {
-            // Otherwise, hide data and display connection error message
-            showError();
-            // Update message TextView with no connection error message
-            mMessagesTextView.setText(R.string.no_internet);
-            // And set collapsing toolbar as collapsed (not expanded)
-            AppBarLayout myAppBar = findViewById(R.id.app_bar);
-            myAppBar.setExpanded(false);
+            getLoaderManager().initLoader(CAST_LOADER_ID, null, castResultLoaderListener);
         }
+
+        // Fetch movie reviews
+        if (savedInstanceState != null && savedInstanceState.containsKey(MOVIE_REVIEWS)) {
+            mReviews = savedInstanceState.getParcelableArrayList(MOVIE_REVIEWS);
+            populateReviews(mReviews);
+        } else {
+            getLoaderManager().initLoader(REVIEWS_LOADER_ID, null, reviewsResultLoaderListener);
+        }
+//        } else {
+//            // Otherwise, hide data and display connection error message
+//            showError();
+//            // Update message TextView with no connection error message
+//            mMessagesTextView.setText(R.string.no_internet);
+//            // And set collapsing toolbar as collapsed (not expanded)
+//            AppBarLayout myAppBar = findViewById(R.id.app_bar);
+//            myAppBar.setExpanded(false);
+//        }
     }
 
     @Override
@@ -289,20 +312,6 @@ public class DetailsActivity extends AppCompatActivity {
         // Videos
         //outState.putParcelableArrayList(MOVIE_VIDEOS, mVideos);
         super.onSaveInstanceState(outState);
-    }
-
-    // Hide the error text and show movie data
-    private void showMovieDetails() {
-        mMovieDetailsLayout.setVisibility(View.VISIBLE);
-        mCloudImageView.setVisibility(View.INVISIBLE);
-        mMessagesTextView.setVisibility(View.INVISIBLE);
-    }
-
-    // Hide the movie data and show error message
-    private void showError() {
-        mMovieDetailsLayout.setVisibility(View.INVISIBLE);
-        mCloudImageView.setVisibility(View.VISIBLE);
-        mMessagesTextView.setVisibility(View.VISIBLE);
     }
 
     // Hide the progress bar and show cast
@@ -390,53 +399,63 @@ public class DetailsActivity extends AppCompatActivity {
             };
 
     private void populateCast(ArrayList<Cast> movieCast) {
-        mCastAdapter.swapCast(movieCast);
+        if (movieCast != null) {
+            mCastAdapter.swapCast(movieCast);
 
-        // If our RecyclerView has is not position, we assume the first position in the list
-        // and set the RecyclerView a the beginning of our results
-        if (mCastPosition == RecyclerView.NO_POSITION) {
-            mCastPosition = 0;
-        }
-        mCastRecyclerView.smoothScrollToPosition(mCastPosition);
+            // If our RecyclerView has is not position, we assume the first position in the list
+            // and set the RecyclerView a the beginning of our results
+            if (mCastPosition == RecyclerView.NO_POSITION) {
+                mCastPosition = 0;
+            }
+            mCastRecyclerView.smoothScrollToPosition(mCastPosition);
 
 
-        // If the movieCast has data
-        if (movieCast.size() != 0) {
-            // Show movie cast
-            showCast();
+            // If the movieCast has data
+            if (movieCast.size() != 0) {
+                // Show movie cast
+                showCast();
+            } else {
+                // Otherwise, hide progress bar and show "No cast available" message
+                mCastMessagesTextView.setVisibility(View.VISIBLE);
+                mCastMessagesTextView.setText(R.string.no_cast);
+                mCastProgressBar.setVisibility(View.INVISIBLE);
+            }
         } else {
-            // Otherwise, hide progress bar and show "No cast available" message
-            mCastMessagesTextView.setVisibility(View.VISIBLE);
-            mCastMessagesTextView.setText(R.string.no_cast);
-            mCastProgressBar.setVisibility(View.INVISIBLE);
+            Log.v("CAST", "IS NULL!");
         }
     }
 
     private void populateReviews(final ArrayList<Review> movieReviews) {
-        if (movieReviews.size() != 0) {
-            if (movieReviews.size() > 1) {
-                mSeeAllReviewsTextView.setVisibility(View.VISIBLE);
-                mSeeAllReviewsTextView.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        Intent reviewsIntent = new Intent(getApplicationContext(), ReviewsActivity.class);
-                        reviewsIntent.putParcelableArrayListExtra(MOVIE_REVIEWS, movieReviews);
-                        startActivity(reviewsIntent);
-                    }
-                });
+        if (movieReviews != null) {
+            if (movieReviews.size() != 0) {
+                if (movieReviews.size() > 1) {
+                    mSeeAllReviewsTextView.setVisibility(View.VISIBLE);
+                    mSeeAllReviewsTextView.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            Intent reviewsIntent = new Intent(getApplicationContext(), ReviewsActivity.class);
+                            reviewsIntent.putParcelableArrayListExtra(MOVIE_REVIEWS, movieReviews);
+                            reviewsIntent.putExtra(MOVIE_TITLE, mSelectedMovie.getMovieTitle());
+                            reviewsIntent.putExtra(MOVIE_BACKDROP, mSelectedMovie.getBackdropPath());
+                            startActivity(reviewsIntent);
+                        }
+                    });
+                } else {
+                    mSeeAllReviewsTextView.setVisibility(View.GONE);
+                }
+                // Show movie reviews
+                showReview();
+                mFirstReviewAuthorTextView.setText(movieReviews.get(0).getReviewAuthor());
+                mFirstReviewContentTextView.setText(movieReviews.get(0).getReviewContent());
             } else {
-                mSeeAllReviewsTextView.setVisibility(View.GONE);
+                // Otherwise, hide progress bar and show "No reviews available" message
+                hideReview();
+                mReviewMessagesTextView.setVisibility(View.VISIBLE);
+                mReviewMessagesTextView.setText(R.string.no_reviews);
+                mReviewProgressBar.setVisibility(View.INVISIBLE);
             }
-            // Show movie reviews
-            showReview();
-            mFirstReviewAuthorTextView.setText(movieReviews.get(0).getReviewAuthor());
-            mFirstReviewContentTextView.setText(movieReviews.get(0).getReviewContent());
         } else {
-            // Otherwise, hide progress bar and show "No reviews available" message
-            hideReview();
-            mReviewMessagesTextView.setVisibility(View.VISIBLE);
-            mReviewMessagesTextView.setText(R.string.no_reviews);
-            mReviewProgressBar.setVisibility(View.INVISIBLE);
+            Log.v("REVIEWS", "ARE NULL!");
         }
     }
 }

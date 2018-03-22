@@ -19,6 +19,22 @@
         app:srcCompat="@drawable/ic_local_movies" />
 
     <TextView
+        android:id="@+id/poster_error_tv"
+        android:layout_width="@id/details_poster_iv"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/details_message_spacing"
+        android:fontFamily="sans-serif-condensed"
+        android:gravity="center"
+        android:text="@string/no_poster"
+        android:textAllCaps="true"
+        android:textColor="@color/colorTransparentWhite"
+        android:textSize="@dimen/details_font_size"
+        android:visibility="visible"
+        app:layout_constraintBottom_toBottomOf="@id/details_poster_iv"
+        app:layout_constraintEnd_toEndOf="@id/details_poster_iv"
+        app:layout_constraintStart_toStartOf="@id/details_poster_iv" />
+
+    <TextView
         android:id="@+id/details_plot_tv"
         android:layout_width="0dp"
         android:layout_height="wrap_content"

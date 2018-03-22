@@ -4,6 +4,7 @@
     <dimen name="details_horizontal_spacing">24dp</dimen>
     <dimen name="details_vertical_spacing">24dp</dimen>
     <dimen name="details_font_size">16sp</dimen>
+    <dimen name="details_message_spacing">48dp</dimen>
     <dimen name="poster_width">320dp</dimen>
 
 </resources>

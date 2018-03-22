@@ -10,6 +10,8 @@ import android.widget.ImageView;
 
 import com.future.bestmovies.R;
 import com.future.bestmovies.utils.ImageUtils;
+import com.future.bestmovies.utils.NetworkUtils;
+import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -40,25 +42,12 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
 
     @Override
     public void onBindViewHolder(@NonNull MovieViewHolder holder, int position) {
-        String description;
-
-        if (!mMovies.get(position).getPosterPath().equals("null")) {
-            Picasso.with(mContext)
-                    .load(ImageUtils.buildImageUrlForRecyclerView(
-                            mContext,
-                            mMovies.get(position).getPosterPath()))
-                    .into(holder.moviePosterImageView);
-            description = mMovies.get(position).
-                    getMovieTitle().
-                    concat(mContext.getString(R.string.poster));
-
-        } else {
-            holder.moviePosterImageView.setImageResource(R.drawable.ic_local_movies);
-            holder.moviePosterImageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
-            description = mContext.getString(R.string.no_poster);
-        }
-
-        holder.moviePosterImageView.setContentDescription(description);
+        Picasso.with(mContext)
+                .load(ImageUtils.buildImageUrlForRecyclerView(
+                        mContext,
+                        mMovies.get(position).getPosterPath()))
+                .error(R.drawable.ic_local_movies)
+                .into(holder.moviePosterImageView);
     }
 
     @Override

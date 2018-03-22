@@ -7,11 +7,13 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -20,10 +22,14 @@ import com.future.bestmovies.data.Movie;
 import com.future.bestmovies.data.Review;
 import com.future.bestmovies.data.ReviewAdapter;
 import com.future.bestmovies.data.ReviewLoader;
+import com.future.bestmovies.utils.ImageUtils;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
+import static com.future.bestmovies.DetailsActivity.MOVIE_BACKDROP;
 import static com.future.bestmovies.DetailsActivity.MOVIE_REVIEWS;
+import static com.future.bestmovies.DetailsActivity.MOVIE_TITLE;
 
 public class ReviewsActivity extends AppCompatActivity {
 
@@ -33,11 +39,17 @@ public class ReviewsActivity extends AppCompatActivity {
     private ReviewAdapter mReviewAdapter;
     private RecyclerView mReviewsRecyclerView;
     private LinearLayoutManager mReviewLayoutManager;
+    private String mMovieTitle;
+    private String mMovieBackdrop;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_reviews);
+
+        // We initialize and set the toolbar
+        Toolbar toolbar = findViewById(R.id.reviews_toolbar);
+        setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
@@ -56,6 +68,14 @@ public class ReviewsActivity extends AppCompatActivity {
             if (savedInstanceState.containsKey(REVIEWS_POSITION)) {
                 mReviewPosition = savedInstanceState.getInt(REVIEWS_POSITION);
             }
+
+            if (savedInstanceState.containsKey(MOVIE_TITLE)) {
+                mMovieTitle = savedInstanceState.getString(MOVIE_TITLE);
+            }
+
+            if (savedInstanceState.containsKey(MOVIE_BACKDROP)) {
+                mMovieBackdrop = savedInstanceState.getString(MOVIE_BACKDROP);
+            }
         } else {
             // Otherwise, we check our intent and see if there is an ArrayList of Review objects
             // passed from DetailsActivity, so we can populate our reviews UI. If there isn't, we
@@ -63,6 +83,12 @@ public class ReviewsActivity extends AppCompatActivity {
             Intent intent = getIntent();
             if (intent != null && intent.hasExtra(MOVIE_REVIEWS)) {
                 mReviews = intent.getParcelableArrayListExtra(MOVIE_REVIEWS);
+                if (intent.hasExtra(MOVIE_TITLE)) {
+                    mMovieTitle = intent.getStringExtra(MOVIE_TITLE);
+                }
+                if (intent.hasExtra(MOVIE_BACKDROP)) {
+                    mMovieBackdrop = intent.getStringExtra(MOVIE_BACKDROP);
+                }
             } else {
                 closeOnError();
             }
@@ -76,12 +102,22 @@ public class ReviewsActivity extends AppCompatActivity {
 
         mReviewAdapter = new ReviewAdapter(this, mReviews);
         mReviewsRecyclerView.setAdapter(mReviewAdapter);
-
         if (mReviewPosition == RecyclerView.NO_POSITION) {
             mReviewPosition = 0;
         }
-
         mReviewsRecyclerView.scrollToPosition(mReviewPosition);
+
+        // Set activity title as the movie name
+        setTitle(mMovieTitle);
+
+        // Set the backdrop for the movie reviews
+        ImageView movieBackdropImageView = findViewById(R.id.reviews_backdrop_iv);
+        Picasso.with(this)
+                .load(ImageUtils.buildImageUrl(
+                        this,
+                        mMovieBackdrop,
+                        ImageUtils.BACKDROP))
+                .into(movieBackdropImageView);
     }
 
     @Override
@@ -103,6 +139,8 @@ public class ReviewsActivity extends AppCompatActivity {
         } else {
             outState.putInt(REVIEWS_POSITION, mReviewLayoutManager.findFirstVisibleItemPosition());
         }
+        outState.putString(MOVIE_TITLE, mMovieTitle);
+        outState.putString(MOVIE_BACKDROP, mMovieBackdrop);
 
         super.onSaveInstanceState(outState);
     }

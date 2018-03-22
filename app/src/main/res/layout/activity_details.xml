@@ -35,6 +35,19 @@
                 app:layout_collapseMode="parallax"
                 app:srcCompat="@drawable/ic_landscape" />
 
+            <TextView
+                android:id="@+id/backdrop_error_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/no_connection"
+                android:layout_gravity="center|bottom"
+                android:layout_marginBottom="60dp"
+                android:fontFamily="sans-serif-condensed"
+                android:visibility="invisible"
+                android:textAllCaps="true"
+                android:textSize="@dimen/review_author_font_size"
+                android:textColor="@color/colorWhite"/>
+
             <View
                 android:layout_width="match_parent"
                 android:layout_height="200dp"

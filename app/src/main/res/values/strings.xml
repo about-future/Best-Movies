@@ -11,8 +11,8 @@
     <!-- Content descriptions -->
     <string name="movie_poster">Movie poster</string>
     <string name="movie_backdrop">Movie backdrop</string>
-    <string name="poster"> poster</string>
-    <string name="no_connection">No connection icon</string>
+    <string name="poster">\ poster</string>
+    <string name="no_connection_icon">No connection icon</string>
     <string name="powered_by">Powered by The Movie Database</string>
 
     <!-- Activity Labels -->
@@ -27,8 +27,9 @@
     <!-- Messages and Error messages -->
     <string name="loading">Loading&#8230;</string>
     <string name="no_internet">No internet connection.\nNo movies, right?</string>
+    <string name="no_connection">Connection unavailable</string>
     <string name="details_error_message">No movie details available</string>
-    <string name="no_poster">No movie poster available</string>
+    <string name="no_poster">No poster available</string>
     <string name="no_backdrop">No backdrop available</string>
     <string name="no_profile_picture">No picture available</string>
     <string name="no_cast">No cast available</string>

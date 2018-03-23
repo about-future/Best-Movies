@@ -58,7 +58,7 @@
                 android:id="@+id/cast_body"
                 layout="@layout/cast_scrolling"
                 android:layout_width="0dp"
-                android:layout_height="188dp"
+                android:layout_height="wrap_content"
                 android:layout_marginBottom="@dimen/details_vertical_spacing"
                 android:layout_marginEnd="@dimen/details_horizontal_spacing"
                 android:layout_marginStart="@dimen/details_horizontal_spacing"

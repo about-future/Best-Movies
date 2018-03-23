@@ -13,6 +13,10 @@
     <string name="movie_backdrop">Movie backdrop</string>
     <string name="poster">\ poster</string>
     <string name="no_connection_icon">No connection icon</string>
+    <string name="no_reviews_icon">No reviews icon</string>
+    <string name="no_cast_icon">No cast icon</string>
+    <string name="no_video_icon">No videos icon</string>
+    <string name="no_favourites_icon">No favourite movies icon</string>
     <string name="powered_by">Powered by The Movie Database</string>
 
     <!-- Activity Labels -->

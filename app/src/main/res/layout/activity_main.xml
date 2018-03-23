@@ -21,8 +21,8 @@
 
     <ImageView
         android:id="@+id/no_connection_cloud_iv"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
+        android:layout_width="@dimen/icon"
+        android:layout_height="@dimen/icon"
         android:layout_gravity="center"
         android:layout_marginBottom="@dimen/details_vertical_spacing"
         android:contentDescription="@string/no_connection_icon"

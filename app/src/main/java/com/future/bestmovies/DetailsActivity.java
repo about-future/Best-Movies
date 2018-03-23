@@ -57,10 +57,10 @@ public class DetailsActivity extends AppCompatActivity {
     public static final String MOVIE_BACKDROP = "movie_backdrop";
 
     private Movie mSelectedMovie;
-    private ConstraintLayout mMovieDetailsLayout;
-    private TextView mMessagesTextView;
+    private TextView backdropErrorTextView;
+    private TextView posterErrorTextView;
+
     private TextView mCastMessagesTextView;
-    private ImageView mCloudImageView;
 
     private int mCastPosition = RecyclerView.NO_POSITION;
     private CastAdapter mCastAdapter;
@@ -68,14 +68,18 @@ public class DetailsActivity extends AppCompatActivity {
     private RecyclerView mCastRecyclerView;
     private ProgressBar mCastProgressBar;
     private ArrayList<Cast> mCast;
+    private ImageView mNoCastImageView;
+    private ImageView mNoCastConnectionImageView;
 
     private ConstraintLayout mFirstReviewLayout;
     private TextView mFirstReviewAuthorTextView;
     private TextView mFirstReviewContentTextView;
-    private ProgressBar mReviewProgressBar;
-    private TextView mReviewMessagesTextView;
+    private ProgressBar mFirstReviewProgressBar;
+    private TextView mFirstReviewMessagesTextView;
     private TextView mSeeAllReviewsTextView;
     private ArrayList<Review> mReviews;
+    private ImageView mNoReviewsImageView;
+    private ImageView mNoReviewsConnectionImageView;
 
     private ArrayList<Video> mVideos;
 
@@ -92,9 +96,6 @@ public class DetailsActivity extends AppCompatActivity {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
 
-        mMovieDetailsLayout = findViewById(R.id.movie_details_layout);
-        mCloudImageView = findViewById(R.id.no_connection_cloud_iv);
-        mMessagesTextView = findViewById(R.id.messages_tv);
         mCastMessagesTextView = findViewById(R.id.cast_messages_tv);
         mCastMessagesTextView.setText(R.string.loading);
         final ImageView movieBackdropImageView = findViewById(R.id.details_backdrop_iv);
@@ -118,15 +119,19 @@ public class DetailsActivity extends AppCompatActivity {
         mCastRecyclerView.setHasFixedSize(true);
         mCastAdapter = new CastAdapter(this, new ArrayList<Cast>());
         mCastRecyclerView.setAdapter(mCastAdapter);
+        mNoCastImageView = findViewById(R.id.no_cast_iv);
+        mNoCastConnectionImageView = findViewById(R.id.no_cast_connection_iv);
 
         // Reviews
         mFirstReviewLayout = findViewById(R.id.first_review_layout);
         mFirstReviewAuthorTextView = findViewById(R.id.first_review_author_tv);
         mFirstReviewContentTextView = findViewById(R.id.first_review_content_tv);
-        mReviewProgressBar = findViewById(R.id.loading_first_review_pb);
-        mReviewMessagesTextView = findViewById(R.id.first_review_messages_tv);
-        mReviewMessagesTextView.setText(R.string.loading);
+        mFirstReviewProgressBar = findViewById(R.id.loading_first_review_pb);
+        mFirstReviewMessagesTextView = findViewById(R.id.first_review_messages_tv);
+        mFirstReviewMessagesTextView.setText(R.string.loading);
         mSeeAllReviewsTextView = findViewById(R.id.see_all_reviews_tv);
+        mNoReviewsImageView = findViewById(R.id.no_reviews_iv);
+        mNoReviewsConnectionImageView = findViewById(R.id.no_review_connection_iv);
 
         // If we have an instance saved and contains our movie object, we use it to populate our UI
         if (savedInstanceState != null && savedInstanceState.containsKey(MOVIE_OBJECT)) {
@@ -188,9 +193,8 @@ public class DetailsActivity extends AppCompatActivity {
         movieRatingTextView.setText(String.valueOf(mSelectedMovie.getVoteAverage()));
         movieReleaseDateTextView.setText(mSelectedMovie.getReleaseDate());
 
-        final TextView backdropErrorTextView = findViewById(R.id.backdrop_error_tv);
-        final TextView posterErrorTextView = findViewById(R.id.poster_error_tv);
-
+        // Backdrop error message will be used if no backdrop is available or if no internet connection
+        backdropErrorTextView = findViewById(R.id.backdrop_error_tv);
         // Fetch movie backdrop if it's available
         Picasso.with(this)
                 .load(ImageUtils.buildImageUrl(
@@ -219,6 +223,8 @@ public class DetailsActivity extends AppCompatActivity {
                     }
                 });
 
+        // Poster error message will be used if no poster is available or if no internet connection
+        posterErrorTextView = findViewById(R.id.poster_error_tv);
         // Fetch movie poster, if it's available
         if (ScreenUtils.isLandscapeMode(this)) {
             moviePosterImageView.getLayoutParams().width = (int) getResources().getDimension(R.dimen.poster_width);
@@ -252,36 +258,53 @@ public class DetailsActivity extends AppCompatActivity {
 
         // Show the Cast progress bar and hide the Cast RecyclerView
         hideCast();
-
-        // Fetch movie cast
+        // Check for saved data or fetch movie cast
         if (savedInstanceState != null && savedInstanceState.containsKey(MOVIE_CAST)) {
             mCast = savedInstanceState.getParcelableArrayList(MOVIE_CAST);
-            mCastAdapter = new CastAdapter(this, mCast);
-            mCastRecyclerView.setAdapter(mCastAdapter);
-            if (savedInstanceState.containsKey(CAST_POSITION)) {
-                mCastPosition = savedInstanceState.getInt(CAST_POSITION);
+            // If cast is not null, data from server was previously fetched successfully
+            if (mCast != null) {
+                // If cast is not empty, use the saved cast and repopulate the cast section
+                if (!mCast.isEmpty()) {
+                    mCastAdapter = new CastAdapter(this, mCast);
+                    mCastRecyclerView.setAdapter(mCastAdapter);
+                    if (savedInstanceState.containsKey(CAST_POSITION)) {
+                        mCastPosition = savedInstanceState.getInt(CAST_POSITION);
+                    }
+                }
+                populateCast(mCast);
+            } else {
+                // Otherwise, there might be an error while accessing the server
+                // Check the connection and if connected try fetching cast again
+                fetchCast();
             }
-            populateCast(mCast);
         } else {
-            getLoaderManager().initLoader(CAST_LOADER_ID, null, castResultLoaderListener);
+            // Otherwise, no previous data was saved before, so loader has to be initialised
+            fetchCast();
         }
 
-        // Fetch movie reviews
+        // Show the Review progress bar and hide the firstReview layout
+        hideReviews();
+        // Check for saved data or fetch movie reviews
         if (savedInstanceState != null && savedInstanceState.containsKey(MOVIE_REVIEWS)) {
             mReviews = savedInstanceState.getParcelableArrayList(MOVIE_REVIEWS);
-            populateReviews(mReviews);
+            // If cast is not null, data from server was previously fetched successfully
+            if (mReviews != null) {
+                // If review is not empty, use the saved reviews and repopulate the reviews section
+                populateReviews(mReviews);
+            } else {
+                // Otherwise, there might be an error while accessing the server
+                // Check the connection and if connected try fetching reviews again
+                fetchReviews();
+            }
         } else {
-            getLoaderManager().initLoader(REVIEWS_LOADER_ID, null, reviewsResultLoaderListener);
+            // Otherwise, no previous data was saved before, so loader has to be initialised
+            fetchReviews();
         }
-//        } else {
-//            // Otherwise, hide data and display connection error message
-//            showError();
-//            // Update message TextView with no connection error message
-//            mMessagesTextView.setText(R.string.no_internet);
-//            // And set collapsing toolbar as collapsed (not expanded)
-//            AppBarLayout myAppBar = findViewById(R.id.app_bar);
-//            myAppBar.setExpanded(false);
-//        }
+
+        // Show the Video progress bar and hide the video layout and RecyclerView
+        //hideVideos();
+        // Check for saved data or fetch movie videos
+
     }
 
     @Override
@@ -311,6 +334,7 @@ public class DetailsActivity extends AppCompatActivity {
         outState.putParcelableArrayList(MOVIE_REVIEWS, mReviews);
         // Videos
         //outState.putParcelableArrayList(MOVIE_VIDEOS, mVideos);
+
         super.onSaveInstanceState(outState);
     }
 
@@ -319,28 +343,64 @@ public class DetailsActivity extends AppCompatActivity {
         mCastRecyclerView.setVisibility(View.VISIBLE);
         mCastProgressBar.setVisibility(View.INVISIBLE);
         mCastMessagesTextView.setVisibility(View.INVISIBLE);
+        mNoCastImageView.setVisibility(View.INVISIBLE);
+        mNoCastConnectionImageView.setVisibility(View.INVISIBLE);
     }
 
     // Show progress bar and hide cast
     private void hideCast() {
-        mCastRecyclerView.setVisibility(View.INVISIBLE);
+        mCastRecyclerView.setVisibility(View.GONE);
         mCastProgressBar.setVisibility(View.VISIBLE);
         mCastMessagesTextView.setVisibility(View.VISIBLE);
+        mNoCastImageView.setVisibility(View.INVISIBLE);
+        mNoCastConnectionImageView.setVisibility(View.INVISIBLE);
     }
 
     // Hide the progress bar and show reviews
-    private void showReview() {
+    private void showReviews() {
         mFirstReviewLayout.setVisibility(View.VISIBLE);
-        mReviewProgressBar.setVisibility(View.INVISIBLE);
-        mReviewMessagesTextView.setVisibility(View.INVISIBLE);
+        mFirstReviewProgressBar.setVisibility(View.INVISIBLE);
+        mFirstReviewMessagesTextView.setVisibility(View.INVISIBLE);
+        mNoReviewsImageView.setVisibility(View.INVISIBLE);
+        mNoReviewsConnectionImageView.setVisibility(View.INVISIBLE);
     }
 
     // Show progress bar and hide reviews
-    private void hideReview() {
+    private void hideReviews() {
         mFirstReviewLayout.setVisibility(View.INVISIBLE);
-        mReviewProgressBar.setVisibility(View.VISIBLE);
-        mReviewMessagesTextView.setVisibility(View.VISIBLE);
+        mFirstReviewProgressBar.setVisibility(View.VISIBLE);
+        mFirstReviewMessagesTextView.setVisibility(View.VISIBLE);
         mSeeAllReviewsTextView.setVisibility(View.INVISIBLE);
+        mNoReviewsImageView.setVisibility(View.INVISIBLE);
+        mNoReviewsConnectionImageView.setVisibility(View.INVISIBLE);
+    }
+
+    private void fetchCast() {
+        if (NetworkUtils.isConnected(getApplicationContext())) {
+            getLoaderManager().restartLoader(CAST_LOADER_ID, null, castResultLoaderListener);
+        } else {
+            // Otherwise, hide progress bar and show "No connection available" message
+            mCastMessagesTextView.setVisibility(View.VISIBLE);
+            mCastMessagesTextView.setText(R.string.no_connection);
+            mCastProgressBar.setVisibility(View.INVISIBLE);
+            mNoCastImageView.setVisibility(View.INVISIBLE);
+            mNoCastConnectionImageView.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void fetchReviews() {
+        if (NetworkUtils.isConnected(getApplicationContext())) {
+            getLoaderManager().restartLoader(REVIEWS_LOADER_ID, null, reviewsResultLoaderListener);
+        } else {
+            // Otherwise, hide progress bar and show "No connection available" message
+            mFirstReviewLayout.setVisibility(View.INVISIBLE);
+            mSeeAllReviewsTextView.setVisibility(View.INVISIBLE);
+            mFirstReviewMessagesTextView.setVisibility(View.VISIBLE);
+            mFirstReviewMessagesTextView.setText(R.string.no_connection);
+            mFirstReviewProgressBar.setVisibility(View.INVISIBLE);
+            mNoReviewsImageView.setVisibility(View.INVISIBLE);
+            mNoReviewsConnectionImageView.setVisibility(View.VISIBLE);
+        }
     }
 
     private LoaderManager.LoaderCallbacks<ArrayList<Cast>> castResultLoaderListener =
@@ -419,9 +479,9 @@ public class DetailsActivity extends AppCompatActivity {
                 mCastMessagesTextView.setVisibility(View.VISIBLE);
                 mCastMessagesTextView.setText(R.string.no_cast);
                 mCastProgressBar.setVisibility(View.INVISIBLE);
+                mNoCastImageView.setVisibility(View.VISIBLE);
+                mNoCastConnectionImageView.setVisibility(View.INVISIBLE);
             }
-        } else {
-            Log.v("CAST", "IS NULL!");
         }
     }
 
@@ -444,18 +504,18 @@ public class DetailsActivity extends AppCompatActivity {
                     mSeeAllReviewsTextView.setVisibility(View.GONE);
                 }
                 // Show movie reviews
-                showReview();
+                showReviews();
                 mFirstReviewAuthorTextView.setText(movieReviews.get(0).getReviewAuthor());
                 mFirstReviewContentTextView.setText(movieReviews.get(0).getReviewContent());
             } else {
                 // Otherwise, hide progress bar and show "No reviews available" message
-                hideReview();
-                mReviewMessagesTextView.setVisibility(View.VISIBLE);
-                mReviewMessagesTextView.setText(R.string.no_reviews);
-                mReviewProgressBar.setVisibility(View.INVISIBLE);
+                hideReviews();
+                mFirstReviewMessagesTextView.setVisibility(View.VISIBLE);
+                mFirstReviewMessagesTextView.setText(R.string.no_reviews);
+                mFirstReviewProgressBar.setVisibility(View.INVISIBLE);
+                mNoReviewsImageView.setVisibility(View.VISIBLE);
+                mNoReviewsConnectionImageView.setVisibility(View.INVISIBLE);
             }
-        } else {
-            Log.v("REVIEWS", "ARE NULL!");
         }
     }
 }

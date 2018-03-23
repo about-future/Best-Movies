@@ -1,32 +1,52 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:minHeight="@dimen/min_height"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/cast_rv"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="188dp"
         android:clipToPadding="false"
         android:visibility="visible" />
 
     <ProgressBar
         android:id="@+id/loading_cast_pb"
-        android:layout_width="42dp"
-        android:layout_height="42dp"
-        android:layout_gravity="center"
+        android:layout_width="@dimen/icon"
+        android:layout_height="@dimen/icon"
+        android:layout_gravity="center_horizontal"
         android:visibility="invisible" />
+
+    <ImageView
+        android:id="@+id/no_cast_iv"
+        android:layout_width="@dimen/icon"
+        android:layout_height="@dimen/icon"
+        android:layout_gravity="center_horizontal"
+        android:contentDescription="@string/no_cast_icon"
+        android:visibility="visible"
+        app:srcCompat="@drawable/ic_no_people" />
+
+    <ImageView
+        android:id="@+id/no_cast_connection_iv"
+        android:layout_width="@dimen/icon"
+        android:layout_height="@dimen/icon"
+        android:layout_gravity="center_horizontal"
+        android:contentDescription="@string/no_connection_icon"
+        android:visibility="invisible"
+        app:srcCompat="@drawable/ic_cloud_off" />
 
     <TextView
         android:id="@+id/cast_messages_tv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_marginTop="40dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="@dimen/message_top_margin"
+        android:fontFamily="sans-serif-condensed"
         android:gravity="center"
         android:text="@string/loading"
-        android:fontFamily="sans-serif-condensed"
         android:textSize="@dimen/details_font_size"
-        android:visibility="invisible" />
+        android:visibility="visible" />
 
 </FrameLayout>

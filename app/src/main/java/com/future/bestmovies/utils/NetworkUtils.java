@@ -89,7 +89,6 @@ public class NetworkUtils {
      */
     //https://api.themoviedb.org/3/movie/157336/videos?api_key=
     //https://api.themoviedb.org/3/movie/157336?api_key=
-
     private static URL buildMovieVideosApiUrl(String movieId) {
         Uri movieQueryUri = Uri.parse(API_MOVIE_BASE_URL).buildUpon()
                 .appendPath(MOVIE)
@@ -164,7 +163,9 @@ public class NetworkUtils {
             return JsonUtils.parseMoviesJson(jsonMovieResponse);
         } catch (Exception e) {
             Log.e(TAG, "Error accessing the Server:", e);
+            //TODO: move return here
         }
+
 
         // If something went wrong, we return an empty array of Movie objects
         return new ArrayList<Movie>();
@@ -184,10 +185,9 @@ public class NetworkUtils {
             return JsonUtils.parseMovieCastJson(jsonMovieCastResponse);
         } catch (Exception e) {
             Log.e(TAG, "Error accessing the Server:", e);
+            // If something went wrong, we return null
+            return null;
         }
-
-        // If something went wrong, we return an empty array of Cast objects
-        return new ArrayList<Cast>();
     }
 
     /* Perform a network request using a URL, parse the JSON from that request and return an array
@@ -204,10 +204,9 @@ public class NetworkUtils {
             return JsonUtils.parseMovieReviewJson(jsonMovieReviewsResponse);
         } catch (Exception e) {
             Log.e(TAG, "Error accessing the Server:", e);
+            // If something went wrong, we return null
+            return null;
         }
-
-        // If something went wrong, we return an empty array list of Review objects
-        return new ArrayList<Review>();
     }
 
     /* Perform a network request using a URL, parse the JSON from that request and return an array
@@ -224,10 +223,9 @@ public class NetworkUtils {
             return JsonUtils.parseMovieVideosJson(jsonMovieVideosResponse);
         } catch (Exception e) {
             Log.e(TAG, "Error accessing the Server:", e);
+            // If something went wrong, we return null
+            return null;
         }
-
-        // If something went wrong, we return an empty array list of Video objects
-        return new ArrayList<Video>();
     }
 
     /* Perform a state of network connectivity test and return true or false.

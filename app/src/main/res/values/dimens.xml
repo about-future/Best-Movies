@@ -10,8 +10,10 @@
     <dimen name="review_author_font_size">18sp</dimen>
     <dimen name="min_height">79dp</dimen>
     <dimen name="message_top_margin">64dp</dimen>
-    <dimen name="poster_width">200dp</dimen>
     <dimen name="icon">48dp</dimen>
     <dimen name="logo">72dp</dimen>
-
+    <dimen name="poster_width">140dp</dimen>
+    <dimen name="video_spacing">8dp</dimen>
+    <dimen name="video_height">200dp</dimen>
+    <dimen name="video_layout_height">250dp</dimen>
 </resources>

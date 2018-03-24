@@ -11,7 +11,7 @@
 
         <ImageView
             android:id="@+id/details_poster_iv"
-            android:layout_width="120dp"
+            android:layout_width="@dimen/poster_width"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
             android:adjustViewBounds="true"
@@ -98,28 +98,6 @@
             android:textSize="@dimen/details_font_size"
             app:layout_constraintStart_toEndOf="@id/details_poster_iv"
             app:layout_constraintTop_toBottomOf="@id/details_release_date_tv" />
-
-        <Button
-            android:id="@+id/details_add_favourites"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:srcCompat="@drawable/ic_favorite"
-            android:text="@string/add_to_favourites"
-            android:layout_marginStart="@dimen/details_horizontal_spacing"
-            android:visibility="gone"
-            app:layout_constraintStart_toEndOf="@id/details_poster_iv"
-            app:layout_constraintBottom_toBottomOf="@id/details_poster_iv"/>
-
-        <!--<ImageView-->
-        <!--android:id="@+id/details_add_favourites"-->
-        <!--android:layout_width="@dimen/icon"-->
-        <!--android:layout_height="@dimen/icon"-->
-        <!--android:layout_marginStart="@dimen/details_horizontal_spacing"-->
-        <!--android:layout_marginTop="@dimen/details_vertical_spacing"-->
-        <!--android:contentDescription="@string/add_favourites"-->
-        <!--app:layout_constraintStart_toEndOf="@id/details_poster_iv"-->
-        <!--app:layout_constraintTop_toBottomOf="@id/details_release_date_label"-->
-        <!--app:srcCompat="@drawable/ic_favorite" />-->
 
         <TextView
             android:id="@+id/details_plot_tv"

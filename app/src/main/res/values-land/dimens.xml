@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="poster_width">200dp</dimen>
+    <dimen name="video_spacing">8dp</dimen>
+    <dimen name="video_height">300dp</dimen>
+    <dimen name="video_layout_height">350dp</dimen>
+</resources>

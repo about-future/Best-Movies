@@ -13,7 +13,9 @@ import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.PagerSnapHelper;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SnapHelper;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
@@ -155,9 +157,6 @@ public class DetailsActivity extends AppCompatActivity implements VideoAdapter.L
         final ImageView moviePosterImageView = findViewById(R.id.details_poster_iv);
         posterErrorTextView = findViewById(R.id.poster_error_tv);
         // Fetch movie poster, if it's available
-        if (ScreenUtils.isLandscapeMode(this)) {
-            moviePosterImageView.getLayoutParams().width = (int) getResources().getDimension(R.dimen.poster_width);
-        }
         Picasso.with(this)
                 .load(ImageUtils.buildImageUrl(
                         this,
@@ -283,6 +282,8 @@ public class DetailsActivity extends AppCompatActivity implements VideoAdapter.L
         mVideosRecyclerView.setHasFixedSize(true);
         mVideosAdapter = new VideoAdapter(this, new ArrayList<Video>(), this);
         mVideosRecyclerView.setAdapter(mVideosAdapter);
+        SnapHelper snapHelper = new PagerSnapHelper();
+        snapHelper.attachToRecyclerView(mVideosRecyclerView);
 
         // Show the Videos progress bar and hide the Videos RecyclerView
         hideVideos();

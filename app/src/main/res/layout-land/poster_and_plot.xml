@@ -11,7 +11,7 @@
 
         <ImageView
             android:id="@+id/details_poster_iv"
-            android:layout_width="120dp"
+            android:layout_width="200dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
             android:adjustViewBounds="true"
@@ -78,26 +78,24 @@
             android:id="@+id/details_release_date_tv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/details_horizontal_spacing"
-            android:layout_marginTop="@dimen/details_vertical_spacing"
+            android:layout_marginStart="96dp"
             android:fontFamily="sans-serif-condensed"
             android:textColor="@color/colorWhite"
             android:textSize="22sp"
-            app:layout_constraintStart_toEndOf="@id/details_poster_iv"
-            app:layout_constraintTop_toBottomOf="@id/details_rating_label"
+            app:layout_constraintStart_toEndOf="@id/details_max_rating_label"
+            app:layout_constraintTop_toTopOf="@id/details_rating_tv"
             tools:text="2018-11-05" />
 
         <TextView
             android:id="@+id/details_release_date_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/details_horizontal_spacing"
             android:fontFamily="sans-serif-condensed"
             android:text="@string/release_date_label"
             android:textColor="@color/colorAccent"
             android:textSize="@dimen/details_font_size"
-            app:layout_constraintStart_toEndOf="@id/details_poster_iv"
-            app:layout_constraintTop_toBottomOf="@id/details_release_date_tv" />
+            app:layout_constraintStart_toStartOf="@id/details_release_date_tv"
+            app:layout_constraintTop_toTopOf="@id/details_rating_label" />
 
         <Button
             android:id="@+id/details_add_favourites"
@@ -105,9 +103,10 @@
             android:layout_height="wrap_content"
             app:srcCompat="@drawable/ic_favorite"
             android:text="@string/add_to_favourites"
+            android:layout_marginTop="36dp"
             android:layout_marginStart="@dimen/details_horizontal_spacing"
             app:layout_constraintStart_toEndOf="@id/details_poster_iv"
-            app:layout_constraintBottom_toBottomOf="@id/details_poster_iv"/>
+            app:layout_constraintTop_toBottomOf="@id/details_rating_label"/>
 
         <!--<ImageView-->
         <!--android:id="@+id/details_add_favourites"-->
@@ -122,16 +121,17 @@
 
         <TextView
             android:id="@+id/details_plot_tv"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/details_vertical_spacing"
+            android:layout_marginStart="@dimen/details_horizontal_spacing"
             android:fontFamily="sans-serif-condensed"
             android:gravity="top|start"
             android:textSize="@dimen/details_font_size"
             android:visibility="visible"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/details_poster_iv"
+            app:layout_constraintStart_toEndOf="@id/details_poster_iv"
+            app:layout_constraintTop_toBottomOf="@id/details_add_favourites"
             tools:text="Movie plot" />
 
     </android.support.constraint.ConstraintLayout>

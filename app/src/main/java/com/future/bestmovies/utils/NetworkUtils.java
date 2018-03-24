@@ -32,6 +32,14 @@ public class NetworkUtils {
     private static final String API_KEY = "api_key";
     private static final String API_ID = "xxx";
 
+    private static final String YOUTUBE_VIDEO_BASE_URL = "https://www.youtube.com/watch";
+    private static final String YOUTUBE_PARAMETER = "v";
+    private static final String VIDEO_THUMBNAIL_BASE_URL = "https://img.youtube.com/vi";
+    private static final String VIDEO_THUMBNAIL_SIZE_M = "mqdefault.jpg"; // 320x180
+    private static final String VIDEO_THUMBNAIL_SIZE_H = "hqdefault.jpg"; // 480x360
+    private static final String VIDEO_THUMBNAIL_SIZE_SD = "sddefault.jpg"; // 640x480
+
+
     /* This method returns the main API URL.
      * Using two preferences as parameters, calls a more complex method that builds the actual URL.
      * @param context is used for fetching the users preferences or default preferences, if the app
@@ -243,5 +251,47 @@ public class NetworkUtils {
         // Return true if there is an active network and  if the device is connected or connecting
         // to the active network, otherwise return false
         return activeNetwork != null && activeNetwork.isConnectedOrConnecting();
+    }
+
+    /* Build and return the YOUTUBE URL for movie trailers and teasers
+     * @param movieKey is used to build the url
+     */
+    public static URL buildVideoUrl (String movieKey) {
+        Uri videoUri = Uri.parse(YOUTUBE_VIDEO_BASE_URL).buildUpon()
+                .appendQueryParameter(YOUTUBE_PARAMETER, movieKey)
+                .build();
+
+        try {
+            return new URL(videoUri.toString());
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    /* Build and return the YOUTUBE Uri for movie trailers and teasers
+     * @param movieKey is used to build the Uri
+     */
+    public static Uri buildVideoUri (String movieKey) {
+        return Uri.parse(YOUTUBE_VIDEO_BASE_URL).buildUpon()
+                .appendQueryParameter(YOUTUBE_PARAMETER, movieKey)
+                .build();
+    }
+
+    /* Build and return the Thumbnail URL for movie trailers and teasers
+     * @param movieKey is used to build the url
+     */
+    public static URL buildVideoThumbnailUrl (String movieKey) {
+        Uri movieQueryUri = Uri.parse(VIDEO_THUMBNAIL_BASE_URL).buildUpon()
+                .appendPath(movieKey)
+                .appendPath(VIDEO_THUMBNAIL_SIZE_SD)
+                .build();
+
+        try {
+            return new URL(movieQueryUri.toString());
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }

@@ -10,4 +10,5 @@
     <color name="colorTransparentBlack">#80000000</color>
     <color name="colorGray">#808080</color>
     <color name="colorTransparent">#00FFFFFF</color>
+    <color name="colorHeart">#FF0066</color>
 </resources>

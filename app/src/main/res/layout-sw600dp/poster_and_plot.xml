@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
+    <!-- TODO: Include ratings and release date in this layout too -->
     <ImageView
         android:id="@+id/details_poster_iv"
         android:layout_width="240dp"
@@ -47,17 +48,5 @@
         app:layout_constraintStart_toEndOf="@id/details_poster_iv"
         app:layout_constraintTop_toTopOf="parent"
         tools:text="Plot" />
-
-    <include
-        android:id="@+id/ratings_landscape"
-        layout="@layout/ratings_landscape"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="0dp"
-        android:layout_marginStart="@dimen/details_horizontal_spacing"
-        android:visibility="visible"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/details_poster_iv" />
 
 </android.support.constraint.ConstraintLayout>

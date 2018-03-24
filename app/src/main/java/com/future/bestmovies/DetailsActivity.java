@@ -1,14 +1,10 @@
 package com.future.bestmovies;
 
 import android.app.LoaderManager;
-import android.content.Context;
 import android.content.Intent;
 import android.content.Loader;
-import android.graphics.PorterDuff;
-import android.os.Build;
-import android.os.Parcel;
+import android.net.Uri;
 import android.support.constraint.ConstraintLayout;
-import android.support.design.widget.AppBarLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -18,7 +14,6 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -29,9 +24,9 @@ import com.future.bestmovies.data.CastAdapter;
 import com.future.bestmovies.data.CastLoader;
 import com.future.bestmovies.data.Movie;
 import com.future.bestmovies.data.Review;
-import com.future.bestmovies.data.ReviewAdapter;
 import com.future.bestmovies.data.ReviewLoader;
 import com.future.bestmovies.data.Video;
+import com.future.bestmovies.data.VideoLoader;
 import com.future.bestmovies.utils.ImageUtils;
 import com.future.bestmovies.utils.MovieUtils;
 import com.future.bestmovies.utils.NetworkUtils;
@@ -43,7 +38,7 @@ import java.util.ArrayList;
 
 
 public class DetailsActivity extends AppCompatActivity {
-    private static final int CAST_LOADER_ID = 34;
+    private static final int CAST_LOADER_ID = 423;
     private static final int REVIEWS_LOADER_ID = 435;
     private static final int VIDEOS_LOADER_ID = 594;
 
@@ -57,10 +52,10 @@ public class DetailsActivity extends AppCompatActivity {
     public static final String MOVIE_BACKDROP = "movie_backdrop";
 
     private Movie mSelectedMovie;
+    private ImageView mMovieBackdropImageView;
     private TextView posterErrorTextView;
 
     private TextView mCastMessagesTextView;
-
     private int mCastPosition = RecyclerView.NO_POSITION;
     private CastAdapter mCastAdapter;
     private LinearLayoutManager mCastLayoutManager;
@@ -81,6 +76,7 @@ public class DetailsActivity extends AppCompatActivity {
     private ImageView mNoReviewsConnectionImageView;
 
     private ArrayList<Video> mVideos;
+    private ImageView mPlayImageView;
 
 
     @Override
@@ -94,43 +90,6 @@ public class DetailsActivity extends AppCompatActivity {
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
-
-        mCastMessagesTextView = findViewById(R.id.cast_messages_tv);
-        mCastMessagesTextView.setText(R.string.loading);
-        final ImageView movieBackdropImageView = findViewById(R.id.details_backdrop_iv);
-        final ImageView moviePosterImageView = findViewById(R.id.details_poster_iv);
-        TextView moviePlotTextView = findViewById(R.id.details_plot_tv);
-        TextView movieGenreTextView = findViewById(R.id.details_genre_tv);
-        mCastRecyclerView = findViewById(R.id.cast_rv);
-
-        mCastProgressBar = findViewById(R.id.loading_cast_pb);
-        // Set the progress bar color to colorAccent, if SDK is lower than API21
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-            mCastProgressBar.getIndeterminateDrawable().setColorFilter(getResources()
-                    .getColor(R.color.colorAccent), PorterDuff.Mode.SRC_IN);
-        }
-
-        // The layout manager for our Cast RecyclerView will be a LinerLayout, so we can display
-        // our cast on a single line, horizontally
-        mCastLayoutManager =
-                new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
-        mCastRecyclerView.setLayoutManager(mCastLayoutManager);
-        mCastRecyclerView.setHasFixedSize(true);
-        mCastAdapter = new CastAdapter(this, new ArrayList<Cast>());
-        mCastRecyclerView.setAdapter(mCastAdapter);
-        mNoCastImageView = findViewById(R.id.no_cast_iv);
-        mNoCastConnectionImageView = findViewById(R.id.no_cast_connection_iv);
-
-        // Reviews
-        mFirstReviewLayout = findViewById(R.id.first_review_layout);
-        mFirstReviewAuthorTextView = findViewById(R.id.first_review_author_tv);
-        mFirstReviewContentTextView = findViewById(R.id.first_review_content_tv);
-        mFirstReviewProgressBar = findViewById(R.id.loading_first_review_pb);
-        mFirstReviewMessagesTextView = findViewById(R.id.first_review_messages_tv);
-        mFirstReviewMessagesTextView.setText(R.string.loading);
-        mSeeAllReviewsTextView = findViewById(R.id.see_all_reviews_tv);
-        mNoReviewsImageView = findViewById(R.id.no_reviews_iv);
-        mNoReviewsConnectionImageView = findViewById(R.id.no_review_connection_iv);
 
         // If we have an instance saved and contains our movie object, we use it to populate our UI
         if (savedInstanceState != null && savedInstanceState.containsKey(MOVIE_OBJECT)) {
@@ -154,54 +113,32 @@ public class DetailsActivity extends AppCompatActivity {
             return;
         }
 
-        // Populating UI with information
-        // Set the title of our activity as the movie title
-        setTitle(mSelectedMovie.getMovieTitle());
-        // Generate and set movie genres
-        String[] movieGenre = new String[mSelectedMovie.getGenreIds().length];
-        for (int i = 0; i < mSelectedMovie.getGenreIds().length; i++) {
-            movieGenre[i] = MovieUtils.getStringMovieGenre(this, mSelectedMovie.getGenreIds()[i]);
-        }
-        movieGenreTextView.setText(TextUtils.join(", ", movieGenre));
-        // Set the movie plot
-        moviePlotTextView.setText(mSelectedMovie.getOverview());
-
-        // Set the ratings and release date
-        ConstraintLayout ratingsLandscape = findViewById(R.id.ratings_landscape);
-        ConstraintLayout ratingsPortrait = findViewById(R.id.ratings_portrait);
-        TextView movieRatingTextView;
-        TextView movieReleaseDateTextView;
-        // If the user has a tablet or user uses the device in landscape mode, always show the
-        // ratings and release date from layout ratings_landscape (placed inside the poster_and_plot layout)
-        // AND hide the ratings_portrait
-        if (ScreenUtils.getSmallestScreenWidthInDps(this) >= 600 || ScreenUtils.isLandscapeMode(this)) {
-            movieRatingTextView = findViewById(R.id.details_ratings_landscape_tv);
-            movieReleaseDateTextView = findViewById(R.id.details_release_date_landscape_tv);
-            ratingsLandscape.setVisibility(View.VISIBLE);
-            ratingsPortrait.setVisibility(View.GONE);
-        } else {
-            // Otherwise, the user has a phone (smallest width < 600DPs) and uses it in portrait mode.
-            // In this case, show ratings_portrait and hide ratings_landscape
-            movieRatingTextView = findViewById(R.id.details_ratings_portrait_tv);
-            movieReleaseDateTextView = findViewById(R.id.details_release_date_portrait_tv);
-            ratingsPortrait.setVisibility(View.VISIBLE);
-            ratingsLandscape.setVisibility(View.GONE);
-        }
-
-        // Populate the allocated rating and release date TextViews
-        movieRatingTextView.setText(String.valueOf(mSelectedMovie.getVoteAverage()));
-        movieReleaseDateTextView.setText(mSelectedMovie.getReleaseDate());
-
-        // Fetch movie backdrop if it's available
+        // BACKDROP
+        mMovieBackdropImageView = findViewById(R.id.details_backdrop_iv);
         Picasso.with(this)
                 .load(ImageUtils.buildImageUrl(
                         this,
                         mSelectedMovie.getBackdropPath(),
                         ImageUtils.BACKDROP))
                 .error(R.drawable.ic_landscape)
-                .into(movieBackdropImageView);
+                .into(mMovieBackdropImageView);
 
+        // MOVIE TITLE
+        // Set the title of our activity as the movie title
+        setTitle(mSelectedMovie.getMovieTitle());
+
+        // GENRE
+        // Generate and set movie genres
+        TextView movieGenreTextView = findViewById(R.id.details_genre_tv);
+        String[] movieGenre = new String[mSelectedMovie.getGenreIds().length];
+        for (int i = 0; i < mSelectedMovie.getGenreIds().length; i++) {
+            movieGenre[i] = MovieUtils.getStringMovieGenre(this, mSelectedMovie.getGenreIds()[i]);
+        }
+        movieGenreTextView.setText(TextUtils.join(", ", movieGenre));
+
+        // POSTER
         // Poster error message will be used if no poster is available or if no internet connection
+        final ImageView moviePosterImageView = findViewById(R.id.details_poster_iv);
         posterErrorTextView = findViewById(R.id.poster_error_tv);
         // Fetch movie poster, if it's available
         if (ScreenUtils.isLandscapeMode(this)) {
@@ -212,6 +149,7 @@ public class DetailsActivity extends AppCompatActivity {
                         this,
                         mSelectedMovie.getPosterPath(),
                         ImageUtils.POSTER))
+                .placeholder(R.drawable.no_poster)
                 .error(R.drawable.ic_local_movies)
                 .into(moviePosterImageView, new Callback() {
                     @Override
@@ -233,6 +171,34 @@ public class DetailsActivity extends AppCompatActivity {
                         moviePosterImageView.setContentDescription(getString(R.string.no_poster));
                     }
                 });
+
+        // RATINGS
+        TextView movieRatingTextView = findViewById(R.id.details_rating_tv);
+        movieRatingTextView.setText(String.valueOf(mSelectedMovie.getVoteAverage()));
+
+        // RELEASE DATE
+        TextView movieReleaseDateTextView = findViewById(R.id.details_release_date_tv);
+        movieReleaseDateTextView.setText(mSelectedMovie.getReleaseDate());
+
+        // PLOT
+        TextView moviePlotTextView = findViewById(R.id.details_plot_tv);
+        moviePlotTextView.setText(mSelectedMovie.getOverview());
+
+        // CAST
+        mCastMessagesTextView = findViewById(R.id.cast_messages_tv);
+        mCastMessagesTextView.setText(R.string.loading);
+        mCastRecyclerView = findViewById(R.id.cast_rv);
+        mCastProgressBar = findViewById(R.id.loading_cast_pb);
+        // The layout manager for our Cast RecyclerView will be a LinerLayout, so we can display
+        // our cast on a single line, horizontally
+        mCastLayoutManager =
+                new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
+        mCastRecyclerView.setLayoutManager(mCastLayoutManager);
+        mCastRecyclerView.setHasFixedSize(true);
+        mCastAdapter = new CastAdapter(this, new ArrayList<Cast>());
+        mCastRecyclerView.setAdapter(mCastAdapter);
+        mNoCastImageView = findViewById(R.id.no_cast_iv);
+        mNoCastConnectionImageView = findViewById(R.id.no_cast_connection_iv);
 
         // Show the Cast progress bar and hide the Cast RecyclerView
         hideCast();
@@ -260,6 +226,17 @@ public class DetailsActivity extends AppCompatActivity {
             fetchCast();
         }
 
+        // REVIEWS
+        mFirstReviewLayout = findViewById(R.id.first_review_layout);
+        mFirstReviewAuthorTextView = findViewById(R.id.first_review_author_tv);
+        mFirstReviewContentTextView = findViewById(R.id.first_review_content_tv);
+        mFirstReviewProgressBar = findViewById(R.id.loading_first_review_pb);
+        mFirstReviewMessagesTextView = findViewById(R.id.first_review_messages_tv);
+        mFirstReviewMessagesTextView.setText(R.string.loading);
+        mSeeAllReviewsTextView = findViewById(R.id.see_all_reviews_tv);
+        mNoReviewsImageView = findViewById(R.id.no_reviews_iv);
+        mNoReviewsConnectionImageView = findViewById(R.id.no_review_connection_iv);
+
         // Show the Review progress bar and hide the firstReview layout
         hideReviews();
         // Check for saved data or fetch movie reviews
@@ -279,9 +256,13 @@ public class DetailsActivity extends AppCompatActivity {
             fetchReviews();
         }
 
+        // VIDEOS
         // Show the Video progress bar and hide the video layout and RecyclerView
         //hideVideos();
         // Check for saved data or fetch movie videos
+        mPlayImageView = findViewById(R.id.play_video_iv);
+        getLoaderManager().restartLoader(VIDEOS_LOADER_ID, null, videoResultLoaderListener);
+
 
     }
 
@@ -433,6 +414,58 @@ public class DetailsActivity extends AppCompatActivity {
                     // Clear TextViews
                     mFirstReviewAuthorTextView.setText(null);
                     mFirstReviewContentTextView.setText(null);
+                }
+            };
+
+    private LoaderManager.LoaderCallbacks<ArrayList<Video>> videoResultLoaderListener =
+            new LoaderManager.LoaderCallbacks<ArrayList<Video>>() {
+                @Override
+                public Loader<ArrayList<Video>> onCreateLoader(int loaderId, Bundle bundle) {
+                    switch (loaderId) {
+                        case VIDEOS_LOADER_ID:
+                            // If the loaded id matches ours, return a new movie review loader
+                            return new VideoLoader(getApplicationContext(), String.valueOf(mSelectedMovie.getMovieId()));
+                        default:
+                            throw new RuntimeException("Loader Not Implemented: " + loaderId);
+                    }
+                }
+
+                @Override
+                public void onLoadFinished(Loader<ArrayList<Video>> loader, final ArrayList<Video> movieVideos) {
+                    mVideos = movieVideos;
+                    // Populate videos section
+                    //populateVideos(movieVideos);
+
+                    if (movieVideos != null && !TextUtils.isEmpty(movieVideos.get(0).getVideoKey())) {
+                        Picasso.with(getApplicationContext())
+                                .load(ImageUtils.buildVideoThumbnailUrl(movieVideos.get(0).getVideoKey()))
+                                .error(R.drawable.ic_landscape)
+                                .into(mMovieBackdropImageView, new Callback() {
+                                    @Override
+                                    public void onSuccess() {
+                                        mPlayImageView.setVisibility(View.VISIBLE);
+                                        mPlayImageView.setOnClickListener(new View.OnClickListener() {
+                                            @Override
+                                            public void onClick(View view) {
+                                                startActivity(new Intent(
+                                                        Intent.ACTION_VIEW,
+                                                        NetworkUtils.buildVideoUri(movieVideos.get(0).getVideoKey())));
+                                            }
+                                        });
+                                    }
+
+                                    @Override
+                                    public void onError() {
+                                        mPlayImageView.setVisibility(View.INVISIBLE);
+                                    }
+                                });
+                    }
+                }
+
+                @Override
+                public void onLoaderReset(Loader<ArrayList<Video>> loader) {
+                    // Clear TextView
+
                 }
             };
 

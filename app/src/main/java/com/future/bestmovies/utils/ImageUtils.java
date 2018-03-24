@@ -1,9 +1,13 @@
 package com.future.bestmovies.utils;
 
 import android.content.Context;
+import android.net.Uri;
 import android.util.Log;
 
 import com.future.bestmovies.data.MoviePreferences;
+
+import java.net.MalformedURLException;
+import java.net.URL;
 
 
 public class ImageUtils {
@@ -14,6 +18,11 @@ public class ImageUtils {
     public static final int CAST = 3;
     private static final String OPTIMAL = "optimal";
     private static final String MEDIUM = "medium";
+
+    private static final String VIDEO_THUMBNAIL_BASE_URL = "https://img.youtube.com/vi/";
+    private static final String VIDEO_THUMBNAIL_SIZE_M = "/mqdefault.jpg"; // 320x180
+    private static final String VIDEO_THUMBNAIL_SIZE_H = "/hqdefault.jpg"; // 480x360
+    private static final String VIDEO_THUMBNAIL_SIZE_SD = "/sddefault.jpg"; // 640x480
 
     /* Return an image URL used in DetailsActivity
      * @param context is used to access getImageWidth method
@@ -118,5 +127,9 @@ public class ImageUtils {
                 // CAST:
                 return castWidth;
         }
+    }
+
+    public static String buildVideoThumbnailUrl (String movieKey) {
+        return VIDEO_THUMBNAIL_BASE_URL.concat(movieKey).concat(VIDEO_THUMBNAIL_SIZE_SD);
     }
 }

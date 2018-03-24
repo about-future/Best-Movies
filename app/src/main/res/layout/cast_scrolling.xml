@@ -17,7 +17,7 @@
         android:layout_width="@dimen/icon"
         android:layout_height="@dimen/icon"
         android:layout_gravity="center_horizontal"
-        android:visibility="invisible" />
+        android:visibility="visible" />
 
     <ImageView
         android:id="@+id/no_cast_iv"
@@ -25,7 +25,7 @@
         android:layout_height="@dimen/icon"
         android:layout_gravity="center_horizontal"
         android:contentDescription="@string/no_cast_icon"
-        android:visibility="visible"
+        android:visibility="invisible"
         app:srcCompat="@drawable/ic_no_people" />
 
     <ImageView

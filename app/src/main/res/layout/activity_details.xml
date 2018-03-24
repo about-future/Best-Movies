@@ -20,6 +20,7 @@
             app:contentScrim="?attr/colorPrimary"
             app:expandedTitleMarginBottom="24dp"
             app:expandedTitleMarginStart="16dp"
+            android:background="@color/colorPrimaryDark"
             app:expandedTitleTextAppearance="@style/TextAppearance.Condensed.Big"
             app:layout_scrollFlags="scroll|exitUntilCollapsed"
             app:toolbarId="@+id/toolbar">
@@ -28,25 +29,11 @@
                 android:id="@+id/details_backdrop_iv"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="@color/colorPrimaryDark"
                 android:contentDescription="@string/movie_backdrop"
                 android:fitsSystemWindows="true"
                 android:scaleType="centerCrop"
                 app:layout_collapseMode="parallax"
                 app:srcCompat="@drawable/ic_landscape" />
-
-            <TextView
-                android:id="@+id/backdrop_error_tv"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/no_connection"
-                android:layout_gravity="center|bottom"
-                android:layout_marginBottom="60dp"
-                android:fontFamily="sans-serif-condensed"
-                android:visibility="invisible"
-                android:textAllCaps="true"
-                android:textSize="@dimen/review_author_font_size"
-                android:textColor="@color/colorWhite"/>
 
             <View
                 android:layout_width="match_parent"

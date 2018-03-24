@@ -17,7 +17,7 @@
         android:adjustViewBounds="true"
         android:scaleType="centerCrop"
         android:background="@color/colorPrimaryDark"
-        app:srcCompat="@drawable/ic_local_movies"
+        app:srcCompat="@drawable/no_poster"
         android:contentDescription="@string/movie_poster"/>
 
 </LinearLayout>

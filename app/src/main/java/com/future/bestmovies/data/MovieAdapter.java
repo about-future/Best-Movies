@@ -46,7 +46,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
                 .load(ImageUtils.buildImageUrlForRecyclerView(
                         mContext,
                         mMovies.get(position).getPosterPath()))
-                .error(R.drawable.ic_local_movies)
+                .error(R.drawable.no_poster)
                 .into(holder.moviePosterImageView);
     }
 

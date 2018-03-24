@@ -57,7 +57,6 @@ public class DetailsActivity extends AppCompatActivity {
     public static final String MOVIE_BACKDROP = "movie_backdrop";
 
     private Movie mSelectedMovie;
-    private TextView backdropErrorTextView;
     private TextView posterErrorTextView;
 
     private TextView mCastMessagesTextView;
@@ -193,8 +192,6 @@ public class DetailsActivity extends AppCompatActivity {
         movieRatingTextView.setText(String.valueOf(mSelectedMovie.getVoteAverage()));
         movieReleaseDateTextView.setText(mSelectedMovie.getReleaseDate());
 
-        // Backdrop error message will be used if no backdrop is available or if no internet connection
-        backdropErrorTextView = findViewById(R.id.backdrop_error_tv);
         // Fetch movie backdrop if it's available
         Picasso.with(this)
                 .load(ImageUtils.buildImageUrl(
@@ -202,26 +199,7 @@ public class DetailsActivity extends AppCompatActivity {
                         mSelectedMovie.getBackdropPath(),
                         ImageUtils.BACKDROP))
                 .error(R.drawable.ic_landscape)
-                .into(movieBackdropImageView, new Callback() {
-                    @Override
-                    public void onSuccess() {
-                        backdropErrorTextView.setVisibility(View.GONE);
-                    }
-
-                    @Override
-                    public void onError() {
-                        backdropErrorTextView.setVisibility(View.VISIBLE);
-                        // If there isn't a network connection, we show a "no connection" message
-                        if (!NetworkUtils.isConnected(getApplicationContext())) {
-                            backdropErrorTextView.setText(getString(R.string.no_connection));
-                        } else {
-                            // Otherwise, we show "no_backdrop" message
-                            backdropErrorTextView.setText(getString(R.string.no_backdrop));
-                        }
-                        // Set backdrop content description for error case
-                        movieBackdropImageView.setContentDescription(getString(R.string.no_backdrop));
-                    }
-                });
+                .into(movieBackdropImageView);
 
         // Poster error message will be used if no poster is available or if no internet connection
         posterErrorTextView = findViewById(R.id.poster_error_tv);

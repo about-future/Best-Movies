@@ -2,26 +2,27 @@
 <FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:minHeight="@dimen/min_height"
+    android:layout_height="wrap_content"
+    android:minHeight="200dp"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <android.support.v7.widget.RecyclerView
-        android:id="@+id/cast_rv"
+        android:id="@+id/videos_rv"
         android:layout_width="match_parent"
-        android:layout_height="188dp"
+        android:layout_height="match_parent"
         android:clipToPadding="false"
         android:visibility="visible" />
+    <!-- TODO: Change recyclerview with view pager -->
 
     <ProgressBar
-        android:id="@+id/loading_cast_pb"
+        android:id="@+id/loading_videos_pb"
         android:layout_width="@dimen/icon"
         android:layout_height="@dimen/icon"
         android:layout_gravity="center_horizontal"
         android:visibility="visible" />
 
     <ImageView
-        android:id="@+id/no_cast_iv"
+        android:id="@+id/no_videos_iv"
         android:layout_width="@dimen/icon"
         android:layout_height="@dimen/icon"
         android:layout_gravity="center_horizontal"
@@ -30,7 +31,7 @@
         app:srcCompat="@drawable/ic_no_people" />
 
     <ImageView
-        android:id="@+id/no_cast_connection_iv"
+        android:id="@+id/no_videos_connection_iv"
         android:layout_width="@dimen/icon"
         android:layout_height="@dimen/icon"
         android:layout_gravity="center_horizontal"
@@ -39,7 +40,7 @@
         app:srcCompat="@drawable/ic_cloud_off" />
 
     <TextView
-        android:id="@+id/cast_messages_tv"
+        android:id="@+id/videos_messages_tv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"

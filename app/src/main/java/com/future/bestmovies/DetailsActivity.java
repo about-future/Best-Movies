@@ -3,8 +3,13 @@ package com.future.bestmovies;
 import android.app.LoaderManager;
 import android.content.Intent;
 import android.content.Loader;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.support.constraint.ConstraintLayout;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -12,6 +17,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
@@ -26,6 +32,7 @@ import com.future.bestmovies.data.Movie;
 import com.future.bestmovies.data.Review;
 import com.future.bestmovies.data.ReviewLoader;
 import com.future.bestmovies.data.Video;
+import com.future.bestmovies.data.VideoAdapter;
 import com.future.bestmovies.data.VideoLoader;
 import com.future.bestmovies.utils.ImageUtils;
 import com.future.bestmovies.utils.MovieUtils;
@@ -37,7 +44,7 @@ import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
 
 
-public class DetailsActivity extends AppCompatActivity {
+public class DetailsActivity extends AppCompatActivity implements VideoAdapter.ListItemClickListener {
     private static final int CAST_LOADER_ID = 423;
     private static final int REVIEWS_LOADER_ID = 435;
     private static final int VIDEOS_LOADER_ID = 594;
@@ -45,6 +52,7 @@ public class DetailsActivity extends AppCompatActivity {
     public static final String MOVIE_OBJECT = "movie";
     private static final String MOVIE_CAST = "movie_cast";
     private static final String CAST_POSITION = "cast_position";
+    private static final String VIDEOS_POSITION = "videos_position";
     public static final String MOVIE_REVIEWS = "movie_reviews";
     public static final String MOVIE_VIDEOS = "movie_videos";
     public static final String MOVIE_ID = "movie_id";
@@ -76,7 +84,13 @@ public class DetailsActivity extends AppCompatActivity {
     private ImageView mNoReviewsConnectionImageView;
 
     private ArrayList<Video> mVideos;
-    private ImageView mPlayImageView;
+    private RecyclerView mVideosRecyclerView;
+    private LinearLayoutManager mVideosLayoutManager;
+    private ProgressBar mVideosProgressBar;
+    private VideoAdapter mVideosAdapter;
+    private TextView mVideosMessagesTextView;
+    private int mVideosPosition = RecyclerView.NO_POSITION;
+
 
 
     @Override
@@ -242,7 +256,7 @@ public class DetailsActivity extends AppCompatActivity {
         // Check for saved data or fetch movie reviews
         if (savedInstanceState != null && savedInstanceState.containsKey(MOVIE_REVIEWS)) {
             mReviews = savedInstanceState.getParcelableArrayList(MOVIE_REVIEWS);
-            // If cast is not null, data from server was previously fetched successfully
+            // If mReview is not null, data from server was previously fetched successfully
             if (mReviews != null) {
                 // If review is not empty, use the saved reviews and repopulate the reviews section
                 populateReviews(mReviews);
@@ -257,20 +271,65 @@ public class DetailsActivity extends AppCompatActivity {
         }
 
         // VIDEOS
-        // Show the Video progress bar and hide the video layout and RecyclerView
-        //hideVideos();
+        mVideosMessagesTextView = findViewById(R.id.videos_messages_tv);
+        mVideosMessagesTextView.setText(R.string.loading);
+        mVideosRecyclerView = findViewById(R.id.videos_rv);
+        mVideosProgressBar = findViewById(R.id.loading_videos_pb);
+        // The layout manager for our Videos RecyclerView will be a LinerLayout, so we can display
+        // our videos on a single line, horizontally
+        mVideosLayoutManager =
+                new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
+        mVideosRecyclerView.setLayoutManager(mVideosLayoutManager);
+        mVideosRecyclerView.setHasFixedSize(true);
+        mVideosAdapter = new VideoAdapter(this, new ArrayList<Video>(), this);
+        mVideosRecyclerView.setAdapter(mVideosAdapter);
+
+        // Show the Videos progress bar and hide the Videos RecyclerView
+        hideVideos();
         // Check for saved data or fetch movie videos
-        mPlayImageView = findViewById(R.id.play_video_iv);
-        getLoaderManager().restartLoader(VIDEOS_LOADER_ID, null, videoResultLoaderListener);
+        if (savedInstanceState != null && savedInstanceState.containsKey(MOVIE_VIDEOS)) {
+            mVideos = savedInstanceState.getParcelableArrayList(MOVIE_VIDEOS);
+            // If mVideos is not null, data from server was previously fetched successfully
+            if (mVideos != null) {
+                // If mVideos is not empty, use the saved videos and repopulate the video section
+                if (!mVideos.isEmpty()) {
+                    mVideosAdapter = new VideoAdapter(this, mVideos, this);
+                    mVideosRecyclerView.setAdapter(mVideosAdapter);
+                    if (savedInstanceState.containsKey(VIDEOS_POSITION)) {
+                        mVideosPosition = savedInstanceState.getInt(VIDEOS_POSITION);
+                    }
+                }
+                populateVideos(mVideos);
+            } else {
+                // Otherwise, there might be an error while accessing the server
+                // Check the connection and if connected try fetching videos again
+                fetchVideos();
+            }
+        } else {
+            // Otherwise, no previous data was saved before, so loader has to be initialised
+            fetchVideos();
+        }
+    }
 
-
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.details_menu, menu);
+        return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
+
         if (id == android.R.id.home) {
             onBackPressed();
+            return true;
+        }
+
+        if (id == R.id.action_favourites) {
+            Toast.makeText(this, "Added to favourites", Toast.LENGTH_SHORT).show();
+            DrawableCompat.setTint(item.getIcon(), ContextCompat.getColor(getApplicationContext(), R.color.colorHeart));
+
             return true;
         }
 
@@ -286,13 +345,21 @@ public class DetailsActivity extends AppCompatActivity {
     protected void onSaveInstanceState(Bundle outState) {
         // Movie Details
         outState.putParcelable(MOVIE_OBJECT, mSelectedMovie);
+
         // Cast
         outState.putParcelableArrayList(MOVIE_CAST, mCast);
         outState.putInt(CAST_POSITION, mCastLayoutManager.findFirstCompletelyVisibleItemPosition());
+
         // Reviews
         outState.putParcelableArrayList(MOVIE_REVIEWS, mReviews);
+
         // Videos
-        //outState.putParcelableArrayList(MOVIE_VIDEOS, mVideos);
+        outState.putParcelableArrayList(MOVIE_VIDEOS, mVideos);
+        if (mVideosLayoutManager.findFirstCompletelyVisibleItemPosition() != RecyclerView.NO_POSITION) {
+            outState.putInt(VIDEOS_POSITION, mVideosLayoutManager.findFirstCompletelyVisibleItemPosition());
+        } else {
+            outState.putInt(VIDEOS_POSITION, mVideosLayoutManager.findFirstVisibleItemPosition());
+        }
 
         super.onSaveInstanceState(outState);
     }
@@ -334,6 +401,20 @@ public class DetailsActivity extends AppCompatActivity {
         mNoReviewsConnectionImageView.setVisibility(View.INVISIBLE);
     }
 
+    // Hide the progress bar and show videos
+    private void showVideos() {
+        mVideosRecyclerView.setVisibility(View.VISIBLE);
+        mVideosProgressBar.setVisibility(View.INVISIBLE);
+        mVideosMessagesTextView.setVisibility(View.INVISIBLE);
+    }
+
+    // Show progress bar and hide videos
+    private void hideVideos() {
+        mVideosRecyclerView.setVisibility(View.GONE);
+        mVideosProgressBar.setVisibility(View.VISIBLE);
+        mVideosMessagesTextView.setVisibility(View.VISIBLE);
+    }
+
     private void fetchCast() {
         if (NetworkUtils.isConnected(getApplicationContext())) {
             getLoaderManager().restartLoader(CAST_LOADER_ID, null, castResultLoaderListener);
@@ -359,6 +440,17 @@ public class DetailsActivity extends AppCompatActivity {
             mFirstReviewProgressBar.setVisibility(View.INVISIBLE);
             mNoReviewsImageView.setVisibility(View.INVISIBLE);
             mNoReviewsConnectionImageView.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void fetchVideos() {
+        if (NetworkUtils.isConnected(getApplicationContext())) {
+            getLoaderManager().restartLoader(VIDEOS_LOADER_ID, null, videoResultLoaderListener);
+        } else {
+            // Otherwise, hide progress bar and show "No connection available" message
+            mVideosMessagesTextView.setVisibility(View.VISIBLE);
+            mVideosMessagesTextView.setText(R.string.no_connection);
+            mVideosProgressBar.setVisibility(View.INVISIBLE);
         }
     }
 
@@ -434,38 +526,37 @@ public class DetailsActivity extends AppCompatActivity {
                 public void onLoadFinished(Loader<ArrayList<Video>> loader, final ArrayList<Video> movieVideos) {
                     mVideos = movieVideos;
                     // Populate videos section
-                    //populateVideos(movieVideos);
+                    populateVideos(movieVideos);
 
-                    if (movieVideos != null && !TextUtils.isEmpty(movieVideos.get(0).getVideoKey())) {
-                        Picasso.with(getApplicationContext())
-                                .load(ImageUtils.buildVideoThumbnailUrl(movieVideos.get(0).getVideoKey()))
-                                .error(R.drawable.ic_landscape)
-                                .into(mMovieBackdropImageView, new Callback() {
-                                    @Override
-                                    public void onSuccess() {
-                                        mPlayImageView.setVisibility(View.VISIBLE);
-                                        mPlayImageView.setOnClickListener(new View.OnClickListener() {
-                                            @Override
-                                            public void onClick(View view) {
-                                                startActivity(new Intent(
-                                                        Intent.ACTION_VIEW,
-                                                        NetworkUtils.buildVideoUri(movieVideos.get(0).getVideoKey())));
-                                            }
-                                        });
-                                    }
-
-                                    @Override
-                                    public void onError() {
-                                        mPlayImageView.setVisibility(View.INVISIBLE);
-                                    }
-                                });
-                    }
+//                    if (movieVideos != null && !TextUtils.isEmpty(movieVideos.get(0).getVideoKey())) {
+//                        Picasso.with(getApplicationContext())
+//                                .load(ImageUtils.buildVideoThumbnailUrl(movieVideos.get(0).getVideoKey()))
+//                                .error(R.drawable.ic_landscape)
+//                                .into(mMovieBackdropImageView, new Callback() {
+//                                    @Override
+//                                    public void onSuccess() {
+//                                        mPlayImageView.setVisibility(View.VISIBLE);
+//                                        mPlayImageView.setOnClickListener(new View.OnClickListener() {
+//                                            @Override
+//                                            public void onClick(View view) {
+//                                                startActivity(new Intent(
+//                                                        Intent.ACTION_VIEW,
+//                                                        NetworkUtils.buildVideoUri(movieVideos.get(0).getVideoKey())));
+//                                            }
+//                                        });
+//                                    }
+//
+//                                    @Override
+//                                    public void onError() {
+//                                        mPlayImageView.setVisibility(View.INVISIBLE);
+//                                    }
+//                                });
+//                    }
                 }
 
                 @Override
                 public void onLoaderReset(Loader<ArrayList<Video>> loader) {
-                    // Clear TextView
-
+                    mVideosAdapter.swapVideos(new ArrayList<Video>() {});
                 }
             };
 
@@ -528,5 +619,37 @@ public class DetailsActivity extends AppCompatActivity {
                 mNoReviewsConnectionImageView.setVisibility(View.INVISIBLE);
             }
         }
+    }
+
+    private void populateVideos(ArrayList<Video> movieVideos) {
+        if (movieVideos != null) {
+            mVideosAdapter.swapVideos(movieVideos);
+
+            // If our RecyclerView has is not position, we assume the first position in the list
+            // and set the RecyclerView a the beginning of our results
+            if (mVideosPosition == RecyclerView.NO_POSITION) {
+                mVideosPosition = 0;
+            }
+            mVideosRecyclerView.smoothScrollToPosition(mVideosPosition);
+
+
+            // If the movieVideo has data
+            if (movieVideos.size() != 0) {
+                // Show movie videos
+                showVideos();
+            } else {
+                // Otherwise, hide progress bar and show "No videos available" message
+                mVideosMessagesTextView.setVisibility(View.VISIBLE);
+                mVideosMessagesTextView.setText(R.string.no_videos);
+                mVideosProgressBar.setVisibility(View.INVISIBLE);
+            }
+        }
+    }
+
+    @Override
+    public void onListItemClick(Video videoClicked) {
+        startActivity(new Intent(
+                Intent.ACTION_VIEW,
+                NetworkUtils.buildVideoUri(videoClicked.getVideoKey())));
     }
 }

@@ -7,6 +7,7 @@
 
     <!-- Menu items -->
     <string name="menu_settings">Settings</string>
+    <string name="menu_details">Details</string>
 
     <!-- Content descriptions -->
     <string name="movie_poster">Movie poster</string>
@@ -19,6 +20,8 @@
     <string name="no_favourites_icon">No favourite movies icon</string>
     <string name="powered_by">Powered by The Movie Database</string>
     <string name="add_favourites_icon">Add to favourites icon</string>
+    <string name="video_thumbnail">Video thumbnail</string>
+    <string name="video_play">Play button</string>
 
     <!-- Activity Labels -->
     <string name="best_result_label">Which one is your favourite?</string>
@@ -27,6 +30,7 @@
     <string name="ratings_label">Ratings</string>
     <string name="movies_label">\ Movies</string>
     <string name="cast_label">Cast</string>
+    <string name="videos_label">Videos</string>
     <string name="reviews_label">Reviews</string>
     <string name="max_rating">\/\ 10</string>
     <string name="add_to_favourites">Add to favourites</string>

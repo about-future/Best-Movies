@@ -106,6 +106,7 @@
             app:srcCompat="@drawable/ic_favorite"
             android:text="@string/add_to_favourites"
             android:layout_marginStart="@dimen/details_horizontal_spacing"
+            android:visibility="gone"
             app:layout_constraintStart_toEndOf="@id/details_poster_iv"
             app:layout_constraintBottom_toBottomOf="@id/details_poster_iv"/>
 

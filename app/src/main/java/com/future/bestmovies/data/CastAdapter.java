@@ -37,7 +37,7 @@ public class CastAdapter extends RecyclerView.Adapter<CastAdapter.CastViewHolder
     @Override
     public void onBindViewHolder(@NonNull CastAdapter.CastViewHolder holder, int position) {
         String description;
-
+        // TODO: Correct picasso image
         if (!mCast.get(position).getProfilePath().equals("null")) {
             Picasso.with(mContext)
                     .load(ImageUtils.buildImageUrl(

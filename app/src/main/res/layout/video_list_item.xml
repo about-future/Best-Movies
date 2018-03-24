@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageView
+        android:id="@+id/video_thumbnail_iv"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:contentDescription="@string/video_thumbnail"
+        android:scaleType="centerCrop"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/video" />
+
+    <ImageView
+        android:id="@+id/video_play_iv"
+        android:layout_width="@dimen/icon"
+        android:layout_height="@dimen/icon"
+        android:contentDescription="@string/video_play"
+        android:visibility="visible"
+        app:layout_constraintBottom_toTopOf="@id/video_thumbnail_iv"
+        app:layout_constraintEnd_toStartOf="@id/video_thumbnail_iv"
+        app:layout_constraintStart_toEndOf="@id/video_thumbnail_iv"
+        app:layout_constraintTop_toBottomOf="@id/video_thumbnail_iv"
+        app:srcCompat="@drawable/ic_play" />
+
+    <TextView
+        android:id="@+id/video_name_tv"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/details_vertical_spacing"
+        android:fontFamily="sans-serif-condensed"
+        android:textColor="@color/colorWhite"
+        android:textSize="18sp"
+        app:layout_constraintEnd_toEndOf="@id/video_thumbnail_iv"
+        app:layout_constraintStart_toStartOf="@id/video_thumbnail_iv"
+        app:layout_constraintTop_toBottomOf="@+id/video_thumbnail_iv"
+        tools:text="Interstellar – Trailer 3 – Official Warner Bros." />
+
+    <TextView
+        android:id="@+id/video_type_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="sans-serif-condensed"
+        android:textColor="@color/colorAccent"
+        android:textSize="@dimen/details_font_size"
+        app:layout_constraintStart_toStartOf="@id/video_name_tv"
+        app:layout_constraintTop_toBottomOf="@id/video_name_tv"
+        tools:text="Trailer" />
+
+</android.support.constraint.ConstraintLayout>

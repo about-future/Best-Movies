@@ -44,13 +44,10 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
     public void onBindViewHolder(@NonNull VideoAdapter.VideoViewHolder holder, int position) {
         Picasso.with(mContext)
                 .load(ImageUtils.buildVideoThumbnailUrl(mVideos.get(position).getVideoKey()))
+                .error(R.drawable.ic_image)
                 .into(holder.videoThumbnailImageView);
-        Log.v ("videoThumbnail " + position, ImageUtils.buildVideoThumbnailUrl(mVideos.get(position).getVideoKey()));
-
         holder.videoNameTextView.setText(mVideos.get(position).getVideoName());
-        Log.v ("videoName ", mVideos.get(position).getVideoName());
         holder.videoTypeTextView.setText(mVideos.get(position).getVideoType());
-        Log.v ("videoType ", mVideos.get(position).getVideoType());
     }
 
     @Override

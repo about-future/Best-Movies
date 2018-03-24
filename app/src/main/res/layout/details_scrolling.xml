@@ -53,7 +53,7 @@
                 android:id="@+id/videos"
                 layout="@layout/videos_scrolling"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/video_layout_height"
+                android:layout_height="wrap_content"
                 android:layout_margin="@dimen/details_horizontal_spacing"
                 app:layout_constraintTop_toBottomOf="@id/videos_label"
                 app:layout_constraintStart_toStartOf="parent"

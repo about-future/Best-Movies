@@ -189,6 +189,8 @@ public class MainActivity extends AppCompatActivity implements
         startActivity(movieDetailsIntent);
     }
 
+    // TODO: Database, favourites and share info
+
     @Override
     public Loader<ArrayList<Movie>> onCreateLoader(int loaderId, Bundle bundle) {
         switch (loaderId) {

@@ -8,5 +8,8 @@
     <dimen name="poster_width">320dp</dimen>
     <dimen name="min_height">88dp</dimen>
     <dimen name="message_top_margin">72dp</dimen>
+    <dimen name="video_spacing">16dp</dimen>
+    <dimen name="video_height">400dp</dimen>
+    <dimen name="video_layout_height">460dp</dimen>
 
 </resources>

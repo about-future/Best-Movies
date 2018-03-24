@@ -11,6 +11,7 @@ import android.widget.TextView;
 
 import com.future.bestmovies.R;
 import com.future.bestmovies.utils.ImageUtils;
+import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -35,26 +36,30 @@ public class CastAdapter extends RecyclerView.Adapter<CastAdapter.CastViewHolder
     }
 
     @Override
-    public void onBindViewHolder(@NonNull CastAdapter.CastViewHolder holder, int position) {
-        String description;
-        // TODO: Correct picasso image
-        if (!mCast.get(position).getProfilePath().equals("null")) {
-            Picasso.with(mContext)
-                    .load(ImageUtils.buildImageUrl(
-                            mContext,
-                            mCast.get(position).getProfilePath(),
-                            ImageUtils.CAST))
-                    .into(holder.actorProfileImageView);
-            description = mCast.get(position).getActorName();
-        }
-        else {
-            holder.actorProfileImageView.setImageResource(R.drawable.ic_person);
-            holder.actorProfileImageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
-            description = mContext.getString(R.string.no_profile_picture);
-        }
+    public void onBindViewHolder(@NonNull final CastAdapter.CastViewHolder holder, int position) {
+        final int pos = position;
+        Picasso.with(mContext)
+                .load(ImageUtils.buildImageUrl(
+                        mContext,
+                        mCast.get(position).getProfilePath(),
+                        ImageUtils.CAST))
+                .error(R.drawable.ic_person)
+                .into(holder.actorProfileImageView, new Callback() {
+                    @Override
+                    public void onSuccess() {
+                        holder.actorProfileImageView.setContentDescription(
+                                mCast.get(pos).getActorName());
+                    }
 
-        holder.actorProfileImageView.setContentDescription(description);
+                    @Override
+                    public void onError() {
+                        holder.actorProfileImageView.setContentDescription(
+                                mContext.getString(R.string.no_profile_picture));
+                    }
+                });
+
         holder.actorNameTextView.setText(mCast.get(position).getActorName());
+        //holder.characterTextView.setText(mCast.get(position).getCharacter());
     }
 
     @Override
@@ -68,11 +73,13 @@ public class CastAdapter extends RecyclerView.Adapter<CastAdapter.CastViewHolder
     class CastViewHolder extends RecyclerView.ViewHolder {
         final ImageView actorProfileImageView;
         final TextView actorNameTextView;
+        //final TextView characterTextView;
 
         CastViewHolder(View itemView) {
             super(itemView);
             actorProfileImageView = itemView.findViewById(R.id.actor_profile_iv);
             actorNameTextView = itemView.findViewById(R.id.actor_name_tv);
+            //characterTextView = itemView.findViewById(R.id.character_tv);
         }
     }
 }

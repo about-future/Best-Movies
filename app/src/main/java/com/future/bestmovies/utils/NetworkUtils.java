@@ -171,12 +171,9 @@ public class NetworkUtils {
             return JsonUtils.parseMoviesJson(jsonMovieResponse);
         } catch (Exception e) {
             Log.e(TAG, "Error accessing the Server:", e);
-            //TODO: move return here
+            // If something went wrong, we return an empty array of Movie objects
+            return null;
         }
-
-
-        // If something went wrong, we return an empty array of Movie objects
-        return new ArrayList<Movie>();
     }
 
     /* Perform a network request using a URL, parse the JSON from that request and return an array

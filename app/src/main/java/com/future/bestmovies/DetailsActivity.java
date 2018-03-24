@@ -92,6 +92,7 @@ public class DetailsActivity extends AppCompatActivity implements VideoAdapter.L
     private VideoAdapter mVideosAdapter;
     private TextView mVideosMessagesTextView;
     private int mVideosPosition = RecyclerView.NO_POSITION;
+    private ImageView mNoVideosImageView;
 
 
 
@@ -284,6 +285,7 @@ public class DetailsActivity extends AppCompatActivity implements VideoAdapter.L
         mVideosRecyclerView.setAdapter(mVideosAdapter);
         SnapHelper snapHelper = new PagerSnapHelper();
         snapHelper.attachToRecyclerView(mVideosRecyclerView);
+        mNoVideosImageView = findViewById(R.id.no_videos_iv);
 
         // Show the Videos progress bar and hide the Videos RecyclerView
         hideVideos();
@@ -407,6 +409,7 @@ public class DetailsActivity extends AppCompatActivity implements VideoAdapter.L
         mVideosRecyclerView.setVisibility(View.VISIBLE);
         mVideosProgressBar.setVisibility(View.INVISIBLE);
         mVideosMessagesTextView.setVisibility(View.INVISIBLE);
+        mNoVideosImageView.setVisibility(View.INVISIBLE);
     }
 
     // Show progress bar and hide videos
@@ -414,6 +417,7 @@ public class DetailsActivity extends AppCompatActivity implements VideoAdapter.L
         mVideosRecyclerView.setVisibility(View.GONE);
         mVideosProgressBar.setVisibility(View.VISIBLE);
         mVideosMessagesTextView.setVisibility(View.VISIBLE);
+        mNoVideosImageView.setVisibility(View.INVISIBLE);
     }
 
     private void fetchCast() {
@@ -528,31 +532,6 @@ public class DetailsActivity extends AppCompatActivity implements VideoAdapter.L
                     mVideos = movieVideos;
                     // Populate videos section
                     populateVideos(movieVideos);
-
-//                    if (movieVideos != null && !TextUtils.isEmpty(movieVideos.get(0).getVideoKey())) {
-//                        Picasso.with(getApplicationContext())
-//                                .load(ImageUtils.buildVideoThumbnailUrl(movieVideos.get(0).getVideoKey()))
-//                                .error(R.drawable.ic_landscape)
-//                                .into(mMovieBackdropImageView, new Callback() {
-//                                    @Override
-//                                    public void onSuccess() {
-//                                        mPlayImageView.setVisibility(View.VISIBLE);
-//                                        mPlayImageView.setOnClickListener(new View.OnClickListener() {
-//                                            @Override
-//                                            public void onClick(View view) {
-//                                                startActivity(new Intent(
-//                                                        Intent.ACTION_VIEW,
-//                                                        NetworkUtils.buildVideoUri(movieVideos.get(0).getVideoKey())));
-//                                            }
-//                                        });
-//                                    }
-//
-//                                    @Override
-//                                    public void onError() {
-//                                        mPlayImageView.setVisibility(View.INVISIBLE);
-//                                    }
-//                                });
-//                    }
                 }
 
                 @Override
@@ -571,7 +550,6 @@ public class DetailsActivity extends AppCompatActivity implements VideoAdapter.L
                 mCastPosition = 0;
             }
             mCastRecyclerView.smoothScrollToPosition(mCastPosition);
-
 
             // If the movieCast has data
             if (movieCast.size() != 0) {
@@ -640,9 +618,11 @@ public class DetailsActivity extends AppCompatActivity implements VideoAdapter.L
                 showVideos();
             } else {
                 // Otherwise, hide progress bar and show "No videos available" message
+                mVideosRecyclerView.setVisibility(View.GONE);
                 mVideosMessagesTextView.setVisibility(View.VISIBLE);
                 mVideosMessagesTextView.setText(R.string.no_videos);
                 mVideosProgressBar.setVisibility(View.INVISIBLE);
+                mNoVideosImageView.setVisibility(View.VISIBLE);
             }
         }
     }

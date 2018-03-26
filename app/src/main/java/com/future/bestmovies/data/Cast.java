@@ -7,14 +7,14 @@ import android.os.Parcelable;
 public class Cast implements Parcelable {
     private final int movieId;
     private final String character;
-    private final int id;
+    private final int actorId;
     private final String name;
     private final String profilePath;
 
     public Cast(int movieId, String character, int id, String name, String profilePath) {
         this.movieId = movieId;
         this.character = character;
-        this.id = id;
+        this.actorId = id;
         this.name = name;
         this.profilePath = profilePath;
     }
@@ -22,7 +22,7 @@ public class Cast implements Parcelable {
     private Cast(Parcel in) {
         movieId = in.readInt();
         character = in.readString();
-        id = in.readInt();
+        actorId = in.readInt();
         name = in.readString();
         profilePath = in.readString();
     }
@@ -31,7 +31,7 @@ public class Cast implements Parcelable {
     public void writeToParcel(Parcel parcel, int i) {
         parcel.writeInt(movieId);
         parcel.writeString(character);
-        parcel.writeInt(id);
+        parcel.writeInt(actorId);
         parcel.writeString(name);
         parcel.writeString(profilePath);
     }
@@ -55,6 +55,7 @@ public class Cast implements Parcelable {
     public String getActorName() {
         return name;
     }
+    public int getActorId() { return actorId; }
     public String getCharacter() { return character; }
     public String getProfilePath() { return profilePath; }
 

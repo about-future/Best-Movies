@@ -107,4 +107,13 @@
     <!-- Buttons -->
     <string name="see_all">See all</string>
 
+    <!-- Database -->
+    <string name="content_authority">com.future.bestmovies</string>
+
+    <!-- TOAST MESSAGES -->
+    <!-- Toast message when new movie has been successfully inserted -->
+    <string name="movie_insert_successful">Movie added to favourites</string>
+    <!-- Toast message when new movie has failed to be inserted -->
+    <string name="movie_insert_failed">Failed to add movie to favourites</string>
+
 </resources>

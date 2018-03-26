@@ -1,6 +1,7 @@
 package com.future.bestmovies;
 
 import android.app.LoaderManager;
+import android.content.ContentValues;
 import android.content.Intent;
 import android.content.Loader;
 import android.graphics.PorterDuff;
@@ -30,6 +31,7 @@ import android.widget.Toast;
 import com.future.bestmovies.data.Cast;
 import com.future.bestmovies.data.CastAdapter;
 import com.future.bestmovies.data.CastLoader;
+import com.future.bestmovies.data.FavouritesContract;
 import com.future.bestmovies.data.Movie;
 import com.future.bestmovies.data.Review;
 import com.future.bestmovies.data.ReviewLoader;
@@ -44,6 +46,8 @@ import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
+
+import static com.future.bestmovies.data.FavouritesContract.*;
 
 
 public class DetailsActivity extends AppCompatActivity implements VideoAdapter.ListItemClickListener {
@@ -64,6 +68,7 @@ public class DetailsActivity extends AppCompatActivity implements VideoAdapter.L
     private Movie mSelectedMovie;
     private ImageView mMovieBackdropImageView;
     private TextView posterErrorTextView;
+    private TextView movieGenreTextView;
 
     private TextView mCastMessagesTextView;
     private int mCastPosition = RecyclerView.NO_POSITION;
@@ -146,7 +151,7 @@ public class DetailsActivity extends AppCompatActivity implements VideoAdapter.L
 
         // GENRE
         // Generate and set movie genres
-        TextView movieGenreTextView = findViewById(R.id.details_genre_tv);
+        movieGenreTextView = findViewById(R.id.details_genre_tv);
         String[] movieGenre = new String[mSelectedMovie.getGenreIds().length];
         for (int i = 0; i < mSelectedMovie.getGenreIds().length; i++) {
             movieGenre[i] = MovieUtils.getStringMovieGenre(this, mSelectedMovie.getGenreIds()[i]);
@@ -330,9 +335,7 @@ public class DetailsActivity extends AppCompatActivity implements VideoAdapter.L
         }
 
         if (id == R.id.action_favourites) {
-            Toast.makeText(this, "Added to favourites", Toast.LENGTH_SHORT).show();
-            DrawableCompat.setTint(item.getIcon(), ContextCompat.getColor(getApplicationContext(), R.color.colorHeart));
-
+            insertMovie(mSelectedMovie, item);
             return true;
         }
 
@@ -632,5 +635,36 @@ public class DetailsActivity extends AppCompatActivity implements VideoAdapter.L
         startActivity(new Intent(
                 Intent.ACTION_VIEW,
                 NetworkUtils.buildVideoUri(videoClicked.getVideoKey())));
+    }
+
+    private void insertMovie(Movie selectedMovie, MenuItem item) {
+        ContentValues values = new ContentValues();
+        values.put(MovieDetailsEntry.COLUMN_MOVIE_ID, selectedMovie.getMovieId());
+        values.put(MovieDetailsEntry.COLUMN_BACKDROP_PATH, selectedMovie.getBackdropPath());
+        values.put(MovieDetailsEntry.COLUMN_GENRES, movieGenreTextView.getText().toString());
+        values.put(MovieDetailsEntry.COLUMN_PLOT, selectedMovie.getOverview());
+        values.put(MovieDetailsEntry.COLUMN_POSTER_PATH, selectedMovie.getPosterPath());
+        values.put(MovieDetailsEntry.COLUMN_RATINGS, selectedMovie.getVoteAverage());
+        values.put(MovieDetailsEntry.COLUMN_RELEASE_DATE, selectedMovie.getReleaseDate());
+        values.put(MovieDetailsEntry.COLUMN_TITLE, selectedMovie.getMovieTitle());
+
+        Uri responseUri = getContentResolver().insert(MovieDetailsEntry.CONTENT_URI, values);
+
+        // Show a toast message depending on whether or not the insertion was successful
+        if (responseUri == null) {
+            // If the new content URI is null, then there was an error with insertion.
+            Toast.makeText(this,
+                    getString(R.string.movie_insert_failed),
+                    Toast.LENGTH_SHORT).show();
+        } else {
+            Log.v("INSERT CONTACT", "CONTACT INSERTED IN " + MovieDetailsEntry.TABLE_NAME + " WITH URI: " + responseUri);
+            // Otherwise, the insertion was successful and we can display a toast.
+            Toast.makeText(this,
+                    getString(R.string.movie_insert_successful),
+                    Toast.LENGTH_SHORT).show();
+            DrawableCompat.setTint(item.getIcon(), ContextCompat.getColor(getApplicationContext(), R.color.colorHeart));
+            // TODO: Remember if heart is red or white
+            // TODO: Check content of insertion
+        }
     }
 }

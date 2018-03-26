@@ -50,6 +50,12 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".DetailsActivity" />
         </activity>
+
+        <!-- Our ContentProvider -->
+        <provider
+            android:name=".data.FavouritesProvider"
+            android:authorities="@string/content_authority"
+            android:exported="false"/>
     </application>
 
 </manifest>

@@ -111,7 +111,6 @@ public class DetailsActivity extends AppCompatActivity implements VideoAdapter.L
     private int mVideosPosition = RecyclerView.NO_POSITION;
     private ImageView mNoVideosImageView;
 
-    private Context mContext;
     private boolean mIsFavourite;
 
 
@@ -830,12 +829,5 @@ public class DetailsActivity extends AppCompatActivity implements VideoAdapter.L
             Toast.makeText(this, getString(R.string.favourite_delete_successful),
                     Toast.LENGTH_SHORT).show();
         }
-    }
-
-    // just a test method
-    public void loadMyCursor(View v) {
-        Intent cursorActivity = new Intent(this, DetailsActivity.class);
-        cursorActivity.putExtra(MOVIE_ID, mSelectedMovie.getMovieId());
-        startActivity(cursorActivity);
     }
 }

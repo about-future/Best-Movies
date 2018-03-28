@@ -50,7 +50,7 @@ public class MoviePreferences {
     public static int getImageWidthForRecyclerView(Context context) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         String optimalImageWidthKey = context.getString(R.string.pref_image_width_key);
-        Log.v(TAG, "getImageSizeForRecyclerView: " + sp.getInt(optimalImageWidthKey, DEFAULT_IMAGE_WIDTH));
+        //Log.v(TAG, "getImageSizeForRecyclerView: " + sp.getInt(optimalImageWidthKey, DEFAULT_IMAGE_WIDTH));
         return sp.getInt(optimalImageWidthKey, DEFAULT_IMAGE_WIDTH);
     }
 
@@ -58,13 +58,13 @@ public class MoviePreferences {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         String preferredImageQualityKey = context.getString(R.string.pref_image_quality_key);
         String defaultImageQuality = context.getString(R.string.pref_image_quality_optimal);
-        Log.v(TAG, "getPreferredImageQuality: " + sp.getString(preferredImageQualityKey, defaultImageQuality));
+        //Log.v(TAG, "getPreferredImageQuality: " + sp.getString(preferredImageQualityKey, defaultImageQuality));
         return sp.getString(preferredImageQualityKey, defaultImageQuality);
     }
 
     public static boolean isImageWidthAvailable(Context context){
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        Log.v(TAG, "isImageWidthAvailable: " + sp.contains(IMAGE_WIDTH));
+        //Log.v(TAG, "isImageWidthAvailable: " + sp.contains(IMAGE_WIDTH));
         return sp.contains(IMAGE_WIDTH);
     }
 }

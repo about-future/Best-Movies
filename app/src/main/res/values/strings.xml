@@ -54,6 +54,7 @@
     <string name="pref_category_label_top_rated">Top Rated</string>
     <string name="pref_category_label_upcoming">Upcoming</string>
     <string name="pref_category_label_now_playing">Now Playing</string>
+    <string name="pref_category_label_favourites">Favourites</string>
 
     <!-- Values in SharedPreferences for each category option -->
     <string name="pref_category_key" translatable="false">category</string>
@@ -61,6 +62,7 @@
     <string name="pref_category_top_rated" translatable="false">top_rated</string>
     <string name="pref_category_upcoming" translatable="false">upcoming</string>
     <string name="pref_category_now_playing" translatable="false">now_playing</string>
+    <string name="pref_category_favourites" translatable="false">favourites</string>
 
     <!-- Page number preference -->
     <string name="pref_page_number_key" translatable="false">page_number</string>
@@ -111,9 +113,10 @@
     <string name="content_authority">com.future.bestmovies</string>
 
     <!-- TOAST MESSAGES -->
-    <!-- Toast message when new movie has been successfully inserted -->
-    <string name="movie_insert_successful">Movie added to favourites</string>
-    <!-- Toast message when new movie has failed to be inserted -->
-    <string name="movie_insert_failed">Failed to add movie to favourites</string>
+    <string name="favourite_insert_successful">Movie added to favourites</string>
+    <string name="favourite_insert_failed">Failed to add movie to favourites</string>
+    <string name="favourite_delete_successful">Movie deleted from favourites</string>
+    <string name="favourite_delete_failed">Failed to delete from favourites</string>
+
 
 </resources>

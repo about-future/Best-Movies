@@ -42,7 +42,8 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity" />
         </activity>
-        <activity android:name=".ReviewsActivity"
+        <activity
+            android:name=".ReviewsActivity"
             android:label="@string/activity_title_reviews"
             android:parentActivityName=".DetailsActivity"
             android:theme="@style/AppTheme.NoActionBar">
@@ -55,7 +56,9 @@
         <provider
             android:name=".data.FavouritesProvider"
             android:authorities="@string/content_authority"
-            android:exported="false"/>
+            android:exported="false" />
+
+        <activity android:name=".ProfileActivity"></activity>
     </application>
 
 </manifest>

@@ -1,0 +1,93 @@
+[33mcommit 62935eaf0a4d79aff6f73e51d2805119eabc3eb6[m[33m ([m[1;36mHEAD -> [m[1;32mmaster[m[33m)[m
+Merge: 8450e02 df88c69
+Author: Ciprian Bindiu <ciprian.bindiu@gmail.com>
+Date:   Thu Mar 1 01:16:28 2018 +0200
+
+    Merge remote-tracking branch 'origin/master'
+    
+    # Conflicts:
+    #       app/src/main/java/com/future/bestmovies/utils/NetworkUtils.java
+
+[33mcommit 8450e02d32436d34dbbe4bc4a97e1432493edacc[m
+Author: Ciprian Bindiu <ciprian.bindiu@gmail.com>
+Date:   Thu Mar 1 01:11:16 2018 +0200
+
+    ReAdd CollapsingToolBar and FAB button in activity_main portrait
+    Create activity_main layout landscape
+    Create MovieUtils
+    Add genre to Movie object, JSON file
+    Add genre to activity_details layout and DetailsActivity
+    Create JSON parse method for pages
+    Create and Test NetworkChangeReceiver
+    Create new strings
+
+[33mcommit df88c69556ce83316573439c7028ed9bba70101d[m[33m ([m[1;31morigin/master[m[33m)[m
+Author: Ciprian Bindiu <35727486+about-future@users.noreply.github.com>
+Date:   Tue Feb 27 23:18:17 2018 +0200
+
+    Update NetworkUtils.java
+
+[33mcommit 61cfab9b07c9063fe84e7512d10a5ee0a016c63e[m
+Author: Ciprian Bindiu <ciprian.bindiu@gmail.com>
+Date:   Tue Feb 27 23:03:10 2018 +0200
+
+    Create MovieLoader
+    Create MoviePreferences
+    Create ImageUtils
+    Create NetworkUtils
+    Create SettingsFragment
+    Create arrays
+    Create bools
+    Delete CollapsingToolBar and FAB button and Redesign activity_main
+
+[33mcommit 8ae46ec43a2edde6c0cca328c73484b1db09f5ac[m
+Author: Ciprian Bindiu <ciprian.bindiu@gmail.com>
+Date:   Sat Feb 24 17:40:10 2018 +0200
+
+    Optimise plot font size in activity_details layout
+
+[33mcommit ee730ee5fb64cd08203162dafed3822474ae270d[m
+Author: Ciprian Bindiu <ciprian.bindiu@gmail.com>
+Date:   Sat Feb 24 17:07:19 2018 +0200
+
+    Finnish activity_details landscape layout
+
+[33mcommit d37873bb6f14ce673de728ffe284044cbdee6c8c[m
+Author: Ciprian Bindiu <ciprian.bindiu@gmail.com>
+Date:   Sat Feb 24 15:22:11 2018 +0200
+
+    Create activity_details landscape layout
+    Correct activity_details portrait layout
+
+[33mcommit ba9a1356ff76c5f998b29d36b9b3f0b0f1ad2dd6[m
+Author: Ciprian Bindiu <ciprian.bindiu@gmail.com>
+Date:   Fri Feb 23 22:07:23 2018 +0200
+
+    Create Settings Activity
+    Add CollapsingView to activity_main layout
+    Add new strings and styles
+    Add FAB film icon
+    Add main_backdrop image
+    Add blue and gray gradient box
+    Finish activity_details layout
+    Correct movie_list_item layout
+
+[33mcommit 0994294d1af6094089065bef9da4aa3d0f8d05d4[m
+Author: Ciprian Bindiu <ciprian.bindiu@gmail.com>
+Date:   Wed Feb 21 03:47:55 2018 +0200
+
+    Create gradient box for transparency effects
+    Make details layout look awesome
+
+[33mcommit f44858030a21d7a80b081b30a3e16722ae972ce0[m
+Author: Ciprian Bindiu <ciprian.bindiu@gmail.com>
+Date:   Tue Feb 20 22:11:36 2018 +0200
+
+    Correct Movie class
+    Create best detail layout for movies
+
+[33mcommit 19a3f6c59406744805c20c94025d0d2a076da5d9[m
+Author: Ciprian Bindiu <ciprian.bindiu@gmail.com>
+Date:   Tue Feb 20 19:29:44 2018 +0200
+
+    Initial commit

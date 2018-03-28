@@ -27,44 +27,29 @@ public class FavouritesContract {
     public static abstract class MovieDetailsEntry implements BaseColumns {
         // The content URI to access the movie data in the provider
         public static final Uri CONTENT_URI = Uri.withAppendedPath(BASE_CONTENT_URI, PATH_MOVIES);
-
         // The MIME type of the {@link #CONTENT_URI} for a list of movies.
         public static final String CONTENT_LIST_TYPE =
                 ContentResolver.CURSOR_DIR_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_MOVIES;
-
         // The MIME type of the {@link #CONTENT_URI} for a single movie.
         public static final String CONTENT_ITEM_TYPE =
                 ContentResolver.CURSOR_ITEM_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_MOVIES;
 
-        // Name of database table for movie details
-        public final static String TABLE_NAME = "movie_details";
+        public final static String TABLE_NAME =                 "movie_details";
+        public final static String _ID = BaseColumns._ID;                           // Type: INTEGER (Unique ID)
+        public final static String COLUMN_MOVIE_ID =            "movie_id";         // Type: INTEGER
+        public final static String COLUMN_TITLE =               "title";            // Type: TEXT
+        public final static String COLUMN_POSTER_PATH =         "poster_path";      // Type: TEXT
+        public final static String COLUMN_BACKDROP_PATH =       "backdrop_path";    // Type: TEXT
+        public final static String COLUMN_PLOT =                "overview";         // Type: TEXT
+        public final static String COLUMN_RATINGS =             "ratings";          // Type: DOUBLE
+        public final static String COLUMN_RELEASE_DATE =        "release_date";     // Type: TEXT
+        public final static String COLUMN_GENRES =              "genres";           // Type: TEXT
 
-        // Unique ID number for the movie (only for use in the database table). Type: INTEGER */
-        public final static String _ID = BaseColumns._ID;
-
-        // Id of the movie. Type: INTEGER
-        public final static String COLUMN_MOVIE_ID ="movie_id";
-
-        // Title of the movie. Type: TEXT
-        public final static String COLUMN_TITLE ="title";
-
-        // Poster path of the movie. Type: TEXT
-        public final static String COLUMN_POSTER_PATH = "poster_path";
-
-        // Backdrop path of the movie. Type: TEXT
-        public final static String COLUMN_BACKDROP_PATH = "backdrop_path";
-
-        // Plot of the movie. Type: TEXT
-        public final static String COLUMN_PLOT = "overview";
-
-        // Average ratings of the movie. Type: DOUBLE
-        public final static String COLUMN_RATINGS ="ratings";
-
-        // Release date of the movie. Type: TEXT
-        public final static String COLUMN_RELEASE_DATE ="release_date";
-
-        // Genres of the movie. Type: INTEGER
-        public final static String COLUMN_GENRES ="genres";
+        public static Uri buildMovieUriWithId(int movieId) {
+            return CONTENT_URI.buildUpon()
+                    .appendPath(Integer.toString(movieId))
+                    .build();
+        }
     }
 
 
@@ -74,35 +59,20 @@ public class FavouritesContract {
     public static abstract class CastEntry implements BaseColumns {
         // The content URI to access the section data in the provider
         public static final Uri CONTENT_URI = Uri.withAppendedPath(BASE_CONTENT_URI, PATH_CAST);
-
         // The MIME type of the {@link #CONTENT_URI} for a cast list.
         public static final String CONTENT_LIST_TYPE =
                 ContentResolver.CURSOR_DIR_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_CAST;
-
         // The MIME type of the {@link #CONTENT_URI} for a single cast member.
         public static final String CONTENT_ITEM_TYPE =
                 ContentResolver.CURSOR_ITEM_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_CAST;
 
-        // Name of database table for cast members
-        public final static String TABLE_NAME = "cast";
-
-        // Unique ID number for the section (only for use in the database table). Type: INTEGER
-        public final static String _ID = BaseColumns._ID;
-
-        // Id of the movie in witch the cast member appears. Type: INTEGER
-        public final static String COLUMN_MOVIE_ID ="movie_id";
-
-        // Name of the cast member. Type: TEXT
-        public final static String COLUMN_ACTOR_NAME ="actor_name";
-
-        // Name of the character. Type: TEXT
-        public final static String COLUMN_CHARACTER_NAME ="character_name";
-
-        // Id of the actor. Type: INTEGER
-        public final static String COLUMN_ACTOR_ID = "actor_id";
-
-        // Image profile path of the cast member. Type: TEXT
-        public final static String COLUMN_IMAGE_PROFILE_PATH = "profile_path";
+        public final static String TABLE_NAME =                 "cast";
+        public final static String _ID = BaseColumns._ID;                           // Type: INTEGER (Unique ID)
+        public final static String COLUMN_MOVIE_ID =            "movie_id";         // Type: INTEGER
+        public final static String COLUMN_ACTOR_NAME =          "actor_name";       // Type: TEXT
+        public final static String COLUMN_CHARACTER_NAME =      "character_name";   // Type: TEXT
+        public final static String COLUMN_ACTOR_ID =            "actor_id";         // Type: INTEGER
+        public final static String COLUMN_IMAGE_PROFILE_PATH =  "profile_path";     // Type: TEXT
     }
 
 
@@ -112,29 +82,18 @@ public class FavouritesContract {
     public static abstract class ReviewsEntry implements BaseColumns {
         // The content URI to access the section data in the provider
         public static final Uri CONTENT_URI = Uri.withAppendedPath(BASE_CONTENT_URI, PATH_REVIEWS);
-
         // The MIME type of the {@link #CONTENT_URI} for a list of reviews.
         public static final String CONTENT_LIST_TYPE =
                 ContentResolver.CURSOR_DIR_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_REVIEWS;
-
         // The MIME type of the {@link #CONTENT_URI} for a single review.
         public static final String CONTENT_ITEM_TYPE =
                 ContentResolver.CURSOR_ITEM_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_REVIEWS;
 
-        // Name of database table for movie reviews
-        public final static String TABLE_NAME = "reviews";
-
-        // Unique ID number for the section (only for use in the database table). Type: INTEGER
-        public final static String _ID = BaseColumns._ID;
-
-        // Id of the movie for witch the review was written. Type: INTEGER
-        public final static String COLUMN_MOVIE_ID ="movie_id";
-
-        // Author of the review. Type: TEXT
-        public final static String COLUMN_AUTHOR ="author";
-
-        // Content of the review. Type: TEXT
-        public final static String COLUMN_CONTENT ="content";
+        public final static String TABLE_NAME =                 "reviews";
+        public final static String _ID = BaseColumns._ID;                           // Type: INTEGER (Unique ID)
+        public final static String COLUMN_MOVIE_ID =            "movie_id";         // Type: INTEGER
+        public final static String COLUMN_AUTHOR =              "author";           // Type: TEXT
+        public final static String COLUMN_CONTENT =             "content";          // Type: TEXT
     }
 
 
@@ -144,31 +103,18 @@ public class FavouritesContract {
     public static abstract class VideosEntry implements BaseColumns {
         // The content URI to access the section data in the provider
         public static final Uri CONTENT_URI = Uri.withAppendedPath(BASE_CONTENT_URI, PATH_VIDEOS);
-
         // The MIME type of the {@link #CONTENT_URI} for a list of videos.
         public static final String CONTENT_LIST_TYPE =
                 ContentResolver.CURSOR_DIR_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_VIDEOS;
-
         // The MIME type of the {@link #CONTENT_URI} for a single video.
         public static final String CONTENT_ITEM_TYPE =
                 ContentResolver.CURSOR_ITEM_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_VIDEOS;
 
-        // Name of database table for movie videos
-        public final static String TABLE_NAME = "videos";
-
-        // Unique ID number for the section (only for use in the database table). Type: INTEGER
-        public final static String _ID = BaseColumns._ID;
-
-        // Id of the movie for witch the video was made. Type: INTEGER
-        public final static String COLUMN_MOVIE_ID ="movie_id";
-
-        // Key of the video. Type: TEXT
-        public final static String COLUMN_VIDEO_KEY ="video_key";
-
-        // Name of the video. Type: TEXT
-        public final static String COLUMN_VIDEO_NAME ="video_name";
-
-        // Type of the video. Type: TEXT
-        public final static String COLUMN_VIDEO_TYPE ="video_type";
+        public final static String TABLE_NAME =                 "videos";
+        public final static String _ID = BaseColumns._ID;                           // Type: INTEGER (Unique ID)
+        public final static String COLUMN_MOVIE_ID =            "movie_id";         // Type: INTEGER
+        public final static String COLUMN_VIDEO_KEY =           "video_key";        // Type: TEXT
+        public final static String COLUMN_VIDEO_NAME =          "video_name";       // Type: TEXT
+        public final static String COLUMN_VIDEO_TYPE =          "video_type";       // Type: TEXT
     }
 }

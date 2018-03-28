@@ -5,6 +5,7 @@
         <item>@string/pref_category_label_top_rated</item>
         <item>@string/pref_category_label_upcoming</item>
         <item>@string/pref_category_label_now_playing</item>
+        <item>@string/pref_category_label_favourites</item>
     </string-array>
 
     <string-array name="pref_category_values">
@@ -12,6 +13,7 @@
         <item>@string/pref_category_top_rated</item>
         <item>@string/pref_category_upcoming</item>
         <item>@string/pref_category_now_playing</item>
+        <item>@string/pref_category_favourites</item>
     </string-array>
 
     <string-array name="pref_image_quality_options">

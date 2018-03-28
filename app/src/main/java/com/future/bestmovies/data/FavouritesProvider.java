@@ -103,7 +103,7 @@ public class FavouritesProvider extends ContentProvider {
                 // arguments that will fill in the "?". Since we have 1 question mark in the
                 // selection, we have 1 String in the selection arguments' String array.
                 selection = MovieDetailsEntry.COLUMN_MOVIE_ID + "=?";
-                selectionArgs = new String[] { String.valueOf(ContentUris.parseId(uri)) };
+                selectionArgs = new String[]{String.valueOf(ContentUris.parseId(uri))};
 
                 // This will perform a query on the movie_details table where the movie_id equals 157336 to return a
                 // Cursor containing that row of the table.
@@ -116,7 +116,7 @@ public class FavouritesProvider extends ContentProvider {
                 break;
             case CAST_ID:
                 selection = CastEntry.COLUMN_MOVIE_ID + "=?";
-                selectionArgs = new String[] { String.valueOf(ContentUris.parseId(uri)) };
+                selectionArgs = new String[]{String.valueOf(ContentUris.parseId(uri))};
 
                 // This will perform a query on the cast table where the movie_id equals 157336 to return a
                 // Cursor containing that row of the table.
@@ -155,13 +155,11 @@ public class FavouritesProvider extends ContentProvider {
 
     @Nullable
     @Override
-    public Uri insert(@NonNull Uri uri, @Nullable ContentValues contentValues) {
+    public Uri insert(@NonNull Uri uri, ContentValues contentValues) {
         final int match = sUriMatcher.match(uri);
         switch (match) {
             case MOVIES:
-                return insertMovie(uri, contentValues);
-//            case CAST:
-//                return insertCast(uri, contentValues);
+                return insertFavourite(uri, contentValues);
             default:
                 throw new IllegalArgumentException("Insertion is not supported for " + uri);
         }
@@ -169,46 +167,52 @@ public class FavouritesProvider extends ContentProvider {
 
     // Insert a movie into the database with the given content values. Return the new content URI
     // for that specific row in the database.
-    private Uri insertMovie(Uri uri, ContentValues contentValues) {
-        // Check that the title is not null
-        String title = contentValues.getAsString(MovieDetailsEntry.COLUMN_TITLE);
-        if (title == null) {
-            throw new IllegalArgumentException("Movie requires a title");
-        }
+    private Uri insertFavourite(Uri uri, ContentValues contentValues) {
 
-        // Check that the movie_id is valid
-        int movieId = contentValues.getAsInteger(MovieDetailsEntry.COLUMN_MOVIE_ID);
-        if (movieId == 0) {
-            throw new IllegalArgumentException("Movie requires a valid id");
-        }
+        // Get writable database and insert the new movie with the given values
+        long id = mDbHelper.getWritableDatabase().insert(MovieDetailsEntry.TABLE_NAME, null, contentValues);
 
-        // Get writable database
-        SQLiteDatabase database = mDbHelper.getWritableDatabase();
+        // Notify all listeners that the data has changed
+        if (id > 0) getContext().getContentResolver().notifyChange(uri, null);
 
-        // Insert the new movie with the given values
-        long id = database.insert(MovieDetailsEntry.TABLE_NAME, null, contentValues);
-
-        // If the ID is -1, then the insertion failed. Log an error and return null.
-        if (id == -1) {
-            Log.e(LOG_TAG, "Failed to insert row for " + uri);
-            return null;
-        }
-
-        // Notify all listeners that the data has changed for the contact content URI
-        // uri: content://com.future.bestmovies/movies
-        getContext().getContentResolver().notifyChange(uri, null);
-
-        // return the id appended to the uri
+        // Return the id appended to the uri
         return ContentUris.withAppendedId(uri, id);
     }
 
     @Override
-    public int delete(@NonNull Uri uri, @Nullable String s, @Nullable String[] strings) {
-        return 0;
+    public int delete(@NonNull Uri uri, String selection, String[] selectionArgs) {
+        final int match = sUriMatcher.match(uri);
+        switch (match) {
+            case MOVIES:
+                // Delete all rows that match the selection and selection args
+                return deleteFavourite(uri, selection, selectionArgs);
+            case MOVIE_ID:
+                // For the MOVIE_ID code, extract out the ID from the URI,
+                // so we know which row to delete. Selection will be "_id=?" and selection
+                // arguments will be a String array containing the actual ID.
+                selection = MovieDetailsEntry.COLUMN_MOVIE_ID + "=?";
+                selectionArgs = new String[] { String.valueOf(ContentUris.parseId(uri)) };
+
+                // Delete a single row given by the ID in the URI
+                return deleteFavourite(uri, selection, selectionArgs);
+            default:
+                throw new IllegalArgumentException("Delete is not supported for " + uri);
+        }
+    }
+
+    private int deleteFavourite(Uri uri, String selection, String[] selectionArgs) {
+        // Get writable database, delete and return the number of database rows affected by the delete statement
+        int rowsDeleted = mDbHelper.getWritableDatabase().delete(MovieDetailsEntry.TABLE_NAME, selection, selectionArgs);
+
+        // If 1 or more rows were deleted, then notify all listeners that the data at the given URI has changed
+        if (rowsDeleted != 0) getContext().getContentResolver().notifyChange(uri, null);
+
+        // Returns the number of rows affected by the delete statement
+        return rowsDeleted;
     }
 
     @Override
-    public int update(@NonNull Uri uri, @Nullable ContentValues contentValues, @Nullable String s, @Nullable String[] strings) {
+    public int update(@NonNull Uri uri, ContentValues contentValues, String selection, String[] selectionArgs) {
         return 0;
     }
 }

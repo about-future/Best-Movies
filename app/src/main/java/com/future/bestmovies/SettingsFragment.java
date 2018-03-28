@@ -8,6 +8,7 @@ import android.support.v7.preference.Preference;
 import android.support.v7.preference.PreferenceFragmentCompat;
 import android.support.v7.preference.PreferenceScreen;
 
+import com.future.bestmovies.data.FavouritesContract;
 import com.future.bestmovies.data.MoviePreferences;
 import com.future.bestmovies.utils.ImageUtils;
 
@@ -51,8 +52,12 @@ public class SettingsFragment extends PreferenceFragmentCompat implements
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         if (key.equals(getString(R.string.pref_category_key))) {
+
             // Desired category has changed, reset the last page number to 1
             MoviePreferences.setLastPageNumber(getContext(), 1);
+
+            //if (getActivity() != null)
+            //    getActivity().getContentResolver().notifyChange(FavouritesContract.MovieDetailsEntry.CONTENT_URI, null);
         }
 
         if (key.equals(getString(R.string.pref_image_quality_key))) {

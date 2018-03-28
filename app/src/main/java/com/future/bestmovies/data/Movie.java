@@ -5,14 +5,14 @@ import android.os.Parcelable;
 
 
 public class Movie implements Parcelable {
-    private final int id;
-    private final double voteAverage;
-    private final String title;
-    private final String posterPath;
-    private final String backdropPath;
-    private final String overview;
-    private final String releaseDate;
-    private final int[] genreIds;
+    private int id;
+    private double voteAverage;
+    private String title;
+    private String posterPath;
+    private String backdropPath;
+    private String overview;
+    private String releaseDate;
+    private int[] genreIds;
 
     public Movie(int id, double voteAverage, String title, String posterPath, String backdropPath, String overview, String releaseDate, int[] genreIds) {
         this.id = id;
@@ -65,35 +65,21 @@ public class Movie implements Parcelable {
         }
     };
 
-    public int getMovieId() {
-        return id;
-    }
+    public int getMovieId() { return id; }
+    public double getVoteAverage() { return voteAverage; }
+    public String getMovieTitle() { return title; }
+    public String getPosterPath() { return posterPath; }
+    public String getBackdropPath() { return backdropPath; }
+    public String getOverview() { return overview; }
+    public String getReleaseDate() { return releaseDate; }
+    public int[] getGenreIds() { return genreIds; }
 
-    public double getVoteAverage() {
-        return voteAverage;
-    }
-
-    public String getMovieTitle() {
-        return title;
-    }
-
-    public String getPosterPath() {
-        return posterPath;
-    }
-
-    public String getBackdropPath() {
-        return backdropPath;
-    }
-
-    public String getOverview() {
-        return overview;
-    }
-
-    public String getReleaseDate() {
-        return releaseDate;
-    }
-
-    public int[] getGenreIds() {
-        return genreIds;
-    }
+    public void setMovieId(int id) { this.id = id; }
+    public void setVoteAverage(double voteAverage) { this.voteAverage = voteAverage; }
+    public void setMovieTitle(String title) { this.title = title; }
+    public void setPosterPath(String posterPath) { this.posterPath = posterPath; }
+    public void setBackdropPath(String backdropPath) { this.backdropPath = backdropPath; }
+    public void setOverview(String overview) { this.overview = overview; }
+    public void setReleaseDate(String releaseDate) { this.releaseDate = releaseDate; }
+    public void setGenreIds(int[] genreIds) { this.genreIds = genreIds; }
 }

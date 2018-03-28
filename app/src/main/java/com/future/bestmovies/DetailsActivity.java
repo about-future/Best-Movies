@@ -2,14 +2,14 @@ package com.future.bestmovies;
 
 import android.app.LoaderManager;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
 import android.content.Loader;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffColorFilter;
-import android.graphics.drawable.Drawable;
+import android.database.Cursor;
 import android.net.Uri;
 import android.support.constraint.ConstraintLayout;
 import android.support.v4.content.ContextCompat;
+import android.content.CursorLoader;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -18,7 +18,6 @@ import android.support.v7.widget.PagerSnapHelper;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SnapHelper;
 import android.support.v7.widget.Toolbar;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -31,7 +30,6 @@ import android.widget.Toast;
 import com.future.bestmovies.data.Cast;
 import com.future.bestmovies.data.CastAdapter;
 import com.future.bestmovies.data.CastLoader;
-import com.future.bestmovies.data.FavouritesContract;
 import com.future.bestmovies.data.Movie;
 import com.future.bestmovies.data.Review;
 import com.future.bestmovies.data.ReviewLoader;
@@ -39,9 +37,8 @@ import com.future.bestmovies.data.Video;
 import com.future.bestmovies.data.VideoAdapter;
 import com.future.bestmovies.data.VideoLoader;
 import com.future.bestmovies.utils.ImageUtils;
-import com.future.bestmovies.utils.MovieUtils;
 import com.future.bestmovies.utils.NetworkUtils;
-import com.future.bestmovies.utils.ScreenUtils;
+import com.future.bestmovies.utils.StringUtils;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
@@ -54,6 +51,20 @@ public class DetailsActivity extends AppCompatActivity implements VideoAdapter.L
     private static final int CAST_LOADER_ID = 423;
     private static final int REVIEWS_LOADER_ID = 435;
     private static final int VIDEOS_LOADER_ID = 594;
+    private static final int FAVOURITE_LOADER_ID = 516;
+
+    public static final String[] MOVIE_CHECK_PROJECTION = {MovieDetailsEntry.COLUMN_MOVIE_ID};
+
+    public static final String[] MOVIE_DETAILED_PROJECTION = {
+            MovieDetailsEntry.COLUMN_MOVIE_ID,
+            MovieDetailsEntry.COLUMN_BACKDROP_PATH,
+            MovieDetailsEntry.COLUMN_GENRES,
+            MovieDetailsEntry.COLUMN_PLOT,
+            MovieDetailsEntry.COLUMN_POSTER_PATH,
+            MovieDetailsEntry.COLUMN_RATINGS,
+            MovieDetailsEntry.COLUMN_RELEASE_DATE,
+            MovieDetailsEntry.COLUMN_TITLE
+    };
 
     public static final String MOVIE_OBJECT = "movie";
     private static final String MOVIE_CAST = "movie_cast";
@@ -66,6 +77,7 @@ public class DetailsActivity extends AppCompatActivity implements VideoAdapter.L
     public static final String MOVIE_BACKDROP = "movie_backdrop";
 
     private Movie mSelectedMovie;
+    private int mMovieId;
     private ImageView mMovieBackdropImageView;
     private TextView posterErrorTextView;
     private TextView movieGenreTextView;
@@ -99,6 +111,8 @@ public class DetailsActivity extends AppCompatActivity implements VideoAdapter.L
     private int mVideosPosition = RecyclerView.NO_POSITION;
     private ImageView mNoVideosImageView;
 
+    private Context mContext;
+    private boolean mIsFavourite;
 
 
     @Override
@@ -117,12 +131,56 @@ public class DetailsActivity extends AppCompatActivity implements VideoAdapter.L
         if (savedInstanceState != null && savedInstanceState.containsKey(MOVIE_OBJECT)) {
             mSelectedMovie = savedInstanceState.getParcelable(MOVIE_OBJECT);
         } else {
-            // Otherwise, we check our intent and see if there is a Movie object passed from
-            // MainActivity, so we can populate our UI. If there isn't we close this activity and
-            // display a toast message.
+            // Otherwise, we check our intent and see if there is a Movie object or a movieId passed
+            // from MainActivity, so we can populate our UI. If there isn't we close this activity
+            // and display a toast message.
             Intent intent = getIntent();
-            if (intent != null && intent.hasExtra(MOVIE_OBJECT)) {
-                mSelectedMovie = intent.getParcelableExtra(MOVIE_OBJECT);
+            if (intent != null) {
+                // If MainActivity passed a movie object
+                if (intent.hasExtra(MOVIE_OBJECT)) {
+                    mSelectedMovie = intent.getParcelableExtra(MOVIE_OBJECT);
+                } else if (intent.hasExtra(MOVIE_ID)) {
+                    // If MainActivity passed a movieId, get the ID and create a Movie object,
+                    // based on that ID.
+                    mMovieId = intent.getIntExtra(MOVIE_ID, 297762);
+
+                    Log.v("ID", String.valueOf(mMovieId));
+
+                    Cursor cursor = getContentResolver().query(MovieDetailsEntry.buildMovieUriWithId(mMovieId),
+                            MOVIE_DETAILED_PROJECTION,
+                            null,
+                            null,
+                            null);
+
+                    if (cursor != null && cursor.moveToFirst()) {
+                        // Find the columns of movie attributes that we're interested in
+                        int movieIdColumnIndex = cursor.getColumnIndex(MovieDetailsEntry.COLUMN_MOVIE_ID);
+                        int backdropColumnIndex = cursor.getColumnIndex(MovieDetailsEntry.COLUMN_BACKDROP_PATH);
+                        int genresColumnIndex = cursor.getColumnIndex(MovieDetailsEntry.COLUMN_GENRES);
+                        int plotColumnIndex = cursor.getColumnIndex(MovieDetailsEntry.COLUMN_PLOT);
+                        int posterColumnIndex = cursor.getColumnIndex(MovieDetailsEntry.COLUMN_POSTER_PATH);
+                        int ratingsColumnIndex = cursor.getColumnIndex(MovieDetailsEntry.COLUMN_RATINGS);
+                        int releaseDateColumnIndex = cursor.getColumnIndex(MovieDetailsEntry.COLUMN_RELEASE_DATE);
+                        int titleColumnIndex = cursor.getColumnIndex(MovieDetailsEntry.COLUMN_TITLE);
+
+                        mSelectedMovie = new Movie(
+                                cursor.getInt(movieIdColumnIndex),
+                                cursor.getDouble(ratingsColumnIndex),
+                                cursor.getString(titleColumnIndex),
+                                cursor.getString(posterColumnIndex),
+                                cursor.getString(backdropColumnIndex),
+                                cursor.getString(plotColumnIndex),
+                                cursor.getString(releaseDateColumnIndex),
+                                StringUtils.stringToIntArray(cursor.getString(genresColumnIndex))
+                        );
+
+                        cursor.close();
+                    }
+
+                    //getLoaderManager().restartLoader(FAVOURITE_LOADER_ID, null, favouriteMovieResultLoaderListener);
+                } else {
+                    closeOnError();
+                }
             } else {
                 closeOnError();
             }
@@ -134,6 +192,21 @@ public class DetailsActivity extends AppCompatActivity implements VideoAdapter.L
             closeOnError();
             return;
         }
+
+        // Check if this movie is a favourite
+        Cursor movieCheck = getContentResolver().query(MovieDetailsEntry.buildMovieUriWithId(mSelectedMovie.getMovieId()),
+                MOVIE_CHECK_PROJECTION,
+                null,
+                null,
+                null);
+
+        if (movieCheck != null && movieCheck.moveToFirst()) {
+            mIsFavourite = true;
+            movieCheck.close();
+        } else {
+            mIsFavourite = false;
+        }
+        Log.v("MOVIE IS FAVOURITE", String.valueOf(mIsFavourite));
 
         // BACKDROP
         mMovieBackdropImageView = findViewById(R.id.details_backdrop_iv);
@@ -152,11 +225,7 @@ public class DetailsActivity extends AppCompatActivity implements VideoAdapter.L
         // GENRE
         // Generate and set movie genres
         movieGenreTextView = findViewById(R.id.details_genre_tv);
-        String[] movieGenre = new String[mSelectedMovie.getGenreIds().length];
-        for (int i = 0; i < mSelectedMovie.getGenreIds().length; i++) {
-            movieGenre[i] = MovieUtils.getStringMovieGenre(this, mSelectedMovie.getGenreIds()[i]);
-        }
-        movieGenreTextView.setText(TextUtils.join(", ", movieGenre));
+        movieGenreTextView.setText(StringUtils.movieGenresAsString(this, mSelectedMovie.getGenreIds()));
 
         // POSTER
         // Poster error message will be used if no poster is available or if no internet connection
@@ -322,6 +391,14 @@ public class DetailsActivity extends AppCompatActivity implements VideoAdapter.L
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.details_menu, menu);
+
+        MenuItem favouritesMenuItem = menu.findItem(R.id.action_favourites);
+        if (mIsFavourite) {
+            DrawableCompat.setTint(favouritesMenuItem.getIcon(), ContextCompat.getColor(getApplicationContext(), R.color.colorHeart));
+        } else {
+            DrawableCompat.setTint(favouritesMenuItem.getIcon(), ContextCompat.getColor(getApplicationContext(), R.color.colorWhite));
+        }
+
         return true;
     }
 
@@ -335,7 +412,12 @@ public class DetailsActivity extends AppCompatActivity implements VideoAdapter.L
         }
 
         if (id == R.id.action_favourites) {
-            insertMovie(mSelectedMovie, item);
+            if (mIsFavourite) {
+                deleteFavourite(mSelectedMovie, item);
+            } else {
+                insertMovie(mSelectedMovie, item);
+            }
+
             return true;
         }
 
@@ -539,7 +621,72 @@ public class DetailsActivity extends AppCompatActivity implements VideoAdapter.L
 
                 @Override
                 public void onLoaderReset(Loader<ArrayList<Video>> loader) {
-                    mVideosAdapter.swapVideos(new ArrayList<Video>() {});
+                    mVideosAdapter.swapVideos(new ArrayList<Video>() {
+                    });
+                }
+            };
+
+    private LoaderManager.LoaderCallbacks<Cursor> favouriteMovieResultLoaderListener =
+            new LoaderManager.LoaderCallbacks<Cursor>() {
+                @Override
+                public Loader<Cursor> onCreateLoader(int loaderId, Bundle bundle) {
+                    Uri uri = MovieDetailsEntry.CONTENT_URI.buildUpon()
+                            .appendPath(Integer.toString(mMovieId))
+                            .build();
+
+                    Log.v("URI", uri.toString());
+
+                    switch (loaderId) {
+                        case FAVOURITE_LOADER_ID:
+                            return new CursorLoader(getApplicationContext(),
+                                    uri,
+                                    MOVIE_DETAILED_PROJECTION,
+                                    null,
+                                    null,
+                                    null);
+
+                        default:
+                            throw new RuntimeException("Loader Not Implemented: " + loaderId);
+                    }
+                }
+
+                @Override
+                public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+                    if (cursor != null && cursor.moveToFirst()) {
+                        //if (cursor == null) return;
+
+                        Log.v("LOAD FINISHED", "CURSOR HAS DATA");
+
+                        //cursor.moveToFirst();
+
+                        // Find the columns of movie attributes that we're interested in
+                        int movieIdColumnIndex = cursor.getColumnIndex(MovieDetailsEntry.COLUMN_MOVIE_ID);
+                        int backdropColumnIndex = cursor.getColumnIndex(MovieDetailsEntry.COLUMN_BACKDROP_PATH);
+                        int genresColumnIndex = cursor.getColumnIndex(MovieDetailsEntry.COLUMN_GENRES);
+                        int plotColumnIndex = cursor.getColumnIndex(MovieDetailsEntry.COLUMN_PLOT);
+                        int posterColumnIndex = cursor.getColumnIndex(MovieDetailsEntry.COLUMN_POSTER_PATH);
+                        int ratingsColumnIndex = cursor.getColumnIndex(MovieDetailsEntry.COLUMN_RATINGS);
+                        int releaseDateColumnIndex = cursor.getColumnIndex(MovieDetailsEntry.COLUMN_RELEASE_DATE);
+                        int titleColumnIndex = cursor.getColumnIndex(MovieDetailsEntry.COLUMN_TITLE);
+
+                        // Set the extracted value from the Cursor for the given column index and use each
+                        // value to create a Movie object
+                        mSelectedMovie = new Movie(
+                                cursor.getInt(movieIdColumnIndex),
+                                cursor.getDouble(ratingsColumnIndex),
+                                cursor.getString(titleColumnIndex),
+                                cursor.getString(posterColumnIndex),
+                                cursor.getString(backdropColumnIndex),
+                                cursor.getString(plotColumnIndex),
+                                cursor.getString(releaseDateColumnIndex),
+                                StringUtils.stringToIntArray(cursor.getString(genresColumnIndex))
+                        );
+                    }
+                }
+
+                @Override
+                public void onLoaderReset(Loader<Cursor> loader) {
+
                 }
             };
 
@@ -641,7 +788,7 @@ public class DetailsActivity extends AppCompatActivity implements VideoAdapter.L
         ContentValues values = new ContentValues();
         values.put(MovieDetailsEntry.COLUMN_MOVIE_ID, selectedMovie.getMovieId());
         values.put(MovieDetailsEntry.COLUMN_BACKDROP_PATH, selectedMovie.getBackdropPath());
-        values.put(MovieDetailsEntry.COLUMN_GENRES, movieGenreTextView.getText().toString());
+        values.put(MovieDetailsEntry.COLUMN_GENRES, StringUtils.intArrayToString(selectedMovie.getGenreIds()));
         values.put(MovieDetailsEntry.COLUMN_PLOT, selectedMovie.getOverview());
         values.put(MovieDetailsEntry.COLUMN_POSTER_PATH, selectedMovie.getPosterPath());
         values.put(MovieDetailsEntry.COLUMN_RATINGS, selectedMovie.getVoteAverage());
@@ -654,17 +801,41 @@ public class DetailsActivity extends AppCompatActivity implements VideoAdapter.L
         if (responseUri == null) {
             // If the new content URI is null, then there was an error with insertion.
             Toast.makeText(this,
-                    getString(R.string.movie_insert_failed),
+                    getString(R.string.favourite_insert_failed),
                     Toast.LENGTH_SHORT).show();
         } else {
-            Log.v("INSERT CONTACT", "CONTACT INSERTED IN " + MovieDetailsEntry.TABLE_NAME + " WITH URI: " + responseUri);
+            Log.v("INSERT MOVIE", "MOVIE INSERTED IN " + MovieDetailsEntry.TABLE_NAME + " WITH URI: " + responseUri);
             // Otherwise, the insertion was successful and we can display a toast.
             Toast.makeText(this,
-                    getString(R.string.movie_insert_successful),
+                    getString(R.string.favourite_insert_successful),
                     Toast.LENGTH_SHORT).show();
             DrawableCompat.setTint(item.getIcon(), ContextCompat.getColor(getApplicationContext(), R.color.colorHeart));
-            // TODO: Remember if heart is red or white
-            // TODO: Check content of insertion
         }
+    }
+
+    private void deleteFavourite(Movie mSelectedMovie, MenuItem item) {
+        int rowsDeleted = getContentResolver().delete(MovieDetailsEntry.CONTENT_URI,
+                MovieDetailsEntry.COLUMN_MOVIE_ID + " =?",
+                new String[]{String.valueOf(mSelectedMovie.getMovieId())});
+
+        // Show a toast message depending on whether or not the delete was successful.
+        if (rowsDeleted == 0) {
+            // If no rows were affected, then there was an error with the delete.
+            //DrawableCompat.setTint(item.getIcon(), ContextCompat.getColor(getApplicationContext(), R.color.colorHeart));
+            Toast.makeText(this, getString(R.string.favourite_delete_failed),
+                    Toast.LENGTH_SHORT).show();
+        } else {
+            // Otherwise, the delete was successful and we can display a toast.
+            DrawableCompat.setTint(item.getIcon(), ContextCompat.getColor(getApplicationContext(), R.color.colorWhite));
+            Toast.makeText(this, getString(R.string.favourite_delete_successful),
+                    Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    // just a test method
+    public void loadMyCursor(View v) {
+        Intent cursorActivity = new Intent(this, DetailsActivity.class);
+        cursorActivity.putExtra(MOVIE_ID, mSelectedMovie.getMovieId());
+        startActivity(cursorActivity);
     }
 }

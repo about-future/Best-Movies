@@ -47,6 +47,7 @@ public class CastAdapter extends RecyclerView.Adapter<CastAdapter.CastViewHolder
                 .into(holder.actorProfileImageView, new Callback() {
                     @Override
                     public void onSuccess() {
+                        // TODO: Error here on click and fast return to main activity
                         holder.actorProfileImageView.setContentDescription(
                                 mCast.get(pos).getActorName());
                     }

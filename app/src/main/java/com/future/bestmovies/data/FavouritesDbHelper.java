@@ -23,7 +23,7 @@ public class FavouritesDbHelper extends SQLiteOpenHelper {
                     MovieDetailsEntry.COLUMN_POSTER_PATH    + " TEXT, "                                 +
                     MovieDetailsEntry.COLUMN_RATINGS        + " REAL, "                                 +
                     MovieDetailsEntry.COLUMN_RELEASE_DATE   + " TEXT, "                                 +
-                    MovieDetailsEntry.COLUMN_TITLE          + " TEXT NOT NULL, "                       +
+                    MovieDetailsEntry.COLUMN_TITLE          + " TEXT NOT NULL, "                        +
                     /*
                     * To ensure this table can only contain one movie entry per with a movie_id,
                     * we declare the movie_id column to be unique. We also specify "ON CONFLICT REPLACE".
@@ -39,7 +39,7 @@ public class FavouritesDbHelper extends SQLiteOpenHelper {
     private static final String SQL_CREATE_CAST_TABLE =
             "CREATE TABLE " + CastEntry.TABLE_NAME          + " ("                                      +
                     CastEntry._ID                           + " INTEGER PRIMARY KEY AUTOINCREMENT, "    +
-                    CastEntry.COLUMN_MOVIE_ID               + " TEXT NOT NULL, "                        +
+                    CastEntry.COLUMN_MOVIE_ID               + " INTEGER NOT NULL, "                     +
                     CastEntry.COLUMN_ACTOR_NAME             + " TEXT, "                                 +
                     CastEntry.COLUMN_CHARACTER_NAME         + " TEXT, "                                 +
                     CastEntry.COLUMN_IMAGE_PROFILE_PATH     + " TEXT, "                                 +

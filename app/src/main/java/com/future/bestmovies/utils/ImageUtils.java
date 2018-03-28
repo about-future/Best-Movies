@@ -33,9 +33,9 @@ public class ImageUtils {
         // Get the image width, so we can build our image URL (i.e. 1280 or 500 or 342)
         int imageWidth = getImageWidth(context, imageType);
         // Create the image URL and return it
-        String imageUrl = IMAGES_BASE_URL.concat(String.valueOf(imageWidth)).concat(imagePath);
-        Log.v(TAG, "Image URL: " + imageUrl);
-        return imageUrl;
+        return IMAGES_BASE_URL.concat(String.valueOf(imageWidth)).concat(imagePath);
+        //Log.v(TAG, "Image URL: " + imageUrl);
+        //return imageUrl;
     }
 
     /* Return an image URL for each poster used in MainActivity's RecyclerView

@@ -70,7 +70,8 @@ public class MainActivity extends AppCompatActivity implements
 
         mMoviesRecyclerView.setLayoutManager(gridLayoutManager);
         mMoviesRecyclerView.setHasFixedSize(true);
-        mAdapter = new MovieAdapter(this, new ArrayList<Movie>(){}, this);
+        mAdapter = new MovieAdapter(this, new ArrayList<Movie>() {
+        }, this);
         mMoviesRecyclerView.setAdapter(mAdapter);
 
         // To create an infinite scrolling effect, we add an OnScrollListener to our RecyclerView
@@ -169,11 +170,31 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-
-        if (id == R.id.action_settings) {
-            startActivity(new Intent(this, SettingsActivity.class));
-            return true;
+        switch (item.getItemId()) {
+            case R.id.action_popular:
+                MoviePreferences.setPreferredQueryType(this, getString(R.string.pref_category_popular));
+                MoviePreferences.setLastPageNumber(this, 1);
+                getLoaderManager().restartLoader(MOVIES_LOADER_ID, null, this);
+                break;
+            case R.id.action_top_rated:
+                MoviePreferences.setPreferredQueryType(this, getString(R.string.pref_category_top_rated));
+                MoviePreferences.setLastPageNumber(this, 1);
+                getLoaderManager().restartLoader(MOVIES_LOADER_ID, null, this);
+                break;
+            case R.id.action_upcoming:
+                MoviePreferences.setPreferredQueryType(this, getString(R.string.pref_category_upcoming));
+                MoviePreferences.setLastPageNumber(this, 1);
+                getLoaderManager().restartLoader(MOVIES_LOADER_ID, null, this);
+                break;
+            case R.id.action_now_playing:
+                MoviePreferences.setPreferredQueryType(this, getString(R.string.pref_category_now_playing));
+                MoviePreferences.setLastPageNumber(this, 1);
+                getLoaderManager().restartLoader(MOVIES_LOADER_ID, null, this);
+                break;
+            default:
+                MoviePreferences.setPreferredQueryType(this, getString(R.string.pref_category_favourites));
+                MoviePreferences.setLastPageNumber(this, 1);
+                break;
         }
 
         return super.onOptionsItemSelected(item);
@@ -210,8 +231,7 @@ public class MainActivity extends AppCompatActivity implements
         // app for the first time. In this situation we swap the Movie array with the new data
         if (currentPage == 1) {
             mAdapter.swapMovies(movies);
-        }
-        else {
+        } else {
             // Otherwise, we add the new data to the old data, creating an infinite scrolling effect
             mAdapter.addMovies(movies);
         }
@@ -235,7 +255,8 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void onLoaderReset(Loader<ArrayList<Movie>> loader) {
         // If the loader is reset, swap old data with null ones
-        mAdapter.swapMovies(new ArrayList<Movie>(){});
+        mAdapter.swapMovies(new ArrayList<Movie>() {
+        });
     }
 
     // Hide the movie data and loading indicator and show error message

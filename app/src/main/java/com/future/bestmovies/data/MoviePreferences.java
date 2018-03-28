@@ -21,6 +21,14 @@ public class MoviePreferences {
         return sp.getString(movieCategoryKey, defaultCategory);
     }
 
+    public static void setPreferredQueryType(Context context, String category) {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor editor = sp.edit();
+        String movieCategoryKey = context.getString(R.string.pref_category_key);
+        editor.putString(movieCategoryKey, category);
+        editor.apply();
+    }
+
     public static int getLastPageNumber(Context context) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         String pageNumberKey = context.getString(R.string.pref_page_number_key);

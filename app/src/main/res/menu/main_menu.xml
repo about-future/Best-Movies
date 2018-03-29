@@ -2,13 +2,6 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <!--<item-->
-        <!--android:id="@+id/action_settings"-->
-        <!--android:title="@string/menu_settings"-->
-        <!--android:icon="@drawable/ic_more"-->
-        <!--android:orderInCategory="7"-->
-        <!--app:showAsAction="never"/>-->
-
     <item
         android:id="@+id/action_popular"
         android:title="@string/pref_category_label_popular"
@@ -37,6 +30,13 @@
         android:id="@+id/action_favourite_movies"
         android:title="@string/pref_category_label_favourites"
         android:orderInCategory="6"
+        app:showAsAction="never"/>
+
+    <item
+        android:id="@+id/action_settings"
+        android:title="@string/menu_settings"
+        android:icon="@drawable/ic_more"
+        android:orderInCategory="7"
         app:showAsAction="never"/>
 
 </menu>

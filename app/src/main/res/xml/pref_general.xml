@@ -5,13 +5,6 @@
     android:layout_height="match_parent">
 
     <ListPreference
-        android:defaultValue="@string/pref_category_popular"
-        android:entries="@array/pref_category_options"
-        android:entryValues="@array/pref_category_values"
-        android:key="@string/pref_category_key"
-        android:title="@string/pref_category_label" />
-
-    <ListPreference
         android:defaultValue="@string/pref_image_quality_optimal"
         android:entries="@array/pref_image_quality_options"
         android:entryValues="@array/pref_image_quality_values"

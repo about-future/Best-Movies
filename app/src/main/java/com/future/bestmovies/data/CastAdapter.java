@@ -37,27 +37,14 @@ public class CastAdapter extends RecyclerView.Adapter<CastAdapter.CastViewHolder
 
     @Override
     public void onBindViewHolder(@NonNull final CastAdapter.CastViewHolder holder, int position) {
-        final int pos = position;
+        //final int pos = position;
         Picasso.with(mContext)
                 .load(ImageUtils.buildImageUrl(
                         mContext,
                         mCast.get(position).getProfilePath(),
                         ImageUtils.CAST))
                 .error(R.drawable.ic_person)
-                .into(holder.actorProfileImageView, new Callback() {
-                    @Override
-                    public void onSuccess() {
-                        // TODO: Error here on click and fast return to main activity
-                        holder.actorProfileImageView.setContentDescription(
-                                mCast.get(pos).getActorName());
-                    }
-
-                    @Override
-                    public void onError() {
-                        holder.actorProfileImageView.setContentDescription(
-                                mContext.getString(R.string.no_profile_picture));
-                    }
-                });
+                .into(holder.actorProfileImageView);
 
         holder.actorNameTextView.setText(mCast.get(position).getActorName());
         //holder.characterTextView.setText(mCast.get(position).getCharacter());

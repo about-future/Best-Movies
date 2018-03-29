@@ -693,11 +693,9 @@ public class DetailsActivity extends AppCompatActivity implements VideoAdapter.L
         if (movieCast != null) {
             mCastAdapter.swapCast(movieCast);
 
-            // If our RecyclerView has is not position, we assume the first position in the list
-            // and set the RecyclerView a the beginning of our results
-            if (mCastPosition == RecyclerView.NO_POSITION) {
-                mCastPosition = 0;
-            }
+            // If the RecyclerView has no position, we assume the first position in the list
+            if (mCastPosition == RecyclerView.NO_POSITION) mCastPosition = 0;
+            // Scroll the RecyclerView to mCastPosition
             mCastRecyclerView.smoothScrollToPosition(mCastPosition);
 
             // If the movieCast has data
@@ -753,11 +751,9 @@ public class DetailsActivity extends AppCompatActivity implements VideoAdapter.L
         if (movieVideos != null) {
             mVideosAdapter.swapVideos(movieVideos);
 
-            // If our RecyclerView has is not position, we assume the first position in the list
-            // and set the RecyclerView a the beginning of our results
-            if (mVideosPosition == RecyclerView.NO_POSITION) {
-                mVideosPosition = 0;
-            }
+            // If the RecyclerView has no position, we assume the first position in the list
+            if (mVideosPosition == RecyclerView.NO_POSITION) mVideosPosition = 0;
+            // Scroll the RecyclerView to mVideoPosition
             mVideosRecyclerView.smoothScrollToPosition(mVideosPosition);
 
 
@@ -809,6 +805,7 @@ public class DetailsActivity extends AppCompatActivity implements VideoAdapter.L
                     getString(R.string.favourite_insert_successful),
                     Toast.LENGTH_SHORT).show();
             DrawableCompat.setTint(item.getIcon(), ContextCompat.getColor(getApplicationContext(), R.color.colorHeart));
+            mIsFavourite = true;
         }
     }
 
@@ -828,6 +825,7 @@ public class DetailsActivity extends AppCompatActivity implements VideoAdapter.L
             DrawableCompat.setTint(item.getIcon(), ContextCompat.getColor(getApplicationContext(), R.color.colorWhite));
             Toast.makeText(this, getString(R.string.favourite_delete_successful),
                     Toast.LENGTH_SHORT).show();
+            mIsFavourite = false;
         }
     }
 }

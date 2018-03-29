@@ -66,7 +66,7 @@
 
     <!-- Page number preference -->
     <string name="pref_page_number_key" translatable="false">page_number</string>
-    <string name="pref_page_number_default" translatable="false">1</string>
+    <string name="pref_page_number_default" translatable="false">0</string>
 
     <!-- Screen size width preference -->
     <string name="pref_image_width_key" translatable="false">image_width</string>

@@ -14,6 +14,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -23,7 +24,6 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.future.bestmovies.data.FavouritesContract;
 import com.future.bestmovies.data.Movie;
 import com.future.bestmovies.data.MovieAdapter;
 import com.future.bestmovies.data.MovieLoader;
@@ -31,7 +31,6 @@ import com.future.bestmovies.data.MoviePreferences;
 import com.future.bestmovies.utils.ImageUtils;
 import com.future.bestmovies.utils.NetworkUtils;
 import com.future.bestmovies.utils.ScreenUtils;
-import com.future.bestmovies.utils.StringUtils;
 
 import java.util.ArrayList;
 
@@ -44,9 +43,12 @@ public class MainActivity extends AppCompatActivity implements
     private static final String TAG = MainActivity.class.getSimpleName();
     private static final String MOVIES_CURSOR = "movies_cursor";
     private static final String MOVIES_LIST = "movies_list";
+    private static final String FAVOURITES = "favourites";
     private static final String MOVIE_POSITION = "movie_position";
+    private static final String CURRENT_LOADED_ID = "loader_id";
     private static final int MOVIES_LOADER_ID = 24;
     private static final int FAVOURITES_LOADER_ID = 516;
+    private int mCurrentLoaderId;
 
     public static final String[] FAVOURITES_MOVIE_PROJECTION = {
             MovieDetailsEntry.COLUMN_MOVIE_ID,
@@ -89,52 +91,55 @@ public class MainActivity extends AppCompatActivity implements
         }, this);
         mMoviesRecyclerView.setAdapter(mAdapter);
 
-        // TODO: check chosen category before checking savedInstanceState so the type of loader can be chosen
-        // Check for saved data or fetch movie list
-        if (savedInstanceState != null && savedInstanceState.containsKey(MOVIES_LIST)) {
-            mMovies = savedInstanceState.getParcelable(MOVIES_LIST);
-            // If mMovies is not null, data from server was previously fetched successfully
-            if (mMovies != null) {
-                // If mMovies is not empty, use the saved movies and repopulate the UI
-                if (!mMovies.isEmpty()) {
-                    mAdapter = new MovieAdapter(this, mMovies, this);
-                    mMoviesRecyclerView.setAdapter(mAdapter);
-                }
-                populateMovies(mMovies);
-            } else {
-                // Otherwise, there might be an error while accessing the server
-                // Check the connection and if connected try fetching movies again
-                fetchMovies(this);
-            }
-            if (savedInstanceState.containsKey(MOVIE_POSITION)) {
-                mPosition = savedInstanceState.getInt(MOVIE_POSITION);
-            }
-        } else {
-            // Otherwise, no previous data was saved before, so loader has to be initialised
-            fetchMovies(this);
+        // Check if preference "image_width" was create before, if not, proceed.
+        if (!MoviePreferences.isImageWidthAvailable(this)) {
+            // Create an image width preference for our RecyclerView
+            // This preference is very useful to our RecyclerView, so we can load all the images
+            // for the RecyclerView heaving the same width, perfect for the device we are using.
+            // We measure once and use it as many times we want.
+            MoviePreferences.setImageWidthForRecyclerView(
+                    this,
+                    ImageUtils.getImageWidth(this, ImageUtils.POSTER));
         }
 
+        // Every time we create this activity we set the page number of our results to be 0
+        MoviePreferences.setLastPageNumber(this, 0);
 
-//        if (mPosition == RecyclerView.NO_POSITION) {
-//            mPosition = 0;
-//        }
-//        mMoviesRecyclerView.smoothScrollToPosition(mPosition);
+        // Check chosen category
+        if (savedInstanceState != null && savedInstanceState.containsKey(CURRENT_LOADED_ID)) {
+            mCurrentLoaderId = savedInstanceState.getInt(CURRENT_LOADED_ID);
+            Log.v ("SAVED INSTANCE", "CURRENT LOADER: " + String.valueOf(mCurrentLoaderId));
+            if (mCurrentLoaderId == FAVOURITES_LOADER_ID) {
+                getLoaderManager().restartLoader(FAVOURITES_LOADER_ID, null, favouriteMoviesLoaderListener);
+            } else {
+                fetchMovies(this);
+                //getLoaderManager().restartLoader(MOVIES_LOADER_ID, null, moviesLoaderListener);
+            }
+        } else {
+            Log.v ("NO INSTANCE SAVE", "CURRENT LOADER: " + String.valueOf(mCurrentLoaderId));
+            MoviePreferences.setPreferredQueryType(this, getString(R.string.pref_category_popular));
+            fetchMovies(this);
+            //MoviePreferences.setLastPageNumber(this, 1);
+            //getLoaderManager().initLoader(MOVIES_LOADER_ID, null, moviesLoaderListener);
+            //currentLoaderId = MOVIES_LOADER_ID;
+        }
 
-        // If mMovie has data, add an OnScrollListener to our RecyclerView and create an infinite scrolling effect
-        if (mMovies != null && !mMovies.isEmpty()) {
-            mMoviesRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-                @Override
-                public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
-                    super.onScrollStateChanged(recyclerView, newState);
-                    if (newState == AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL) {
-                        isScrolling = true;
-                    }
+        // To create an infinite scrolling effect, we add an OnScrollListener to our RecyclerView
+        mMoviesRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+                if (newState == AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL) {
+                    isScrolling = true;
                 }
+            }
 
-                @Override
-                public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-                    super.onScrolled(recyclerView, dx, dy);
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
 
+                // This scroll listener will be used only if the selected category is not favourites
+                if (!TextUtils.equals(MoviePreferences.getPreferredQueryType(getApplicationContext()), FAVOURITES)) {
                     // To be able to load data in advance, before the user gets to the bottom of our
                     // present results, we have to know how many items are visible on the screen, how
                     // many items are in total and how many items are already scrolled out of the screen
@@ -142,45 +147,41 @@ public class MainActivity extends AppCompatActivity implements
                     totalItems = mGridLayoutManager.getItemCount();
                     scrolledUpItems = mGridLayoutManager.findFirstVisibleItemPosition();
 
-                    // We set a threshold, to help us know that the use is about to get to the end of
+                    // We set a threshold, to help us know that the user is about to get to the end of
                     // the list.
-                    //int threshold = 5;
+                    int threshold = 5;
 
                     // If the user is still scrolling and the the Threshold is bigger or equal with the
                     // totalItems - visibleItems - scrolledUpItems, we know we have to load new Movies
-                    if (isScrolling && (visibleItems + scrolledUpItems == totalItems)) {
+                    if (isScrolling && (threshold >= totalItems - visibleItems - scrolledUpItems)) {
                         isScrolling = false;
                         Log.v(TAG, "Load new movies!");
-                        loadNewMovies();
+                        //loadNewMovies();
                     }
                 }
-            });
-        }
-
-//        // Check if preference "image_width" was create before, if not, proceed.
-//        if (!MoviePreferences.isImageWidthAvailable(this)) {
-//            // Create an image width preference for our RecyclerView
-//            // This preference is very useful to our RecyclerView, so we can download all the images
-//            // for the RecyclerView heaving the same width, perfect for the device we are using.
-//            // We measure once and use it as many times we want.
-//            MoviePreferences.setImageWidthForRecyclerView(
-//                    this,
-//                    ImageUtils.getImageWidth(this, ImageUtils.POSTER));
-//        }
-
-        // Every time we create this activity we set the page number of our results to be 0
-        MoviePreferences.setLastPageNumber(this, 1);
-
-        // If there is a network connection, fetch data
-        //fetchDataIfConnected(this);
+            }
+        });
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        outState.putParcelableArrayList(MOVIES_LIST, mMovies);
-        outState.putInt(MOVIE_POSITION, mGridLayoutManager.findFirstCompletelyVisibleItemPosition());
+        outState.putInt(CURRENT_LOADED_ID, mCurrentLoaderId);
+        Log.v ("ON INSTANCE SAVE", "CURRENT LOADER: " + String.valueOf(mCurrentLoaderId));
+        //outState.putInt(MOVIE_POSITION, mGridLayoutManager.findFirstCompletelyVisibleItemPosition());
 
         super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        if (savedInstanceState != null) {
+            mCurrentLoaderId = savedInstanceState.getInt(CURRENT_LOADED_ID);
+            if (mCurrentLoaderId == FAVOURITES_LOADER_ID)
+                getLoaderManager().initLoader(mCurrentLoaderId, null, favouriteMoviesLoaderListener);
+            else
+                getLoaderManager().initLoader(mCurrentLoaderId, null, moviesLoaderListener);
+        }
+        super.onRestoreInstanceState(savedInstanceState);
     }
 
     private void loadNewMovies() {
@@ -198,21 +199,14 @@ public class MainActivity extends AppCompatActivity implements
     private void fetchMovies(Context context) {
         // If there is a network connection, fetch data
         if (NetworkUtils.isConnected(context)) {
-            if (mMovies != null && !mMovies.isEmpty()) {
-                // Before we fetch data, we need the last page number that was loaded in our RecyclerView,
-                // increment it by 1 and save it in a preference for next data fetching
-                int nextPage = MoviePreferences.getLastPageNumber(context) + 1;
-                MoviePreferences.setLastPageNumber(context, nextPage);
-                //Init or restart loader
-                getLoaderManager().restartLoader(MOVIES_LOADER_ID, null, moviesLoaderListener);
-            } else if (mMoviesCursor != null && mMoviesCursor.getCount() > 0) {
-                getSupportLoaderManager().restartLoader(FAVOURITES_LOADER_ID, null, favouriteMoviesLoaderListener);
-            } else {
-                int nextPage = MoviePreferences.getLastPageNumber(context) + 1;
-                MoviePreferences.setLastPageNumber(context, nextPage);
-                //Init or restart loader
-                getLoaderManager().restartLoader(MOVIES_LOADER_ID, null, moviesLoaderListener);
-            }
+            // Before we fetch data, we need the last page number that was loaded in our RecyclerView,
+            // increment it by 1 and save it in a preference for next data fetching
+            int nextPage = MoviePreferences.getLastPageNumber(context) + 1;
+            MoviePreferences.setLastPageNumber(context, nextPage);
+            //Init or restart loader
+            getLoaderManager().restartLoader(MOVIES_LOADER_ID, null, moviesLoaderListener);
+            mCurrentLoaderId = MOVIES_LOADER_ID;
+            Log.v ("FETCH MOVIES", "CURRENT LOADER: " + String.valueOf(mCurrentLoaderId));
         } else {
             // Otherwise, hide loading indicator, hide data and display connection error message
             showError();
@@ -237,26 +231,30 @@ public class MainActivity extends AppCompatActivity implements
                 MoviePreferences.setPreferredQueryType(this, getString(R.string.pref_category_popular));
                 MoviePreferences.setLastPageNumber(this, 1);
                 getLoaderManager().restartLoader(MOVIES_LOADER_ID, null, moviesLoaderListener);
+                mCurrentLoaderId = MOVIES_LOADER_ID;
                 break;
             case R.id.action_top_rated:
                 MoviePreferences.setPreferredQueryType(this, getString(R.string.pref_category_top_rated));
                 MoviePreferences.setLastPageNumber(this, 1);
                 getLoaderManager().restartLoader(MOVIES_LOADER_ID, null, moviesLoaderListener);
+                mCurrentLoaderId = MOVIES_LOADER_ID;
                 break;
             case R.id.action_upcoming:
                 MoviePreferences.setPreferredQueryType(this, getString(R.string.pref_category_upcoming));
                 MoviePreferences.setLastPageNumber(this, 1);
                 getLoaderManager().restartLoader(MOVIES_LOADER_ID, null, moviesLoaderListener);
+                mCurrentLoaderId = MOVIES_LOADER_ID;
                 break;
             case R.id.action_now_playing:
                 MoviePreferences.setPreferredQueryType(this, getString(R.string.pref_category_now_playing));
                 MoviePreferences.setLastPageNumber(this, 1);
                 getLoaderManager().restartLoader(MOVIES_LOADER_ID, null, moviesLoaderListener);
+                mCurrentLoaderId = MOVIES_LOADER_ID;
                 break;
             default:
                 MoviePreferences.setPreferredQueryType(this, getString(R.string.pref_category_favourites));
-                MoviePreferences.setLastPageNumber(this, 1);
-                getSupportLoaderManager().restartLoader(FAVOURITES_LOADER_ID, null, favouriteMoviesLoaderListener);
+                getLoaderManager().restartLoader(FAVOURITES_LOADER_ID, null, favouriteMoviesLoaderListener);
+                mCurrentLoaderId = FAVOURITES_LOADER_ID;
                 break;
         }
 
@@ -296,6 +294,7 @@ public class MainActivity extends AppCompatActivity implements
                     switch (loaderId) {
                         case MOVIES_LOADER_ID:
                             // If the loaded id matches ours, return a new movie loader
+                            Log.v ("MOVIE LOADER", "CURRENT LOADER: " + String.valueOf(mCurrentLoaderId));
                             return new MovieLoader(getApplicationContext());
                         default:
                             throw new RuntimeException("Loader Not Implemented: " + loaderId);
@@ -304,33 +303,26 @@ public class MainActivity extends AppCompatActivity implements
 
                 @Override
                 public void onLoadFinished(Loader<ArrayList<Movie>> loader, ArrayList<Movie> movies) {
-                    mMovies = movies;
-                    populateMovies(movies);
+                    // Every time we get new results we have 2 possibilities
+                    int currentPage = MoviePreferences.getLastPageNumber(getApplicationContext());
+                    // If currentPage is "0" or "1", we know that the user has changed the movie category or uses the
+                    // app for the first time. In this situation we swap the Movie array with the new data
+                    if (currentPage == 0 || currentPage == 1) {
+                        mAdapter.swapMovies(movies);
+                    } else {
+                        // Otherwise, we add the new data to the old data, creating an infinite scrolling effect
+                        mAdapter.addMovies(movies);
+                    }
 
-//                    // Every time we get new results we have 2 possibilities
-//                    int currentPage = MoviePreferences.getLastPageNumber(getApplicationContext());
-//                    // If currentPage is "1", we know that the user has changed the movie category or uses the
-//                    // app for the first time. In this situation we swap the Movie array with the new data
-//                    if (currentPage == 1) {
-//                        mAdapter.swapMovies(movies);
-//                    } else {
-//                        // Otherwise, we add the new data to the old data, creating an infinite scrolling effect
-//                        mAdapter.addMovies(movies);
-//                    }
-//
-//                    // If our RecyclerView has is not position, we assume the first position in the list
-//                    // and set the RecyclerView a the beginning of our results
-//                    if (mPosition == RecyclerView.NO_POSITION) {
-//                        mPosition = 0;
-//                        mMoviesRecyclerView.smoothScrollToPosition(mPosition);
-//                    }
-//
-//                    // If new data is available
-//                    if (movies.size() != 0) {
-//                        // Hide progress bar
-//                        mLoading.setVisibility(View.GONE);
-//                        // Set the text for mMovieCategory as the selected category
-//                    }
+                    // If the RecyclerView has no position, we assume the first position in the list
+                    // and set the RecyclerView at the beginning of results
+                    if (mPosition == RecyclerView.NO_POSITION) {
+                        mPosition = 0;
+                        mMoviesRecyclerView.smoothScrollToPosition(mPosition);
+                    }
+
+                    // If new data is available, hide progress bar
+                    if (movies != null && movies.size() != 0) mLoading.setVisibility(View.GONE);
                 }
 
                 @Override
@@ -341,10 +333,10 @@ public class MainActivity extends AppCompatActivity implements
                 }
             };
 
-    private android.support.v4.app.LoaderManager.LoaderCallbacks<Cursor> favouriteMoviesLoaderListener =
-            new android.support.v4.app.LoaderManager.LoaderCallbacks<Cursor>() {
+    private LoaderManager.LoaderCallbacks<Cursor> favouriteMoviesLoaderListener =
+            new LoaderManager.LoaderCallbacks<Cursor>() {
                 @Override
-                public android.support.v4.content.Loader<Cursor> onCreateLoader(int loaderId, Bundle bundle) {
+                public Loader<Cursor> onCreateLoader(int loaderId, Bundle bundle) {
 
                     Uri uri = MovieDetailsEntry.CONTENT_URI;
 
@@ -352,7 +344,7 @@ public class MainActivity extends AppCompatActivity implements
 
                     switch (loaderId) {
                         case FAVOURITES_LOADER_ID:
-                            return new android.support.v4.content.CursorLoader(
+                            return new CursorLoader(
                                     getApplicationContext(),
                                     uri,
                                     FAVOURITES_MOVIE_PROJECTION,
@@ -366,28 +358,22 @@ public class MainActivity extends AppCompatActivity implements
                 }
 
                 @Override
-                public void onLoadFinished(@NonNull android.support.v4.content.Loader<Cursor> loader, Cursor moviesCursor) {
-                    mMoviesCursor = moviesCursor;
-                    mMovies = null;
+                public void onLoadFinished(@NonNull Loader<Cursor> loader, Cursor moviesCursor) {
+                    //mMoviesCursor = moviesCursor;
+                    // mMovies = null;
                     mAdapter.swapCursor(moviesCursor);
 
-                    // If our RecyclerView has is not position, we assume the first position
-                    // and set the RecyclerView a the beginning of our results
-                    if (mPosition == RecyclerView.NO_POSITION) {
-                        mPosition = 0;
-                    }
-                    mMoviesRecyclerView.smoothScrollToPosition(mPosition);
+                    // If the RecyclerView has no position, we assume the first position in the list
+                    //if (mPosition == RecyclerView.NO_POSITION) mPosition = 0;
+                    // Scroll the RecyclerView to mPosition
+                    //mMoviesRecyclerView.smoothScrollToPosition(mPosition);
 
-
-                    // If new data is available
-                    if (moviesCursor.getCount() != 0) {
-                        // Hide progress bar
-                        mLoading.setVisibility(View.GONE);
-                    }
+                    // If new data is available, hide progress bar
+                    if (moviesCursor.getCount() != 0) mLoading.setVisibility(View.GONE);
                 }
 
                 @Override
-                public void onLoaderReset(@NonNull android.support.v4.content.Loader<Cursor> loader) {
+                public void onLoaderReset(@NonNull Loader<Cursor> loader) {
                     mAdapter.swapCursor(null);
                 }
             };
@@ -395,19 +381,24 @@ public class MainActivity extends AppCompatActivity implements
     private void populateMovies(ArrayList<Movie> movies) {
         // Every time we get new results we have 2 possibilities
         int currentPage = MoviePreferences.getLastPageNumber(getApplicationContext());
-        // If currentPage is "1", we know that the user has changed the movie category or uses the
+        // If currentPage is "0" or "1", we know that the user has changed the movie category or uses the
         // app for the first time. In this situation we swap the Movie array with the new data
-        if (currentPage == 1) {
+        if (currentPage == 0 || currentPage == 1) {
+            mAdapter = new MovieAdapter(this, new ArrayList<Movie>() {
+            }, this);
+            mMoviesRecyclerView.setAdapter(mAdapter);
             mAdapter.swapMovies(movies);
         } else {
             // Otherwise, we add the new data to the old data, creating an infinite scrolling effect
             mAdapter.addMovies(movies);
         }
 
-        // If our RecyclerView has is not position, we assume the first position in the list
-        // and set the RecyclerView a the beginning of our results
-        if (mPosition == RecyclerView.NO_POSITION) mPosition = 0;
-        mMoviesRecyclerView.smoothScrollToPosition(mPosition);
+        // If the RecyclerView has no position, we assume the first position in the list
+        // and set the RecyclerView at the beginning of results
+        if (mPosition == RecyclerView.NO_POSITION) {
+            mPosition = 0;
+            mMoviesRecyclerView.smoothScrollToPosition(mPosition);
+        }
 
         // If new data is available, hide progress bar
         if (movies.size() != 0) mLoading.setVisibility(View.GONE);

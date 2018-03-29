@@ -142,7 +142,7 @@ public class MainActivity extends AppCompatActivity implements
                     if (isScrolling && (threshold >= totalItems - visibleItems - scrolledUpItems)) {
                         isScrolling = false;
                         Log.v(TAG, "Load new movies!");
-                        //loadNewMovies();
+                        loadNewMovies();
                     }
                 }
             }
@@ -302,13 +302,17 @@ public class MainActivity extends AppCompatActivity implements
     @SuppressWarnings({"unchecked"})
     @Override
     public void onLoadFinished(@NonNull Loader loader, Object data) {
+        if (data != null) {
+            mLoading.setVisibility(View.GONE);
+        }
+
         switch (loader.getId()) {
             case MOVIES_LOADER_ID:
                 // Every time we get new results we have 2 possibilities
                 int currentPage = MoviePreferences.getLastPageNumber(getApplicationContext());
-                // If currentPage is "0" or "1", we know that the user has changed the movie category or uses the
+                // If currentPage is "1", we know that the user has changed the movie category or uses the
                 // app for the first time. In this situation we swap the Movie array with the new data
-                if (currentPage == 0 || currentPage == 1) {
+                if (currentPage == 1) {
                     mAdapter.swapMovies((ArrayList<Movie>) data);
                 } else {
                     // Otherwise, we add the new data to the old data, creating an infinite scrolling effect
@@ -322,10 +326,8 @@ public class MainActivity extends AppCompatActivity implements
                     mMoviesRecyclerView.smoothScrollToPosition(mPosition);
                 }
 
-                // If new data is available, hide progress bar
-                if ((ArrayList<Movie>) data != null && ((ArrayList<Movie>) data).size() != 0)
-                    mLoading.setVisibility(View.GONE);
                 break;
+
             case FAVOURITES_LOADER_ID:
                 mAdapter.swapCursor((Cursor) data);
 
@@ -334,9 +336,8 @@ public class MainActivity extends AppCompatActivity implements
                 // Scroll the RecyclerView to mPosition
                 //mMoviesRecyclerView.smoothScrollToPosition(mPosition);
 
-                // If new data is available, hide progress bar
-                if (((Cursor) data).getCount() != 0) mLoading.setVisibility(View.GONE);
                 break;
+
             default:
                 break;
         }
@@ -345,9 +346,6 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void onLoaderReset(@NonNull Loader loader) {
         switch (loader.getId()) {
-            case MOVIES_LOADER_ID:
-                mAdapter.swapMovies(new ArrayList<Movie>());
-                break;
             case FAVOURITES_LOADER_ID:
                 mAdapter.swapCursor(null);
                 break;

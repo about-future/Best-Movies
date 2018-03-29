@@ -4,6 +4,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -70,17 +71,20 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
 
     // This method swaps the old movie result with the newly loaded ones and notify the change
     public void swapMovies(ArrayList<Movie> newMovies) {
+        Log.v ("MOVIE ADAPTER", "SWAP MOVIES");
         mMovies = newMovies;
         notifyDataSetChanged();
     }
 
     // Add to the existing movie list the new movies and notify the change
     public void addMovies(ArrayList<Movie> newMovies) {
+        Log.v ("MOVIE ADAPTER", "ADD MOVIES");
         mMovies.addAll(newMovies);
         notifyDataSetChanged();
     }
 
     public void swapCursor(Cursor newCursor) {
+        Log.v ("MOVIE ADAPTER", "SWAP CURSOR");
         mMoviesCursor = newCursor;
         notifyDataSetChanged();
     }
@@ -98,11 +102,11 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
         public void onClick(View view) {
             // Find the position of the movie that was clicked and pass the movie object from that
             // position to the listener
-            int clickedPosition = getAdapterPosition();
-            if (mMoviesCursor == null)
-                mOnclickListener.onGridItemClick(mMovies.get(clickedPosition), 0);
+            int adapterPosition = getAdapterPosition();
+            if (mMovies != null && mMoviesCursor == null)
+                mOnclickListener.onGridItemClick(mMovies.get(adapterPosition), 0);
             else {
-                mMoviesCursor.moveToPosition(clickedPosition);
+                mMoviesCursor.moveToPosition(adapterPosition);
                 int movieId = mMoviesCursor.getInt(mMoviesCursor.getColumnIndex(MovieDetailsEntry.COLUMN_MOVIE_ID));
                 mOnclickListener.onGridItemClick(null, movieId);
             }

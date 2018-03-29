@@ -4,39 +4,39 @@
 
     <item
         android:id="@+id/action_popular"
-        android:title="@string/pref_category_label_popular"
         android:orderInCategory="2"
-        app:showAsAction="never"/>
+        android:title="@string/pref_category_label_popular"
+        app:showAsAction="never" />
 
     <item
         android:id="@+id/action_top_rated"
-        android:title="@string/pref_category_label_top_rated"
         android:orderInCategory="3"
-        app:showAsAction="never"/>
+        android:title="@string/pref_category_label_top_rated"
+        app:showAsAction="never" />
 
     <item
         android:id="@+id/action_upcoming"
-        android:title="@string/pref_category_label_upcoming"
         android:orderInCategory="4"
-        app:showAsAction="never"/>
+        android:title="@string/pref_category_label_upcoming"
+        app:showAsAction="never" />
 
     <item
         android:id="@+id/action_now_playing"
-        android:title="@string/pref_category_label_now_playing"
         android:orderInCategory="5"
-        app:showAsAction="never"/>
+        android:title="@string/pref_category_label_now_playing"
+        app:showAsAction="never" />
 
     <item
         android:id="@+id/action_favourite_movies"
-        android:title="@string/pref_category_label_favourites"
         android:orderInCategory="6"
-        app:showAsAction="never"/>
+        android:title="@string/pref_category_label_favourites"
+        app:showAsAction="never" />
 
     <item
         android:id="@+id/action_settings"
-        android:title="@string/menu_settings"
         android:icon="@drawable/ic_more"
         android:orderInCategory="7"
-        app:showAsAction="never"/>
+        android:title="@string/menu_settings"
+        app:showAsAction="never" />
 
 </menu>

@@ -17,7 +17,7 @@ public class MoviePreferences {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         String movieCategoryKey = context.getString(R.string.pref_category_key);
         String defaultCategory = context.getString(R.string.pref_category_popular);
-        Log.v(TAG, "getQueryType: " + sp.getString(movieCategoryKey, defaultCategory));
+        //Log.v(TAG, "getQueryType: " + sp.getString(movieCategoryKey, defaultCategory));
         return sp.getString(movieCategoryKey, defaultCategory);
     }
 
@@ -50,7 +50,7 @@ public class MoviePreferences {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = sp.edit();
         String imageWidthKey = context.getString(R.string.pref_image_width_key);
-        Log.v(TAG, "setImageSizeForRecyclerView: " + imageWidth);
+        //Log.v(TAG, "setImageSizeForRecyclerView: " + imageWidth);
         editor.putInt(imageWidthKey, imageWidth);
         editor.apply();
     }

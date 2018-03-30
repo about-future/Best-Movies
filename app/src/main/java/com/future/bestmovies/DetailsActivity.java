@@ -112,6 +112,7 @@ public class DetailsActivity extends AppCompatActivity implements VideoAdapter.L
     private ImageView mNoVideosImageView;
 
     private boolean mIsFavourite;
+    private Toast mToast;
 
 
     @Override
@@ -425,7 +426,7 @@ public class DetailsActivity extends AppCompatActivity implements VideoAdapter.L
 
     private void closeOnError() {
         finish();
-        Toast.makeText(this, R.string.details_error_message, Toast.LENGTH_SHORT).show();
+        toastThis(getString(R.string.details_error_message));
     }
 
     @Override
@@ -795,16 +796,12 @@ public class DetailsActivity extends AppCompatActivity implements VideoAdapter.L
         // Show a toast message depending on whether or not the insertion was successful
         if (responseUri == null) {
             // If the new content URI is null, then there was an error with insertion.
-            Toast.makeText(this,
-                    getString(R.string.favourite_insert_failed),
-                    Toast.LENGTH_SHORT).show();
+            DrawableCompat.setTint(item.getIcon(), ContextCompat.getColor(getApplicationContext(), R.color.colorWhite));
+            toastThis(getString(R.string.favourite_insert_failed));
         } else {
-            Log.v("INSERT MOVIE", "MOVIE INSERTED IN " + MovieDetailsEntry.TABLE_NAME + " WITH URI: " + responseUri);
             // Otherwise, the insertion was successful and we can display a toast.
-            Toast.makeText(this,
-                    getString(R.string.favourite_insert_successful),
-                    Toast.LENGTH_SHORT).show();
             DrawableCompat.setTint(item.getIcon(), ContextCompat.getColor(getApplicationContext(), R.color.colorHeart));
+            toastThis(getString(R.string.favourite_insert_successful));
             mIsFavourite = true;
         }
     }
@@ -817,15 +814,19 @@ public class DetailsActivity extends AppCompatActivity implements VideoAdapter.L
         // Show a toast message depending on whether or not the delete was successful.
         if (rowsDeleted == 0) {
             // If no rows were affected, then there was an error with the delete.
-            //DrawableCompat.setTint(item.getIcon(), ContextCompat.getColor(getApplicationContext(), R.color.colorHeart));
-            Toast.makeText(this, getString(R.string.favourite_delete_failed),
-                    Toast.LENGTH_SHORT).show();
+            DrawableCompat.setTint(item.getIcon(), ContextCompat.getColor(getApplicationContext(), R.color.colorHeart));
+            toastThis(getString(R.string.favourite_delete_failed));
         } else {
             // Otherwise, the delete was successful and we can display a toast.
             DrawableCompat.setTint(item.getIcon(), ContextCompat.getColor(getApplicationContext(), R.color.colorWhite));
-            Toast.makeText(this, getString(R.string.favourite_delete_successful),
-                    Toast.LENGTH_SHORT).show();
+            toastThis(getString(R.string.favourite_delete_successful));
             mIsFavourite = false;
         }
+    }
+
+    public void toastThis (String toastMessage) {
+        if (mToast != null) mToast.cancel();
+        mToast = Toast.makeText(this, toastMessage, Toast.LENGTH_LONG);
+        mToast.show();
     }
 }

@@ -71,20 +71,17 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
 
     // This method swaps the old movie result with the newly loaded ones and notify the change
     public void swapMovies(ArrayList<Movie> newMovies) {
-        Log.v ("MOVIE ADAPTER", "SWAP MOVIES");
         mMovies = newMovies;
         notifyDataSetChanged();
     }
 
     // Add to the existing movie list the new movies and notify the change
     public void addMovies(ArrayList<Movie> newMovies) {
-        Log.v ("MOVIE ADAPTER", "ADD MOVIES");
         mMovies.addAll(newMovies);
         notifyDataSetChanged();
     }
 
     public void swapCursor(Cursor newCursor) {
-        Log.v ("MOVIE ADAPTER", "SWAP CURSOR");
         mMoviesCursor = newCursor;
         notifyDataSetChanged();
     }

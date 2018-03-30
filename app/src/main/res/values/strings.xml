@@ -60,6 +60,7 @@
     <string name="no_cast">No cast available</string>
     <string name="no_reviews">No reviews available</string>
     <string name="no_videos">No videos available</string>
+    <string name="no_favourites">I\'m a favourite movie list\nand I feel so empty&#8230;</string>
 
     <!-- Toast messages -->
     <string name="favourite_insert_successful">Movie added to favourites</string>

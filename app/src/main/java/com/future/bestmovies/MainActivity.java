@@ -41,10 +41,7 @@ public class MainActivity extends AppCompatActivity implements
         MovieAdapter.GridItemClickListener, LoaderManager.LoaderCallbacks {
 
     private static final String TAG = MainActivity.class.getSimpleName();
-    private static final String MOVIES_CURSOR = "movies_cursor";
-    private static final String MOVIES_LIST = "movies_list";
-
-    private static final String MOVIE_POSITION = "movie_position";
+    private static final String TITLE = "title";
 
     // Movie categories
     private static final String CATEGORY_POPULAR = "popular";
@@ -59,11 +56,12 @@ public class MainActivity extends AppCompatActivity implements
     private static final String CURRENT_LOADED_ID = "loader_id";
     private int mCurrentLoaderId;
 
-
+    // Cursor projection
     public static final String[] FAVOURITES_MOVIE_PROJECTION = {
             MovieDetailsEntry.COLUMN_MOVIE_ID,
             MovieDetailsEntry.COLUMN_POSTER_PATH
     };
+
 
     private MovieAdapter mAdapter;
     private RecyclerView mMoviesRecyclerView;
@@ -71,8 +69,9 @@ public class MainActivity extends AppCompatActivity implements
     private TextView mMessagesTextView;
     private ImageView mCloudImageView;
     private ProgressBar mLoading;
-
     private int mPosition = RecyclerView.NO_POSITION;
+
+    // Infinite scrolling variables
     private boolean isScrolling = false;
     private int visibleItems;
     private int totalItems;
@@ -114,8 +113,8 @@ public class MainActivity extends AppCompatActivity implements
 
         // Check chosen category
         if (savedInstanceState == null) {
-            Log.v("NO INSTANCE SAVED", "CURRENT LOADER: " + String.valueOf(mCurrentLoaderId));
             MoviePreferences.setPreferredQueryType(this, getString(R.string.category_popular));
+            setTitle(R.string.menu_popular);
             mCurrentLoaderId = MOVIES_LOADER_ID;
             fetchMovies(this);
         }
@@ -162,19 +161,18 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void onSaveInstanceState(Bundle outState) {
         outState.putInt(CURRENT_LOADED_ID, mCurrentLoaderId);
-        Log.v("ON INSTANCE SAVE", "CURRENT LOADER: " + String.valueOf(mCurrentLoaderId));
-        //outState.putInt(MOVIE_POSITION, mGridLayoutManager.findFirstCompletelyVisibleItemPosition());
-
+        outState.putString(TITLE, getTitle().toString());
         super.onSaveInstanceState(outState);
     }
 
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        if (savedInstanceState != null && savedInstanceState.containsKey(CURRENT_LOADED_ID)) {
-            mCurrentLoaderId = savedInstanceState.getInt(CURRENT_LOADED_ID);
-            fetchMovies(this);
-
-            Log.v("ON RESTORED INSTANCE", "CURRENT LOADER: " + String.valueOf(mCurrentLoaderId));
+        if (savedInstanceState != null) {
+            if (savedInstanceState.containsKey(CURRENT_LOADED_ID)) {
+                mCurrentLoaderId = savedInstanceState.getInt(CURRENT_LOADED_ID);
+                fetchMovies(this);
+            }
+            if (savedInstanceState.containsKey(TITLE)) setTitle(savedInstanceState.getString(TITLE));
         }
         super.onRestoreInstanceState(savedInstanceState);
     }
@@ -199,7 +197,6 @@ public class MainActivity extends AppCompatActivity implements
             int nextPage = MoviePreferences.getLastPageNumber(context) + 1;
             MoviePreferences.setLastPageNumber(context, nextPage);
             //Init or restart loader
-            Log.v("FETCH MOVIES", "CURRENT LOADER: " + String.valueOf(mCurrentLoaderId));
             getSupportLoaderManager().restartLoader(mCurrentLoaderId, null, this);
         } else {
             // Otherwise, hide loading indicator, hide data and display connection error message
@@ -256,6 +253,7 @@ public class MainActivity extends AppCompatActivity implements
                 getSupportLoaderManager().destroyLoader(FAVOURITES_LOADER_ID);
                 mCurrentLoaderId = MOVIES_LOADER_ID;
                 getSupportLoaderManager().restartLoader(mCurrentLoaderId, null, this);
+                setTitle(item.getTitle());
                 invalidateOptionsMenu();
                 break;
 
@@ -265,6 +263,7 @@ public class MainActivity extends AppCompatActivity implements
                 getSupportLoaderManager().destroyLoader(FAVOURITES_LOADER_ID);
                 mCurrentLoaderId = MOVIES_LOADER_ID;
                 getSupportLoaderManager().restartLoader(mCurrentLoaderId, null, this);
+                setTitle(item.getTitle());
                 invalidateOptionsMenu();
                 break;
 
@@ -274,6 +273,7 @@ public class MainActivity extends AppCompatActivity implements
                 getSupportLoaderManager().destroyLoader(FAVOURITES_LOADER_ID);
                 mCurrentLoaderId = MOVIES_LOADER_ID;
                 getSupportLoaderManager().restartLoader(mCurrentLoaderId, null, this);
+                setTitle(item.getTitle());
                 invalidateOptionsMenu();
                 break;
 
@@ -283,6 +283,7 @@ public class MainActivity extends AppCompatActivity implements
                 getSupportLoaderManager().destroyLoader(FAVOURITES_LOADER_ID);
                 mCurrentLoaderId = MOVIES_LOADER_ID;
                 getSupportLoaderManager().restartLoader(mCurrentLoaderId, null, this);
+                setTitle(item.getTitle());
                 invalidateOptionsMenu();
                 break;
 
@@ -291,6 +292,7 @@ public class MainActivity extends AppCompatActivity implements
                 getSupportLoaderManager().destroyLoader(MOVIES_LOADER_ID);
                 mCurrentLoaderId = FAVOURITES_LOADER_ID;
                 getSupportLoaderManager().restartLoader(mCurrentLoaderId, null, this);
+                setTitle(item.getTitle());
                 invalidateOptionsMenu();
                 break;
 
@@ -318,7 +320,7 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
-    // TODO: no favourites case and share info
+    // TODO: share info, save video and reviews, cast activity, cast click listener
 
     // Hide the movie data and loading indicator and show error message
     private void showError() {
@@ -362,6 +364,9 @@ public class MainActivity extends AppCompatActivity implements
 
         switch (loader.getId()) {
             case MOVIES_LOADER_ID:
+                mCloudImageView.setVisibility(View.INVISIBLE);
+                mMessagesTextView.setVisibility(View.INVISIBLE);
+
                 // Every time we get new results we have 2 possibilities
                 int currentPage = MoviePreferences.getLastPageNumber(getApplicationContext());
                 // If currentPage is "1", we know that the user has changed the movie category or uses the
@@ -375,20 +380,29 @@ public class MainActivity extends AppCompatActivity implements
 
                 // If the RecyclerView has no position, we assume the first position in the list
                 // and set the RecyclerView at the beginning of results
-                if (mPosition == RecyclerView.NO_POSITION) {
-                    mPosition = 0;
-                    mMoviesRecyclerView.smoothScrollToPosition(mPosition);
-                }
+                if (mPosition == RecyclerView.NO_POSITION) mPosition = 0;
+                mMoviesRecyclerView.smoothScrollToPosition(mPosition);
 
                 break;
 
             case FAVOURITES_LOADER_ID:
                 mAdapter.swapCursor((Cursor) data);
 
-                // If the RecyclerView has no position, we assume the first position in the list
-                //if (mPosition == RecyclerView.NO_POSITION) mPosition = 0;
-                // Scroll the RecyclerView to mPosition
-                //mMoviesRecyclerView.smoothScrollToPosition(mPosition);
+                if (data != null && ((Cursor) data).getCount() == 0) {
+                    mCloudImageView.setVisibility(View.VISIBLE);
+                    mCloudImageView.setImageResource(R.drawable.ic_favorite);
+                    mMessagesTextView.setVisibility(View.VISIBLE);
+                    mMessagesTextView.setText(R.string.no_favourites);
+                } else {
+                    mCloudImageView.setVisibility(View.INVISIBLE);
+                    mMessagesTextView.setVisibility(View.INVISIBLE);
+                    // If the RecyclerView has no position, we assume the first position in the list
+                    if (mPosition == RecyclerView.NO_POSITION) {
+                        mPosition = 0;
+                        // Scroll the RecyclerView to mPosition
+                        mMoviesRecyclerView.smoothScrollToPosition(mPosition);
+                    }
+                }
 
                 break;
 

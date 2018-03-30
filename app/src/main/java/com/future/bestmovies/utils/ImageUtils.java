@@ -1,17 +1,11 @@
 package com.future.bestmovies.utils;
 
 import android.content.Context;
-import android.net.Uri;
-import android.util.Log;
-
 import com.future.bestmovies.data.MoviePreferences;
-
-import java.net.MalformedURLException;
-import java.net.URL;
 
 
 public class ImageUtils {
-    private static final String TAG = ImageUtils.class.getSimpleName();
+    //private static final String TAG = ImageUtils.class.getSimpleName();
     private static final String IMAGES_BASE_URL = "http://image.tmdb.org/t/p/w";
     public static final int BACKDROP = 1;
     public static final int POSTER = 2;
@@ -95,19 +89,19 @@ public class ImageUtils {
             backdropWidth = 1280;
             posterWidth = 780;
             castWidth = 500;
-        } else if (selectedScreenWidth > 1000 && selectedScreenWidth <= 1600) {
+        } else if (selectedScreenWidth > 1000) {
             backdropWidth = 1280;
             posterWidth = 500;
             castWidth = 342;
-        } else if (selectedScreenWidth > 500 && selectedScreenWidth <= 1000) {
+        } else if (selectedScreenWidth > 500) {
             backdropWidth = 780;
             posterWidth = 342;
             castWidth = 185;
-        } else if (selectedScreenWidth > 342 && selectedScreenWidth <= 500) {
+        } else if (selectedScreenWidth > 342) {
             backdropWidth = 500;
             posterWidth = 185;
             castWidth = 154;
-        } else if (selectedScreenWidth > 185 && selectedScreenWidth <= 342) {
+        } else if (selectedScreenWidth > 185) {
             backdropWidth = 342;
             posterWidth = 154;
             castWidth = 92;
@@ -129,7 +123,18 @@ public class ImageUtils {
         }
     }
 
-    public static String buildVideoThumbnailUrl (String movieKey) {
-        return VIDEO_THUMBNAIL_BASE_URL.concat(movieKey).concat(VIDEO_THUMBNAIL_SIZE_SD);
+    /* Build and return the Thumbnail URL for movie trailers and teasers
+     * @param context is used to access utility method getPreferredImageQuality
+     * @param movieKey is used to build the url
+     */
+    public static String buildVideoThumbnailUrl(Context context, String movieKey) {
+        switch (MoviePreferences.getPreferredImageQuality(context)) {
+            case OPTIMAL:
+                return VIDEO_THUMBNAIL_BASE_URL.concat(movieKey).concat(VIDEO_THUMBNAIL_SIZE_SD);
+            case MEDIUM:
+                return VIDEO_THUMBNAIL_BASE_URL.concat(movieKey).concat(VIDEO_THUMBNAIL_SIZE_H);
+            default:
+                return VIDEO_THUMBNAIL_BASE_URL.concat(movieKey).concat(VIDEO_THUMBNAIL_SIZE_M);
+        }
     }
 }

@@ -10,22 +10,21 @@ import com.future.bestmovies.R;
 
 public class MoviePreferences {
     private static final String TAG = MoviePreferences.class.getSimpleName();
+    private static final String CATEGORY = "category";
     private static final String IMAGE_WIDTH = "image_width";
     private static final int DEFAULT_IMAGE_WIDTH = 185;
 
     public static String getPreferredQueryType(Context context) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        String movieCategoryKey = context.getString(R.string.pref_category_key);
-        String defaultCategory = context.getString(R.string.pref_category_popular);
-        //Log.v(TAG, "getQueryType: " + sp.getString(movieCategoryKey, defaultCategory));
-        return sp.getString(movieCategoryKey, defaultCategory);
+        String defaultCategory = context.getString(R.string.category_popular);
+        //Log.v(TAG, "getQueryType: " + sp.getString(CATEGORY, defaultCategory));
+        return sp.getString(CATEGORY, defaultCategory);
     }
 
     public static void setPreferredQueryType(Context context, String category) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = sp.edit();
-        String movieCategoryKey = context.getString(R.string.pref_category_key);
-        editor.putString(movieCategoryKey, category);
+        editor.putString(CATEGORY, category);
         editor.apply();
     }
 

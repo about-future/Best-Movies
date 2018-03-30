@@ -391,7 +391,7 @@ public class DetailsActivity extends AppCompatActivity implements VideoAdapter.L
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.details_menu, menu);
 
-        MenuItem favouritesMenuItem = menu.findItem(R.id.action_favourites);
+        MenuItem favouritesMenuItem = menu.findItem(R.id.action_favourite_movie);
         if (mIsFavourite) {
             DrawableCompat.setTint(favouritesMenuItem.getIcon(), ContextCompat.getColor(getApplicationContext(), R.color.colorHeart));
         } else {
@@ -410,7 +410,7 @@ public class DetailsActivity extends AppCompatActivity implements VideoAdapter.L
             return true;
         }
 
-        if (id == R.id.action_favourites) {
+        if (id == R.id.action_favourite_movie) {
             if (mIsFavourite) {
                 deleteFavourite(mSelectedMovie, item);
             } else {

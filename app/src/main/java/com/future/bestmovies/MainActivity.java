@@ -43,12 +43,22 @@ public class MainActivity extends AppCompatActivity implements
     private static final String TAG = MainActivity.class.getSimpleName();
     private static final String MOVIES_CURSOR = "movies_cursor";
     private static final String MOVIES_LIST = "movies_list";
-    private static final String FAVOURITES = "favourites";
+
     private static final String MOVIE_POSITION = "movie_position";
-    private static final String CURRENT_LOADED_ID = "loader_id";
+
+    // Movie categories
+    private static final String CATEGORY_POPULAR = "popular";
+    private static final String CATEGORY_TOP_RATED = "top_rated";
+    private static final String CATEGORY_UPCOMING = "upcoming";
+    private static final String CATEGORY_NOW_PLAYING = "now_playing";
+    private static final String CATEGORY_FAVOURITES = "favourites";
+
+    // Loaders
     private static final int MOVIES_LOADER_ID = 24;
     private static final int FAVOURITES_LOADER_ID = 516;
+    private static final String CURRENT_LOADED_ID = "loader_id";
     private int mCurrentLoaderId;
+
 
     public static final String[] FAVOURITES_MOVIE_PROJECTION = {
             MovieDetailsEntry.COLUMN_MOVIE_ID,
@@ -105,7 +115,7 @@ public class MainActivity extends AppCompatActivity implements
         // Check chosen category
         if (savedInstanceState == null) {
             Log.v("NO INSTANCE SAVED", "CURRENT LOADER: " + String.valueOf(mCurrentLoaderId));
-            MoviePreferences.setPreferredQueryType(this, getString(R.string.pref_category_popular));
+            MoviePreferences.setPreferredQueryType(this, getString(R.string.category_popular));
             mCurrentLoaderId = MOVIES_LOADER_ID;
             fetchMovies(this);
         }
@@ -125,7 +135,7 @@ public class MainActivity extends AppCompatActivity implements
                 super.onScrolled(recyclerView, dx, dy);
 
                 // This scroll listener will be used only if the selected category is not favourites
-                if (!TextUtils.equals(MoviePreferences.getPreferredQueryType(getApplicationContext()), FAVOURITES)) {
+                if (!TextUtils.equals(MoviePreferences.getPreferredQueryType(getApplicationContext()), CATEGORY_FAVOURITES)) {
                     // To be able to load data in advance, before the user gets to the bottom of our
                     // present results, we have to know how many items are visible on the screen, how
                     // many items are in total and how many items are already scrolled out of the screen
@@ -209,42 +219,86 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        MenuItem selectedItem;
+        switch (MoviePreferences.getPreferredQueryType(this)) {
+            case CATEGORY_POPULAR:
+                selectedItem = menu.findItem(R.id.action_popular);
+                selectedItem.setIcon(R.drawable.ic_check);
+                break;
+            case CATEGORY_TOP_RATED:
+                selectedItem = menu.findItem(R.id.action_top_rated);
+                selectedItem.setIcon(R.drawable.ic_check);
+                break;
+            case CATEGORY_UPCOMING:
+                selectedItem = menu.findItem(R.id.action_upcoming);
+                selectedItem.setIcon(R.drawable.ic_check);
+                break;
+            case CATEGORY_NOW_PLAYING:
+                selectedItem = menu.findItem(R.id.action_now_playing);
+                selectedItem.setIcon(R.drawable.ic_check);
+                break;
+            case CATEGORY_FAVOURITES:
+                selectedItem = menu.findItem(R.id.action_favourites);
+                selectedItem.setIcon(R.drawable.ic_check);
+                break;
+        }
+
+        return super.onPrepareOptionsMenu(menu);
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_popular:
-                MoviePreferences.setPreferredQueryType(this, getString(R.string.pref_category_popular));
+                MoviePreferences.setPreferredQueryType(this, getString(R.string.category_popular));
                 MoviePreferences.setLastPageNumber(this, 1);
                 getSupportLoaderManager().destroyLoader(FAVOURITES_LOADER_ID);
                 mCurrentLoaderId = MOVIES_LOADER_ID;
+                getSupportLoaderManager().restartLoader(mCurrentLoaderId, null, this);
+                invalidateOptionsMenu();
                 break;
+
             case R.id.action_top_rated:
-                MoviePreferences.setPreferredQueryType(this, getString(R.string.pref_category_top_rated));
+                MoviePreferences.setPreferredQueryType(this, getString(R.string.category_top_rated));
                 MoviePreferences.setLastPageNumber(this, 1);
                 getSupportLoaderManager().destroyLoader(FAVOURITES_LOADER_ID);
                 mCurrentLoaderId = MOVIES_LOADER_ID;
+                getSupportLoaderManager().restartLoader(mCurrentLoaderId, null, this);
+                invalidateOptionsMenu();
                 break;
+
             case R.id.action_upcoming:
-                MoviePreferences.setPreferredQueryType(this, getString(R.string.pref_category_upcoming));
+                MoviePreferences.setPreferredQueryType(this, getString(R.string.category_upcoming));
                 MoviePreferences.setLastPageNumber(this, 1);
                 getSupportLoaderManager().destroyLoader(FAVOURITES_LOADER_ID);
                 mCurrentLoaderId = MOVIES_LOADER_ID;
+                getSupportLoaderManager().restartLoader(mCurrentLoaderId, null, this);
+                invalidateOptionsMenu();
                 break;
+
             case R.id.action_now_playing:
-                MoviePreferences.setPreferredQueryType(this, getString(R.string.pref_category_now_playing));
+                MoviePreferences.setPreferredQueryType(this, getString(R.string.category_now_playing));
                 MoviePreferences.setLastPageNumber(this, 1);
                 getSupportLoaderManager().destroyLoader(FAVOURITES_LOADER_ID);
                 mCurrentLoaderId = MOVIES_LOADER_ID;
+                getSupportLoaderManager().restartLoader(mCurrentLoaderId, null, this);
+                invalidateOptionsMenu();
                 break;
-            case R.id.action_favourite_movies:
-                MoviePreferences.setPreferredQueryType(this, getString(R.string.pref_category_favourites));
+
+            case R.id.action_favourites:
+                MoviePreferences.setPreferredQueryType(this, getString(R.string.category_favourites));
+                getSupportLoaderManager().destroyLoader(MOVIES_LOADER_ID);
                 mCurrentLoaderId = FAVOURITES_LOADER_ID;
+                getSupportLoaderManager().restartLoader(mCurrentLoaderId, null, this);
+                invalidateOptionsMenu();
                 break;
-            default:
+
+            case R.id.action_settings:
                 startActivity(new Intent(this, SettingsActivity.class));
                 return true;
         }
 
-        getSupportLoaderManager().restartLoader(mCurrentLoaderId, null, this);
         return super.onOptionsItemSelected(item);
     }
 
@@ -264,7 +318,7 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
-    // TODO: and share info
+    // TODO: no favourites case and share info
 
     // Hide the movie data and loading indicator and show error message
     private void showError() {

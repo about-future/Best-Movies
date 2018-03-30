@@ -18,26 +18,6 @@ public class ScreenUtils {
         return context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
     }
 
-    /* Return the movie category title. The category title is selected and saved in Settings.
-     * @param context is used to access movie preferences method
-     *
-     * This method is used, but in a hidden state, with no visible results for the user. It's purpose
-     * is to make the UI more complete and let the user know what category of movies is browsing.
-     */
-    public static String createCategoryTitle(Context context) {
-        String queryType = MoviePreferences.getPreferredQueryType(context);
-        switch (queryType) {
-            case "top_rated":
-                return context.getString(R.string.pref_category_label_top_rated);
-            case "upcoming":
-                return context.getString(R.string.pref_category_label_upcoming);
-            case "now_playing":
-                return context.getString(R.string.pref_category_label_now_playing);
-            default:
-                return context.getString(R.string.pref_category_label_popular);
-        }
-    }
-
     /* Return the width, height of the screen in pixels and the screen density (i.e. {720.0, 1280.0, 2.0})
      * @param context is used to create a windowManager, so we can get the screen metrics
      */

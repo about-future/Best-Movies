@@ -51,15 +51,6 @@ public class SettingsFragment extends PreferenceFragmentCompat implements
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        if (key.equals(getString(R.string.pref_category_key))) {
-
-            // Desired category has changed, reset the last page number to 1
-            MoviePreferences.setLastPageNumber(getContext(), 1);
-
-            //if (getActivity() != null)
-            //    getActivity().getContentResolver().notifyChange(FavouritesContract.MovieDetailsEntry.CONTENT_URI, null);
-        }
-
         if (key.equals(getString(R.string.pref_image_quality_key))) {
             // If image quality was change, recreate image_width preference
             MoviePreferences.setImageWidthForRecyclerView(

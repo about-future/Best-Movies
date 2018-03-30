@@ -3,40 +3,49 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:id="@+id/action_popular"
-        android:orderInCategory="2"
-        android:title="@string/pref_category_label_popular"
-        app:showAsAction="never" />
-
-    <item
-        android:id="@+id/action_top_rated"
-        android:orderInCategory="3"
-        android:title="@string/pref_category_label_top_rated"
-        app:showAsAction="never" />
-
-    <item
-        android:id="@+id/action_upcoming"
-        android:orderInCategory="4"
-        android:title="@string/pref_category_label_upcoming"
-        app:showAsAction="never" />
-
-    <item
-        android:id="@+id/action_now_playing"
-        android:orderInCategory="5"
-        android:title="@string/pref_category_label_now_playing"
-        app:showAsAction="never" />
-
-    <item
-        android:id="@+id/action_favourite_movies"
-        android:orderInCategory="6"
-        android:title="@string/pref_category_label_favourites"
-        app:showAsAction="never" />
-
-    <item
-        android:id="@+id/action_settings"
+        android:title="Main Menu"
         android:icon="@drawable/ic_more"
-        android:orderInCategory="7"
-        android:title="@string/menu_settings"
-        app:showAsAction="never" />
+        app:showAsAction="always">
+
+        <menu>
+
+            <item
+                android:id="@+id/action_popular"
+                android:orderInCategory="1"
+                android:title="@string/menu_popular"
+                app:showAsAction="never" />
+
+            <item
+                android:id="@+id/action_top_rated"
+                android:orderInCategory="2"
+                android:title="@string/menu_top_rated"
+                app:showAsAction="never" />
+
+            <item
+                android:id="@+id/action_upcoming"
+                android:orderInCategory="3"
+                android:title="@string/menu_upcoming"
+                app:showAsAction="never" />
+
+            <item
+                android:id="@+id/action_now_playing"
+                android:orderInCategory="4"
+                android:title="@string/menu_now_playing"
+                app:showAsAction="never" />
+
+            <item
+                android:id="@+id/action_favourites"
+                android:orderInCategory="5"
+                android:title="@string/menu_favourites"
+                app:showAsAction="never" />
+
+            <item
+                android:id="@+id/action_settings"
+                android:orderInCategory="7"
+                android:title="@string/menu_settings"
+                app:showAsAction="never" />
+        </menu>
+
+    </item>
 
 </menu>

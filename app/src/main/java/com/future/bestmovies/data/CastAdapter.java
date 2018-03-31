@@ -1,5 +1,6 @@
 package com.future.bestmovies.data;
 
+
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
@@ -11,7 +12,6 @@ import android.widget.TextView;
 
 import com.future.bestmovies.R;
 import com.future.bestmovies.utils.ImageUtils;
-import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -20,12 +20,15 @@ import java.util.ArrayList;
 public class CastAdapter extends RecyclerView.Adapter<CastAdapter.CastViewHolder> {
     private final Context mContext;
     private ArrayList<Cast> mCast;
+    private final ListItemClickListener mOnClickListener;
 
-    //No click listener needed yet
+    public interface ListItemClickListener {
+        void onListItemClick(Cast castClicked);
+    }
 
-    public CastAdapter(Context context, ArrayList<Cast> cast) {
+    public CastAdapter(Context context, ListItemClickListener listener) {
         mContext = context;
-        mCast = cast;
+        mOnClickListener = listener;
     }
 
     @Override @NonNull
@@ -58,7 +61,7 @@ public class CastAdapter extends RecyclerView.Adapter<CastAdapter.CastViewHolder
         notifyDataSetChanged();
     }
 
-    class CastViewHolder extends RecyclerView.ViewHolder {
+    class CastViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         final ImageView actorProfileImageView;
         final TextView actorNameTextView;
         //final TextView characterTextView;
@@ -68,6 +71,15 @@ public class CastAdapter extends RecyclerView.Adapter<CastAdapter.CastViewHolder
             actorProfileImageView = itemView.findViewById(R.id.actor_profile_iv);
             actorNameTextView = itemView.findViewById(R.id.actor_name_tv);
             //characterTextView = itemView.findViewById(R.id.character_tv);
+            itemView.setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View view) {
+            // Find the position of the cast that was clicked and pass the cast object from that
+            // position to the listener
+            int clickedPosition = getAdapterPosition();
+            mOnClickListener.onListItemClick(mCast.get(clickedPosition));
         }
     }
 }

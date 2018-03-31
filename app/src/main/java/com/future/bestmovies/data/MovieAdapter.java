@@ -21,18 +21,17 @@ import java.util.ArrayList;
 public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHolder> {
 
     private final Context mContext;
-    private ArrayList<Movie> mMovies;
+    private ArrayList<Movie> mMovies = new ArrayList<Movie>(){};
     private Cursor mMoviesCursor;
-    private final GridItemClickListener mOnclickListener;
+    private final GridItemClickListener mOnClickListener;
 
     public interface GridItemClickListener {
         void onGridItemClick(Movie movieClicked, int movieId);
     }
 
-    public MovieAdapter(Context context, ArrayList<Movie> movies, GridItemClickListener listener) {
+    public MovieAdapter(Context context, GridItemClickListener listener) {
         mContext = context;
-        mMovies = movies;
-        mOnclickListener = listener;
+        mOnClickListener = listener;
     }
 
     @Override @NonNull
@@ -98,14 +97,14 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
         @Override
         public void onClick(View view) {
             // Find the position of the movie that was clicked and pass the movie object from that
-            // position to the listener
+            // position to the listener or the movieId
             int adapterPosition = getAdapterPosition();
             if (mMovies != null && mMoviesCursor == null)
-                mOnclickListener.onGridItemClick(mMovies.get(adapterPosition), 0);
+                mOnClickListener.onGridItemClick(mMovies.get(adapterPosition), 0);
             else {
                 mMoviesCursor.moveToPosition(adapterPosition);
                 int movieId = mMoviesCursor.getInt(mMoviesCursor.getColumnIndex(MovieDetailsEntry.COLUMN_MOVIE_ID));
-                mOnclickListener.onGridItemClick(null, movieId);
+                mOnClickListener.onGridItemClick(null, movieId);
             }
         }
     }

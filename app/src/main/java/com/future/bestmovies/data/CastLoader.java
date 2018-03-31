@@ -2,9 +2,7 @@ package com.future.bestmovies.data;
 
 import android.content.AsyncTaskLoader;
 import android.content.Context;
-
 import com.future.bestmovies.utils.NetworkUtils;
-
 import java.util.ArrayList;
 
 

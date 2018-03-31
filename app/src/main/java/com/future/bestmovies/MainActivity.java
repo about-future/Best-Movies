@@ -67,7 +67,7 @@ public class MainActivity extends AppCompatActivity implements
     private RecyclerView mMoviesRecyclerView;
     private GridLayoutManager mGridLayoutManager;
     private TextView mMessagesTextView;
-    private ImageView mCloudImageView;
+    private ImageView mImageView;
     private ProgressBar mLoading;
     private int mPosition = RecyclerView.NO_POSITION;
 
@@ -85,7 +85,7 @@ public class MainActivity extends AppCompatActivity implements
 
         mLoading = findViewById(R.id.loading_pb);
         mLoading.setVisibility(View.VISIBLE);
-        mCloudImageView = findViewById(R.id.no_connection_cloud_iv);
+        mImageView = findViewById(R.id.no_connection_cloud_iv);
         mMessagesTextView = findViewById(R.id.messages_tv);
         mMoviesRecyclerView = findViewById(R.id.movies_rv);
         // The layout manager for our RecyclerView will be a GridLayout, so we can display our movies
@@ -93,8 +93,7 @@ public class MainActivity extends AppCompatActivity implements
         mGridLayoutManager = new GridLayoutManager(this, ScreenUtils.getNumberOfColumns(this));
         mMoviesRecyclerView.setLayoutManager(mGridLayoutManager);
         mMoviesRecyclerView.setHasFixedSize(true);
-        mAdapter = new MovieAdapter(this, new ArrayList<Movie>() {
-        }, this);
+        mAdapter = new MovieAdapter(this, this);
         mMoviesRecyclerView.setAdapter(mAdapter);
 
         // Check if preference "image_width" was create before, if not, proceed.
@@ -325,7 +324,8 @@ public class MainActivity extends AppCompatActivity implements
     // Hide the movie data and loading indicator and show error message
     private void showError() {
         mMoviesRecyclerView.setVisibility(View.INVISIBLE);
-        mCloudImageView.setVisibility(View.VISIBLE);
+        mImageView.setVisibility(View.VISIBLE);
+        mImageView.setImageResource(R.drawable.ic_cloud_off);
         mMessagesTextView.setVisibility(View.VISIBLE);
         mLoading.setVisibility(View.INVISIBLE);
     }
@@ -364,7 +364,7 @@ public class MainActivity extends AppCompatActivity implements
 
         switch (loader.getId()) {
             case MOVIES_LOADER_ID:
-                mCloudImageView.setVisibility(View.INVISIBLE);
+                mImageView.setVisibility(View.INVISIBLE);
                 mMessagesTextView.setVisibility(View.INVISIBLE);
 
                 // Every time we get new results we have 2 possibilities
@@ -380,8 +380,10 @@ public class MainActivity extends AppCompatActivity implements
 
                 // If the RecyclerView has no position, we assume the first position in the list
                 // and set the RecyclerView at the beginning of results
-                if (mPosition == RecyclerView.NO_POSITION) mPosition = 0;
-                mMoviesRecyclerView.smoothScrollToPosition(mPosition);
+                if (mPosition == RecyclerView.NO_POSITION) {
+                    mPosition = 0;
+                    mMoviesRecyclerView.smoothScrollToPosition(mPosition);
+                }
 
                 break;
 
@@ -389,12 +391,12 @@ public class MainActivity extends AppCompatActivity implements
                 mAdapter.swapCursor((Cursor) data);
 
                 if (data != null && ((Cursor) data).getCount() == 0) {
-                    mCloudImageView.setVisibility(View.VISIBLE);
-                    mCloudImageView.setImageResource(R.drawable.ic_favorite);
+                    mImageView.setVisibility(View.VISIBLE);
+                    mImageView.setImageResource(R.drawable.ic_favorite);
                     mMessagesTextView.setVisibility(View.VISIBLE);
                     mMessagesTextView.setText(R.string.no_favourites);
                 } else {
-                    mCloudImageView.setVisibility(View.INVISIBLE);
+                    mImageView.setVisibility(View.INVISIBLE);
                     mMessagesTextView.setVisibility(View.INVISIBLE);
                     // If the RecyclerView has no position, we assume the first position in the list
                     if (mPosition == RecyclerView.NO_POSITION) {

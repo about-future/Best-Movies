@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Parcelable;
 import android.support.constraint.ConstraintLayout;
 import android.support.v4.content.ContextCompat;
 import android.content.CursorLoader;
@@ -47,7 +48,8 @@ import java.util.ArrayList;
 import static com.future.bestmovies.data.FavouritesContract.*;
 
 
-public class DetailsActivity extends AppCompatActivity implements VideoAdapter.ListItemClickListener {
+public class DetailsActivity extends AppCompatActivity implements
+        VideoAdapter.ListItemClickListener, CastAdapter.ListItemClickListener {
     private static final int CAST_LOADER_ID = 423;
     private static final int REVIEWS_LOADER_ID = 435;
     private static final int VIDEOS_LOADER_ID = 594;
@@ -69,6 +71,8 @@ public class DetailsActivity extends AppCompatActivity implements VideoAdapter.L
     public static final String MOVIE_OBJECT = "movie";
     private static final String MOVIE_CAST = "movie_cast";
     private static final String CAST_POSITION = "cast_position";
+    private static final String CAST_STATE = "cast_state";
+    public static final String ACTOR_ID = "actor_id";
     private static final String VIDEOS_POSITION = "videos_position";
     public static final String MOVIE_REVIEWS = "movie_reviews";
     public static final String MOVIE_VIDEOS = "movie_videos";
@@ -76,6 +80,7 @@ public class DetailsActivity extends AppCompatActivity implements VideoAdapter.L
     public static final String MOVIE_TITLE = "movie_title";
     public static final String MOVIE_BACKDROP = "movie_backdrop";
 
+    private Bundle mBundleState;
     private Movie mSelectedMovie;
     private int mMovieId;
     private ImageView mMovieBackdropImageView;
@@ -283,7 +288,7 @@ public class DetailsActivity extends AppCompatActivity implements VideoAdapter.L
                 new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
         mCastRecyclerView.setLayoutManager(mCastLayoutManager);
         mCastRecyclerView.setHasFixedSize(true);
-        mCastAdapter = new CastAdapter(this, new ArrayList<Cast>());
+        mCastAdapter = new CastAdapter(this, this);
         mCastRecyclerView.setAdapter(mCastAdapter);
         mNoCastImageView = findViewById(R.id.no_cast_iv);
         mNoCastConnectionImageView = findViewById(R.id.no_cast_connection_iv);
@@ -297,7 +302,7 @@ public class DetailsActivity extends AppCompatActivity implements VideoAdapter.L
             if (mCast != null) {
                 // If cast is not empty, use the saved cast and repopulate the cast section
                 if (!mCast.isEmpty()) {
-                    mCastAdapter = new CastAdapter(this, mCast);
+                    mCastAdapter = new CastAdapter(this, this);
                     mCastRecyclerView.setAdapter(mCastAdapter);
                     if (savedInstanceState.containsKey(CAST_POSITION)) {
                         mCastPosition = savedInstanceState.getInt(CAST_POSITION);
@@ -355,7 +360,7 @@ public class DetailsActivity extends AppCompatActivity implements VideoAdapter.L
                 new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
         mVideosRecyclerView.setLayoutManager(mVideosLayoutManager);
         mVideosRecyclerView.setHasFixedSize(true);
-        mVideosAdapter = new VideoAdapter(this, new ArrayList<Video>(), this);
+        mVideosAdapter = new VideoAdapter(this, this);
         mVideosRecyclerView.setAdapter(mVideosAdapter);
         SnapHelper snapHelper = new PagerSnapHelper();
         snapHelper.attachToRecyclerView(mVideosRecyclerView);
@@ -370,11 +375,11 @@ public class DetailsActivity extends AppCompatActivity implements VideoAdapter.L
             if (mVideos != null) {
                 // If mVideos is not empty, use the saved videos and repopulate the video section
                 if (!mVideos.isEmpty()) {
-                    mVideosAdapter = new VideoAdapter(this, mVideos, this);
+                    mVideosAdapter = new VideoAdapter(this, this);
                     mVideosRecyclerView.setAdapter(mVideosAdapter);
-                    if (savedInstanceState.containsKey(VIDEOS_POSITION)) {
+                    //if (savedInstanceState.containsKey(VIDEOS_POSITION)) {
                         mVideosPosition = savedInstanceState.getInt(VIDEOS_POSITION);
-                    }
+                    //}
                 }
                 populateVideos(mVideos);
             } else {
@@ -412,11 +417,8 @@ public class DetailsActivity extends AppCompatActivity implements VideoAdapter.L
         }
 
         if (id == R.id.action_favourite_movie) {
-            if (mIsFavourite) {
-                deleteFavourite(mSelectedMovie, item);
-            } else {
-                insertMovie(mSelectedMovie, item);
-            }
+            if (mIsFavourite) deleteFavourite(mSelectedMovie, item);
+             else insertMovie(mSelectedMovie, item);
 
             return true;
         }
@@ -443,13 +445,58 @@ public class DetailsActivity extends AppCompatActivity implements VideoAdapter.L
 
         // Videos
         outState.putParcelableArrayList(MOVIE_VIDEOS, mVideos);
-        if (mVideosLayoutManager.findFirstCompletelyVisibleItemPosition() != RecyclerView.NO_POSITION) {
-            outState.putInt(VIDEOS_POSITION, mVideosLayoutManager.findFirstCompletelyVisibleItemPosition());
-        } else {
-            outState.putInt(VIDEOS_POSITION, mVideosLayoutManager.findFirstVisibleItemPosition());
-        }
+        outState.putInt(VIDEOS_POSITION, mVideosLayoutManager.findFirstCompletelyVisibleItemPosition());
 
         super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        if (savedInstanceState != null) {
+            if (savedInstanceState.containsKey(MOVIE_OBJECT)) mSelectedMovie = savedInstanceState.getParcelable(MOVIE_OBJECT);
+            if (savedInstanceState.containsKey(MOVIE_CAST)) mCast = savedInstanceState.getParcelableArrayList(MOVIE_CAST);
+            if (savedInstanceState.containsKey(MOVIE_REVIEWS)) mReviews = savedInstanceState.getParcelableArrayList(MOVIE_REVIEWS);
+            if (savedInstanceState.containsKey(MOVIE_VIDEOS)) mVideos = savedInstanceState.getParcelableArrayList(MOVIE_VIDEOS);
+            if (savedInstanceState.containsKey(CAST_POSITION)) mCastPosition = savedInstanceState.getInt(CAST_POSITION);
+            if (savedInstanceState.containsKey(VIDEOS_POSITION)) mVideosPosition = savedInstanceState.getInt(VIDEOS_POSITION);
+        }
+    }
+
+    @Override
+    protected void onPause()
+    {
+        super.onPause();
+        mBundleState = new Bundle();
+
+        // Save Cast position
+        mCastPosition = mCastLayoutManager.findFirstCompletelyVisibleItemPosition();
+        mBundleState.putInt(CAST_POSITION, mCastPosition);
+
+        // Save Video position
+        mVideosPosition = mVideosLayoutManager.findFirstCompletelyVisibleItemPosition();
+        mBundleState.putInt(VIDEOS_POSITION, mVideosPosition);
+    }
+
+    @Override
+    protected void onResume()
+    {
+        super.onResume();
+
+        // restore RecyclerView state
+        if (mBundleState != null) {
+            // Restoring Cast position
+            mCastPosition = mBundleState.getInt(CAST_POSITION);
+            if (mCastPosition == RecyclerView.NO_POSITION) mCastPosition = 0;
+            // Scroll the RecyclerView to mCastPosition
+            mCastRecyclerView.smoothScrollToPosition(mCastPosition);
+
+            // Restore Videos position
+            mVideosPosition = mBundleState.getInt(VIDEOS_POSITION);
+            if (mVideosPosition == RecyclerView.NO_POSITION) mVideosPosition = 0;
+            // Scroll the RecyclerView to mVideosPosition
+            mVideosRecyclerView.smoothScrollToPosition(mVideosPosition);
+        }
     }
 
     // Hide the progress bar and show cast
@@ -773,13 +820,6 @@ public class DetailsActivity extends AppCompatActivity implements VideoAdapter.L
         }
     }
 
-    @Override
-    public void onListItemClick(Video videoClicked) {
-        startActivity(new Intent(
-                Intent.ACTION_VIEW,
-                NetworkUtils.buildVideoUri(videoClicked.getVideoKey())));
-    }
-
     private void insertMovie(Movie selectedMovie, MenuItem item) {
         ContentValues values = new ContentValues();
         values.put(MovieDetailsEntry.COLUMN_MOVIE_ID, selectedMovie.getMovieId());
@@ -824,9 +864,24 @@ public class DetailsActivity extends AppCompatActivity implements VideoAdapter.L
         }
     }
 
-    public void toastThis (String toastMessage) {
+    public void toastThis(String toastMessage) {
         if (mToast != null) mToast.cancel();
         mToast = Toast.makeText(this, toastMessage, Toast.LENGTH_LONG);
         mToast.show();
+    }
+
+    @Override
+    public void onListItemClick(Video videoClicked) {
+        startActivity(new Intent(
+                Intent.ACTION_VIEW,
+                NetworkUtils.buildVideoUri(videoClicked.getVideoKey())));
+    }
+
+    @Override
+    public void onListItemClick(Cast castClicked) {
+        Intent actorProfileIntent = new Intent(DetailsActivity.this, ProfileActivity.class);
+        actorProfileIntent.putExtra(ACTOR_ID, castClicked.getActorId());
+        toastThis(String.valueOf(castClicked.getActorId()));
+        startActivity(actorProfileIntent);
     }
 }

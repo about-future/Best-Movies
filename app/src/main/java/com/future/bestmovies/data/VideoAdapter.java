@@ -26,9 +26,8 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
         void onListItemClick(Video videoClicked);
     }
 
-    public VideoAdapter(Context context, ArrayList<Video> videos, ListItemClickListener listener) {
+    public VideoAdapter(Context context, ListItemClickListener listener) {
         mContext = context;
-        mVideos = videos;
         mOnclickListener = listener;
     }
 
@@ -43,7 +42,9 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
     @Override
     public void onBindViewHolder(@NonNull VideoAdapter.VideoViewHolder holder, int position) {
         Picasso.with(mContext)
-                .load(ImageUtils.buildVideoThumbnailUrl(mContext, mVideos.get(position).getVideoKey()))
+                .load(ImageUtils.buildVideoThumbnailUrl(
+                        mContext,
+                        mVideos.get(position).getVideoKey()))
                 .error(R.drawable.ic_image)
                 .into(holder.videoThumbnailImageView);
         holder.videoNameTextView.setText(mVideos.get(position).getVideoName());

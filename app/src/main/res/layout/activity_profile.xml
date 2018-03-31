@@ -4,12 +4,15 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ProfileActivity">
+    tools:context=".ProfileActivity"
+    android:layout_margin="@dimen/details_horizontal_spacing">
 
     <TextView
         android:id="@+id/testText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        />
+        tools:text="Actor details"
+        android:textSize="@dimen/details_font_size"
+        android:fontFamily="sans-serif-condensed" />
 
 </android.support.constraint.ConstraintLayout>

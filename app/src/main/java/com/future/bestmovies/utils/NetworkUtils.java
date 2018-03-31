@@ -8,6 +8,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import com.future.bestmovies.data.Actor;
 import com.future.bestmovies.data.Movie;
 import com.future.bestmovies.data.Cast;
 import com.future.bestmovies.data.MoviePreferences;
@@ -31,8 +32,13 @@ public class NetworkUtils {
     private static final String CREDITS = "credits";
     private static final String VIDEOS = "videos";
     private static final String REVIEWS = "reviews";
+    private static final String PERSON = "person";
+    private static final String MOVIE_CREDITS = "movie_credits";
     private static final String API_KEY = "api_key";
     private static final String API_ID = "xxx";
+
+    //https://api.themoviedb.org/3/person/10297/movie_credits?api_key=
+    //https://api.themoviedb.org/3/person/10297?api_key=
 
     private static final String YOUTUBE_VIDEO_BASE_URL = "https://www.youtube.com/watch";
     private static final String YOUTUBE_PARAMETER = "v";
@@ -62,7 +68,7 @@ public class NetworkUtils {
 
         try {
             URL movieQueryUrl = new URL(movieQueryUri.toString());
-            Log.v(TAG, "URL: " + movieQueryUrl);
+            //Log.v(TAG, "URL: " + movieQueryUrl);
             return movieQueryUrl;
         } catch (MalformedURLException e) {
             e.printStackTrace();
@@ -92,8 +98,6 @@ public class NetworkUtils {
     /* Build and return the API URL for movie videos
      * @param movieId is used to build the url
      */
-    //https://api.themoviedb.org/3/movie/157336/videos?api_key=
-    //https://api.themoviedb.org/3/movie/157336?api_key=
     private static URL buildMovieVideosApiUrl(String movieId) {
         Uri movieQueryUri = Uri.parse(API_MOVIE_BASE_URL).buildUpon()
                 .appendPath(MOVIE)
@@ -123,6 +127,47 @@ public class NetworkUtils {
 
         try {
             return new URL(movieQueryUri.toString());
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    /* Build and return the API URL for an actor details
+     * @param actorId is used to build the url
+     */
+    private static URL buildActorApiUrl(String actorId) {
+        Uri actorQueryUri = Uri.parse(API_MOVIE_BASE_URL).buildUpon()
+                .appendPath(PERSON)
+                .appendPath(actorId)
+                .appendQueryParameter(API_KEY, API_ID)
+                .build();
+
+        try {
+            URL movieQueryUrl = new URL(actorQueryUri.toString());
+            Log.v(TAG, "ACTOR URL: " + movieQueryUrl);
+            return movieQueryUrl;
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    /* Build and return the API URL for an actor details
+     * @param actorId is used to build the url
+     */
+    private static URL buildActorCreditsApiUrl(String actorId) {
+        Uri actorQueryUri = Uri.parse(API_MOVIE_BASE_URL).buildUpon()
+                .appendPath(PERSON)
+                .appendPath(actorId)
+                .appendPath(MOVIE_CREDITS)
+                .appendQueryParameter(API_KEY, API_ID)
+                .build();
+
+        try {
+            URL movieQueryUrl = new URL(actorQueryUri.toString());
+            Log.v(TAG, "ACTOR CREDITS URL: " + movieQueryUrl);
+            return movieQueryUrl;
         } catch (MalformedURLException e) {
             e.printStackTrace();
             return null;
@@ -183,7 +228,7 @@ public class NetworkUtils {
             URL url = buildMovieCastApiUrl(movieId);
             // Use the URL to retrieve the JSON response from Movie API
             String jsonMovieCastResponse = NetworkUtils.getResponseFromHttpUrl(url);
-            // Parse the JSON into an array of Cast objects
+            // Parse the JSON into an array list of Cast objects
             return JsonUtils.parseMovieCastJson(jsonMovieCastResponse);
         } catch (Exception e) {
             Log.e(TAG, "Error accessing the Server:", e);
@@ -229,6 +274,44 @@ public class NetworkUtils {
             return null;
         }
     }
+
+    /* Perform a network request using a URL, parse the JSON from that request and return
+     * an Actor object.
+     * @param actorId is used to access buildActorApiUrl utility method
+     */
+    public static Actor fetchActorDetails(String actorId) {
+        try {
+            // Create and return the Api URL for an actor details, based on an actor id
+            URL url = buildActorApiUrl(actorId);
+            // Use the URL to retrieve the JSON response from Movie API
+            String jsonActorDetailsResponse = NetworkUtils.getResponseFromHttpUrl(url);
+            // Parse the JSON into an Actor object
+            return JsonUtils.parseActorDetailsJson(jsonActorDetailsResponse);
+        } catch (Exception e) {
+            Log.e(TAG, "Error accessing the Server:", e);
+            // If something went wrong, we return null
+            return null;
+        }
+    }
+
+    /* Perform a network request using a URL, parse the JSON from that request and return
+     * an array list of Credits objects for a given actor.
+     * @param actorId is used to access buildActorCreditsApiUrl utility method
+     */
+//    public static Actor fetchActorCredits(String actorId) {
+//        try {
+//            // Create and return the Api URL for an actor credits, based on an actor id
+//            URL url = buildActorCreditsApiUrl(actorId);
+//            // Use the URL to retrieve the JSON response from Movie API
+//            String jsonActorCreditsResponse = NetworkUtils.getResponseFromHttpUrl(url);
+//            // Parse the JSON into an array list of Credits objects
+//            return JsonUtils.parseActorCreditsJson(jsonActorCreditsResponse);
+//        } catch (Exception e) {
+//            Log.e(TAG, "Error accessing the Server:", e);
+//            // If something went wrong, we return null
+//            return null;
+//        }
+//    }
 
     /* Perform a state of network connectivity test and return true or false.
      * @param context is used to create a reference to the ConnectivityManager

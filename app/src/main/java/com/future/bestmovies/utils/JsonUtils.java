@@ -4,12 +4,14 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.future.bestmovies.data.Actor;
 import com.future.bestmovies.data.Movie;
 import com.future.bestmovies.data.Cast;
 import com.future.bestmovies.data.Review;
 import com.future.bestmovies.data.Video;
 
 import java.util.ArrayList;
+import java.util.List;
 
 
 public class JsonUtils {
@@ -51,6 +53,15 @@ public class JsonUtils {
     private static final String VIDEO_SITE = "site";
     private static final String VIDEO_SIZE = "size";
     private static final String VIDEO_TYPE = "type";
+
+    // Actor labels
+    private static final String BIRTHDAY = "birthday";
+    private static final String DEATHDAY = "deathday";
+    //private static final String ACTOR_ID = "id";
+    //private static final String NAME = "name";
+    private static final String BIOGRAPHY = "biography";
+    private static final String PLACE_OF_BIRTH = "place_of_birth";
+    //private static final String PROFILE_PATH = "profile_path";
 
     // Parses the JSON response for the list of movies and their details
     public static ArrayList<Movie> parseMoviesJson(String moviesJsonStr) throws JSONException {
@@ -170,5 +181,28 @@ public class JsonUtils {
         }
 
         return videos;
+    }
+
+    public static Actor parseActorDetailsJson (String actorDetailsJsonStr) throws JSONException {
+        int id;
+        String birthday;
+        String deathday;
+        String name;
+        String biography;
+        String placeOfBirth;
+        String profilePath;
+
+        // Instantiate a JSON object so we can get data.
+        JSONObject actorDetailsJson = new JSONObject(actorDetailsJsonStr);
+
+        id = actorDetailsJson.getInt(ACTOR_ID);
+        birthday = actorDetailsJson.getString(BIRTHDAY);
+        deathday = actorDetailsJson.getString(DEATHDAY);
+        name = actorDetailsJson.getString(NAME);
+        biography = actorDetailsJson.getString(BIOGRAPHY);
+        placeOfBirth = actorDetailsJson.getString(PLACE_OF_BIRTH);
+        profilePath = actorDetailsJson.getString(PROFILE_PATH);
+
+        return new Actor(id, birthday, deathday, name, biography, placeOfBirth, profilePath);
     }
 }

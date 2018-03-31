@@ -8,9 +8,9 @@ import com.future.bestmovies.utils.NetworkUtils;
 import java.util.ArrayList;
 
 
-public class MovieLoader extends AsyncTaskLoader<ArrayList<Movie>> {
+public class MovieCategoryLoader extends AsyncTaskLoader<ArrayList<Movie>> {
 
-    public MovieLoader(Context context) {
+    public MovieCategoryLoader(Context context) {
         super(context);
     }
 
@@ -19,6 +19,6 @@ public class MovieLoader extends AsyncTaskLoader<ArrayList<Movie>> {
 
     @Override
     public ArrayList<Movie> loadInBackground() {
-        return NetworkUtils.fetchMovieData(getContext());
+        return NetworkUtils.fetchMovieCategory(getContext());
     }
 }

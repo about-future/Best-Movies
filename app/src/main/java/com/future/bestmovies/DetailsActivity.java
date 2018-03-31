@@ -19,6 +19,7 @@ import android.support.v7.widget.PagerSnapHelper;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SnapHelper;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -32,6 +33,8 @@ import com.future.bestmovies.data.Cast;
 import com.future.bestmovies.data.CastAdapter;
 import com.future.bestmovies.data.CastLoader;
 import com.future.bestmovies.data.Movie;
+import com.future.bestmovies.data.MovieDetails;
+import com.future.bestmovies.data.MovieDetailsLoader;
 import com.future.bestmovies.data.Review;
 import com.future.bestmovies.data.ReviewLoader;
 import com.future.bestmovies.data.Video;
@@ -50,42 +53,57 @@ import static com.future.bestmovies.data.FavouritesContract.*;
 
 public class DetailsActivity extends AppCompatActivity implements
         VideoAdapter.ListItemClickListener, CastAdapter.ListItemClickListener {
+    private static final int MOVIE_DETAILS_LOADER_ID = 805;
     private static final int CAST_LOADER_ID = 423;
     private static final int REVIEWS_LOADER_ID = 435;
     private static final int VIDEOS_LOADER_ID = 594;
     private static final int FAVOURITE_LOADER_ID = 516;
+    private static final int CHECK_IF_FAVOURITE_MOVIE_LOADER_ID = 473;
 
+    // Query projection used to check if the movie is a favourite or not
     public static final String[] MOVIE_CHECK_PROJECTION = {MovieDetailsEntry.COLUMN_MOVIE_ID};
 
+    // Query projection used to retrieve movie details
     public static final String[] MOVIE_DETAILED_PROJECTION = {
             MovieDetailsEntry.COLUMN_MOVIE_ID,
             MovieDetailsEntry.COLUMN_BACKDROP_PATH,
             MovieDetailsEntry.COLUMN_GENRES,
+            MovieDetailsEntry.COLUMN_LANGUAGE,
             MovieDetailsEntry.COLUMN_PLOT,
             MovieDetailsEntry.COLUMN_POSTER_PATH,
             MovieDetailsEntry.COLUMN_RATINGS,
             MovieDetailsEntry.COLUMN_RELEASE_DATE,
+            MovieDetailsEntry.COLUMN_RUNTIME,
             MovieDetailsEntry.COLUMN_TITLE
     };
 
-    public static final String MOVIE_OBJECT = "movie";
-    private static final String MOVIE_CAST = "movie_cast";
-    private static final String CAST_POSITION = "cast_position";
-    private static final String CAST_STATE = "cast_state";
+    // Instance Keys
+    public static final String MOVIE_OBJECT_KEY = "movie";
+    private static final String MOVIE_CAST_KEY = "movie_cast";
+    public static final String MOVIE_REVIEWS_KEY = "movie_reviews";
+    public static final String MOVIE_VIDEOS_KEY = "movie_videos";
+
+    private static final String IS_FAVOURITE_KEY = "is_favourite";
     public static final String ACTOR_ID = "actor_id";
-    private static final String VIDEOS_POSITION = "videos_position";
-    public static final String MOVIE_REVIEWS = "movie_reviews";
-    public static final String MOVIE_VIDEOS = "movie_videos";
-    public static final String MOVIE_ID = "movie_id";
-    public static final String MOVIE_TITLE = "movie_title";
-    public static final String MOVIE_BACKDROP = "movie_backdrop";
+    private static final String CAST_POSITION_KEY = "cast_position";
+    private static final String VIDEOS_POSITION_KEY = "videos_position";
+
+    public static final String MOVIE_ID_KEY = "movie_id";
+    public static final String MOVIE_TITLE_KEY = "movie_title";
+    public static final String MOVIE_BACKDROP_KEY = "movie_backdrop";
+
 
     private Bundle mBundleState;
-    private Movie mSelectedMovie;
+    private MovieDetails mSelectedMovie;
     private int mMovieId;
     private ImageView mMovieBackdropImageView;
+    private ImageView mMoviePosterImageView;
     private TextView posterErrorTextView;
-    private TextView movieGenreTextView;
+    private TextView mMovieGenreTextView;
+    private TextView mMovieRatingTextView;
+    private TextView mMovieReleaseDateTextView;
+    private TextView mMoviePlotTextView;
+    private TextView mMovieRuntimeTextView;
 
     private TextView mCastMessagesTextView;
     private int mCastPosition = RecyclerView.NO_POSITION;
@@ -132,57 +150,30 @@ public class DetailsActivity extends AppCompatActivity implements
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
 
-        // If we have an instance saved and contains our movie object, we use it to populate our UI
-        if (savedInstanceState != null && savedInstanceState.containsKey(MOVIE_OBJECT)) {
-            mSelectedMovie = savedInstanceState.getParcelable(MOVIE_OBJECT);
-        } else {
+        // MOVIE DETAILS
+        mMovieBackdropImageView = findViewById(R.id.details_backdrop_iv);
+        mMovieGenreTextView = findViewById(R.id.details_genre_tv);
+        mMoviePosterImageView = findViewById(R.id.details_poster_iv);
+        posterErrorTextView = findViewById(R.id.poster_error_tv);
+        mMovieRatingTextView = findViewById(R.id.details_rating_tv);
+        mMovieReleaseDateTextView = findViewById(R.id.details_release_date_tv);
+        mMoviePlotTextView = findViewById(R.id.details_plot_tv);
+        mMovieRuntimeTextView = findViewById(R.id.details_runtime_tv);
+
+        if (savedInstanceState == null) {
             // Otherwise, we check our intent and see if there is a Movie object or a movieId passed
             // from MainActivity, so we can populate our UI. If there isn't we close this activity
             // and display a toast message.
             Intent intent = getIntent();
             if (intent != null) {
-                // If MainActivity passed a movie object
-                if (intent.hasExtra(MOVIE_OBJECT)) {
-                    mSelectedMovie = intent.getParcelableExtra(MOVIE_OBJECT);
-                } else if (intent.hasExtra(MOVIE_ID)) {
-                    // If MainActivity passed a movieId, get the ID and create a Movie object,
-                    // based on that ID.
-                    mMovieId = intent.getIntExtra(MOVIE_ID, 297762);
-
-                    Log.v("ID", String.valueOf(mMovieId));
-
-                    Cursor cursor = getContentResolver().query(MovieDetailsEntry.buildMovieUriWithId(mMovieId),
-                            MOVIE_DETAILED_PROJECTION,
-                            null,
-                            null,
-                            null);
-
-                    if (cursor != null && cursor.moveToFirst()) {
-                        // Find the columns of movie attributes that we're interested in
-                        int movieIdColumnIndex = cursor.getColumnIndex(MovieDetailsEntry.COLUMN_MOVIE_ID);
-                        int backdropColumnIndex = cursor.getColumnIndex(MovieDetailsEntry.COLUMN_BACKDROP_PATH);
-                        int genresColumnIndex = cursor.getColumnIndex(MovieDetailsEntry.COLUMN_GENRES);
-                        int plotColumnIndex = cursor.getColumnIndex(MovieDetailsEntry.COLUMN_PLOT);
-                        int posterColumnIndex = cursor.getColumnIndex(MovieDetailsEntry.COLUMN_POSTER_PATH);
-                        int ratingsColumnIndex = cursor.getColumnIndex(MovieDetailsEntry.COLUMN_RATINGS);
-                        int releaseDateColumnIndex = cursor.getColumnIndex(MovieDetailsEntry.COLUMN_RELEASE_DATE);
-                        int titleColumnIndex = cursor.getColumnIndex(MovieDetailsEntry.COLUMN_TITLE);
-
-                        mSelectedMovie = new Movie(
-                                cursor.getInt(movieIdColumnIndex),
-                                cursor.getDouble(ratingsColumnIndex),
-                                cursor.getString(titleColumnIndex),
-                                cursor.getString(posterColumnIndex),
-                                cursor.getString(backdropColumnIndex),
-                                cursor.getString(plotColumnIndex),
-                                cursor.getString(releaseDateColumnIndex),
-                                StringUtils.stringToIntArray(cursor.getString(genresColumnIndex))
-                        );
-
-                        cursor.close();
-                    }
-
-                    //getLoaderManager().restartLoader(FAVOURITE_LOADER_ID, null, favouriteMovieResultLoaderListener);
+                // If MainActivity passed a movie id
+                if (intent.hasExtra(MOVIE_ID_KEY)) {
+                    // Save the passed movieId
+                    mMovieId = intent.getIntExtra(MOVIE_ID_KEY, 297762);
+                    // MOVIE TITLE (set the title of our activity as the movie title)
+                    setTitle(intent.getStringExtra(MOVIE_TITLE_KEY));
+                    // Check if this movie is a favourite or not
+                    getLoaderManager().restartLoader(CHECK_IF_FAVOURITE_MOVIE_LOADER_ID,null, favouriteMovieResultLoaderListener);
                 } else {
                     closeOnError();
                 }
@@ -190,92 +181,6 @@ public class DetailsActivity extends AppCompatActivity implements
                 closeOnError();
             }
         }
-
-        // If the Movie object contains no data, we close this activity and display a toast message
-        if (mSelectedMovie == null) {
-            // Movies data unavailable
-            closeOnError();
-            return;
-        }
-
-        // Check if this movie is a favourite
-        Cursor movieCheck = getContentResolver().query(MovieDetailsEntry.buildMovieUriWithId(mSelectedMovie.getMovieId()),
-                MOVIE_CHECK_PROJECTION,
-                null,
-                null,
-                null);
-
-        if (movieCheck != null && movieCheck.moveToFirst()) {
-            mIsFavourite = true;
-            movieCheck.close();
-        } else {
-            mIsFavourite = false;
-        }
-        Log.v("MOVIE IS FAVOURITE", String.valueOf(mIsFavourite));
-
-        // BACKDROP
-        mMovieBackdropImageView = findViewById(R.id.details_backdrop_iv);
-        Picasso.with(this)
-                .load(ImageUtils.buildImageUrl(
-                        this,
-                        mSelectedMovie.getBackdropPath(),
-                        ImageUtils.BACKDROP))
-                .error(R.drawable.ic_landscape)
-                .into(mMovieBackdropImageView);
-
-        // MOVIE TITLE
-        // Set the title of our activity as the movie title
-        setTitle(mSelectedMovie.getMovieTitle());
-
-        // GENRE
-        // Generate and set movie genres
-        movieGenreTextView = findViewById(R.id.details_genre_tv);
-        movieGenreTextView.setText(StringUtils.movieGenresAsString(this, mSelectedMovie.getGenreIds()));
-
-        // POSTER
-        // Poster error message will be used if no poster is available or if no internet connection
-        final ImageView moviePosterImageView = findViewById(R.id.details_poster_iv);
-        posterErrorTextView = findViewById(R.id.poster_error_tv);
-        // Fetch movie poster, if it's available
-        Picasso.with(this)
-                .load(ImageUtils.buildImageUrl(
-                        this,
-                        mSelectedMovie.getPosterPath(),
-                        ImageUtils.POSTER))
-                .placeholder(R.drawable.no_poster)
-                .error(R.drawable.ic_local_movies)
-                .into(moviePosterImageView, new Callback() {
-                    @Override
-                    public void onSuccess() {
-                        posterErrorTextView.setVisibility(View.GONE);
-                    }
-
-                    @Override
-                    public void onError() {
-                        posterErrorTextView.setVisibility(View.VISIBLE);
-                        // If there isn't a network connection, we show a "no connection" message
-                        if (!NetworkUtils.isConnected(getApplicationContext())) {
-                            posterErrorTextView.setText(getString(R.string.no_connection));
-                        } else {
-                            // Otherwise, we show "no_poster" message
-                            posterErrorTextView.setText(getString(R.string.no_poster));
-                        }
-                        // Set poster content description for error case
-                        moviePosterImageView.setContentDescription(getString(R.string.no_poster));
-                    }
-                });
-
-        // RATINGS
-        TextView movieRatingTextView = findViewById(R.id.details_rating_tv);
-        movieRatingTextView.setText(String.valueOf(mSelectedMovie.getVoteAverage()));
-
-        // RELEASE DATE
-        TextView movieReleaseDateTextView = findViewById(R.id.details_release_date_tv);
-        movieReleaseDateTextView.setText(mSelectedMovie.getReleaseDate());
-
-        // PLOT
-        TextView moviePlotTextView = findViewById(R.id.details_plot_tv);
-        moviePlotTextView.setText(mSelectedMovie.getOverview());
 
         // CAST
         mCastMessagesTextView = findViewById(R.id.cast_messages_tv);
@@ -296,16 +201,16 @@ public class DetailsActivity extends AppCompatActivity implements
         // Show the Cast progress bar and hide the Cast RecyclerView
         hideCast();
         // Check for saved data or fetch movie cast
-        if (savedInstanceState != null && savedInstanceState.containsKey(MOVIE_CAST)) {
-            mCast = savedInstanceState.getParcelableArrayList(MOVIE_CAST);
+        if (savedInstanceState != null && savedInstanceState.containsKey(MOVIE_CAST_KEY)) {
+            mCast = savedInstanceState.getParcelableArrayList(MOVIE_CAST_KEY);
             // If cast is not null, data from server was previously fetched successfully
             if (mCast != null) {
                 // If cast is not empty, use the saved cast and repopulate the cast section
                 if (!mCast.isEmpty()) {
                     mCastAdapter = new CastAdapter(this, this);
                     mCastRecyclerView.setAdapter(mCastAdapter);
-                    if (savedInstanceState.containsKey(CAST_POSITION)) {
-                        mCastPosition = savedInstanceState.getInt(CAST_POSITION);
+                    if (savedInstanceState.containsKey(CAST_POSITION_KEY)) {
+                        mCastPosition = savedInstanceState.getInt(CAST_POSITION_KEY);
                     }
                 }
                 populateCast(mCast);
@@ -333,8 +238,8 @@ public class DetailsActivity extends AppCompatActivity implements
         // Show the Review progress bar and hide the firstReview layout
         hideReviews();
         // Check for saved data or fetch movie reviews
-        if (savedInstanceState != null && savedInstanceState.containsKey(MOVIE_REVIEWS)) {
-            mReviews = savedInstanceState.getParcelableArrayList(MOVIE_REVIEWS);
+        if (savedInstanceState != null && savedInstanceState.containsKey(MOVIE_REVIEWS_KEY)) {
+            mReviews = savedInstanceState.getParcelableArrayList(MOVIE_REVIEWS_KEY);
             // If mReview is not null, data from server was previously fetched successfully
             if (mReviews != null) {
                 // If review is not empty, use the saved reviews and repopulate the reviews section
@@ -369,8 +274,8 @@ public class DetailsActivity extends AppCompatActivity implements
         // Show the Videos progress bar and hide the Videos RecyclerView
         hideVideos();
         // Check for saved data or fetch movie videos
-        if (savedInstanceState != null && savedInstanceState.containsKey(MOVIE_VIDEOS)) {
-            mVideos = savedInstanceState.getParcelableArrayList(MOVIE_VIDEOS);
+        if (savedInstanceState != null && savedInstanceState.containsKey(MOVIE_VIDEOS_KEY)) {
+            mVideos = savedInstanceState.getParcelableArrayList(MOVIE_VIDEOS_KEY);
             // If mVideos is not null, data from server was previously fetched successfully
             if (mVideos != null) {
                 // If mVideos is not empty, use the saved videos and repopulate the video section
@@ -378,7 +283,7 @@ public class DetailsActivity extends AppCompatActivity implements
                     mVideosAdapter = new VideoAdapter(this, this);
                     mVideosRecyclerView.setAdapter(mVideosAdapter);
                     //if (savedInstanceState.containsKey(VIDEOS_POSITION)) {
-                        mVideosPosition = savedInstanceState.getInt(VIDEOS_POSITION);
+                    mVideosPosition = savedInstanceState.getInt(VIDEOS_POSITION_KEY);
                     //}
                 }
                 populateVideos(mVideos);
@@ -418,7 +323,7 @@ public class DetailsActivity extends AppCompatActivity implements
 
         if (id == R.id.action_favourite_movie) {
             if (mIsFavourite) deleteFavourite(mSelectedMovie, item);
-             else insertMovie(mSelectedMovie, item);
+            else insertMovie(mSelectedMovie, item);
 
             return true;
         }
@@ -434,18 +339,17 @@ public class DetailsActivity extends AppCompatActivity implements
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         // Movie Details
-        outState.putParcelable(MOVIE_OBJECT, mSelectedMovie);
-
+        outState.putParcelable(MOVIE_OBJECT_KEY, mSelectedMovie);
         // Cast
-        outState.putParcelableArrayList(MOVIE_CAST, mCast);
-        outState.putInt(CAST_POSITION, mCastLayoutManager.findFirstCompletelyVisibleItemPosition());
-
+        outState.putParcelableArrayList(MOVIE_CAST_KEY, mCast);
+        outState.putInt(CAST_POSITION_KEY, mCastLayoutManager.findFirstCompletelyVisibleItemPosition());
         // Reviews
-        outState.putParcelableArrayList(MOVIE_REVIEWS, mReviews);
-
+        outState.putParcelableArrayList(MOVIE_REVIEWS_KEY, mReviews);
         // Videos
-        outState.putParcelableArrayList(MOVIE_VIDEOS, mVideos);
-        outState.putInt(VIDEOS_POSITION, mVideosLayoutManager.findFirstCompletelyVisibleItemPosition());
+        outState.putParcelableArrayList(MOVIE_VIDEOS_KEY, mVideos);
+        outState.putInt(VIDEOS_POSITION_KEY, mVideosLayoutManager.findFirstCompletelyVisibleItemPosition());
+        // Favourite Movie
+        outState.putBoolean(IS_FAVOURITE_KEY, mIsFavourite);
 
         super.onSaveInstanceState(outState);
     }
@@ -454,45 +358,53 @@ public class DetailsActivity extends AppCompatActivity implements
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
         if (savedInstanceState != null) {
-            if (savedInstanceState.containsKey(MOVIE_OBJECT)) mSelectedMovie = savedInstanceState.getParcelable(MOVIE_OBJECT);
-            if (savedInstanceState.containsKey(MOVIE_CAST)) mCast = savedInstanceState.getParcelableArrayList(MOVIE_CAST);
-            if (savedInstanceState.containsKey(MOVIE_REVIEWS)) mReviews = savedInstanceState.getParcelableArrayList(MOVIE_REVIEWS);
-            if (savedInstanceState.containsKey(MOVIE_VIDEOS)) mVideos = savedInstanceState.getParcelableArrayList(MOVIE_VIDEOS);
-            if (savedInstanceState.containsKey(CAST_POSITION)) mCastPosition = savedInstanceState.getInt(CAST_POSITION);
-            if (savedInstanceState.containsKey(VIDEOS_POSITION)) mVideosPosition = savedInstanceState.getInt(VIDEOS_POSITION);
+            if (savedInstanceState.containsKey(MOVIE_OBJECT_KEY)) {
+                mSelectedMovie = savedInstanceState.getParcelable(MOVIE_OBJECT_KEY);
+                if (mSelectedMovie != null) populateMovieDetails(mSelectedMovie);
+            }
+            if (savedInstanceState.containsKey(MOVIE_CAST_KEY))
+                mCast = savedInstanceState.getParcelableArrayList(MOVIE_CAST_KEY);
+            if (savedInstanceState.containsKey(MOVIE_REVIEWS_KEY))
+                mReviews = savedInstanceState.getParcelableArrayList(MOVIE_REVIEWS_KEY);
+            if (savedInstanceState.containsKey(MOVIE_VIDEOS_KEY))
+                mVideos = savedInstanceState.getParcelableArrayList(MOVIE_VIDEOS_KEY);
+            if (savedInstanceState.containsKey(CAST_POSITION_KEY))
+                mCastPosition = savedInstanceState.getInt(CAST_POSITION_KEY);
+            if (savedInstanceState.containsKey(VIDEOS_POSITION_KEY))
+                mVideosPosition = savedInstanceState.getInt(VIDEOS_POSITION_KEY);
+            if (savedInstanceState.containsKey(IS_FAVOURITE_KEY))
+                mIsFavourite = savedInstanceState.getBoolean(IS_FAVOURITE_KEY);
         }
     }
 
     @Override
-    protected void onPause()
-    {
+    protected void onPause() {
         super.onPause();
         mBundleState = new Bundle();
 
         // Save Cast position
         mCastPosition = mCastLayoutManager.findFirstCompletelyVisibleItemPosition();
-        mBundleState.putInt(CAST_POSITION, mCastPosition);
+        mBundleState.putInt(CAST_POSITION_KEY, mCastPosition);
 
         // Save Video position
         mVideosPosition = mVideosLayoutManager.findFirstCompletelyVisibleItemPosition();
-        mBundleState.putInt(VIDEOS_POSITION, mVideosPosition);
+        mBundleState.putInt(VIDEOS_POSITION_KEY, mVideosPosition);
     }
 
     @Override
-    protected void onResume()
-    {
+    protected void onResume() {
         super.onResume();
 
         // restore RecyclerView state
         if (mBundleState != null) {
             // Restoring Cast position
-            mCastPosition = mBundleState.getInt(CAST_POSITION);
+            mCastPosition = mBundleState.getInt(CAST_POSITION_KEY);
             if (mCastPosition == RecyclerView.NO_POSITION) mCastPosition = 0;
             // Scroll the RecyclerView to mCastPosition
             mCastRecyclerView.smoothScrollToPosition(mCastPosition);
 
             // Restore Videos position
-            mVideosPosition = mBundleState.getInt(VIDEOS_POSITION);
+            mVideosPosition = mBundleState.getInt(VIDEOS_POSITION_KEY);
             if (mVideosPosition == RecyclerView.NO_POSITION) mVideosPosition = 0;
             // Scroll the RecyclerView to mVideosPosition
             mVideosRecyclerView.smoothScrollToPosition(mVideosPosition);
@@ -591,6 +503,35 @@ public class DetailsActivity extends AppCompatActivity implements
         }
     }
 
+    private LoaderManager.LoaderCallbacks<MovieDetails> movieDetailsResultLoaderListener =
+            new LoaderManager.LoaderCallbacks<MovieDetails>() {
+                @Override
+                public Loader<MovieDetails> onCreateLoader(int loaderId, Bundle bundle) {
+                    switch (loaderId) {
+                        case MOVIE_DETAILS_LOADER_ID:
+                            // If the loaded id matches ours, return a new movie details loader
+                            return new MovieDetailsLoader(getApplicationContext(), mMovieId);
+                        default:
+                            throw new RuntimeException("Loader Not Implemented: " + loaderId);
+                    }
+                }
+
+                @Override
+                public void onLoadFinished(Loader<MovieDetails> loader, MovieDetails movieDetails) {
+                    mSelectedMovie = movieDetails;
+                    // MOVIE TITLE (set the title of our activity as the movie title)
+                    setTitle(movieDetails.getMovieTitle());
+                    // Populate movie details section
+                    populateMovieDetails(movieDetails);
+                }
+
+                @Override
+                public void onLoaderReset(Loader<MovieDetails> loader) {
+                    mSelectedMovie = null;
+                    Log.v("SELECTED MOVIE", "BECAME NULL");
+                }
+            };
+
     private LoaderManager.LoaderCallbacks<ArrayList<Cast>> castResultLoaderListener =
             new LoaderManager.LoaderCallbacks<ArrayList<Cast>>() {
                 @Override
@@ -598,7 +539,7 @@ public class DetailsActivity extends AppCompatActivity implements
                     switch (loaderId) {
                         case CAST_LOADER_ID:
                             // If the loaded id matches ours, return a new cast movie loader
-                            return new CastLoader(getApplicationContext(), String.valueOf(mSelectedMovie.getMovieId()));
+                            return new CastLoader(getApplicationContext(), mMovieId);
                         default:
                             throw new RuntimeException("Loader Not Implemented: " + loaderId);
                     }
@@ -625,7 +566,7 @@ public class DetailsActivity extends AppCompatActivity implements
                     switch (loaderId) {
                         case REVIEWS_LOADER_ID:
                             // If the loaded id matches ours, return a new movie review loader
-                            return new ReviewLoader(getApplicationContext(), String.valueOf(mSelectedMovie.getMovieId()));
+                            return new ReviewLoader(getApplicationContext(), mMovieId);
                         default:
                             throw new RuntimeException("Loader Not Implemented: " + loaderId);
                     }
@@ -653,7 +594,7 @@ public class DetailsActivity extends AppCompatActivity implements
                     switch (loaderId) {
                         case VIDEOS_LOADER_ID:
                             // If the loaded id matches ours, return a new movie review loader
-                            return new VideoLoader(getApplicationContext(), String.valueOf(mSelectedMovie.getMovieId()));
+                            return new VideoLoader(getApplicationContext(), mMovieId);
                         default:
                             throw new RuntimeException("Loader Not Implemented: " + loaderId);
                     }
@@ -677,21 +618,21 @@ public class DetailsActivity extends AppCompatActivity implements
             new LoaderManager.LoaderCallbacks<Cursor>() {
                 @Override
                 public Loader<Cursor> onCreateLoader(int loaderId, Bundle bundle) {
-                    Uri uri = MovieDetailsEntry.CONTENT_URI.buildUpon()
-                            .appendPath(Integer.toString(mMovieId))
-                            .build();
-
-                    Log.v("URI", uri.toString());
-
                     switch (loaderId) {
                         case FAVOURITE_LOADER_ID:
                             return new CursorLoader(getApplicationContext(),
-                                    uri,
+                                    MovieDetailsEntry.buildMovieUriWithId(mMovieId),
                                     MOVIE_DETAILED_PROJECTION,
                                     null,
                                     null,
                                     null);
-
+                        case CHECK_IF_FAVOURITE_MOVIE_LOADER_ID:
+                            return new CursorLoader(getApplicationContext(),
+                                    MovieDetailsEntry.buildMovieUriWithId(mMovieId),
+                                    MOVIE_CHECK_PROJECTION,
+                                    null,
+                                    null,
+                                    null);
                         default:
                             throw new RuntimeException("Loader Not Implemented: " + loaderId);
                     }
@@ -699,35 +640,53 @@ public class DetailsActivity extends AppCompatActivity implements
 
                 @Override
                 public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
-                    if (cursor != null && cursor.moveToFirst()) {
-                        //if (cursor == null) return;
+                    switch (loader.getId()) {
+                        case FAVOURITE_LOADER_ID:
+                            if (cursor != null && cursor.moveToFirst()) {
+                                // Find the columns of movie attributes that we're interested in
+                                int backdropColumnIndex = cursor.getColumnIndex(MovieDetailsEntry.COLUMN_BACKDROP_PATH);
+                                int genresColumnIndex = cursor.getColumnIndex(MovieDetailsEntry.COLUMN_GENRES);
+                                int movieIdColumnIndex = cursor.getColumnIndex(MovieDetailsEntry.COLUMN_MOVIE_ID);
+                                int languageColumnIndex = cursor.getColumnIndex(MovieDetailsEntry.COLUMN_LANGUAGE);
+                                int plotColumnIndex = cursor.getColumnIndex(MovieDetailsEntry.COLUMN_PLOT);
+                                int posterColumnIndex = cursor.getColumnIndex(MovieDetailsEntry.COLUMN_POSTER_PATH);
+                                int ratingsColumnIndex = cursor.getColumnIndex(MovieDetailsEntry.COLUMN_RATINGS);
+                                int releaseDateColumnIndex = cursor.getColumnIndex(MovieDetailsEntry.COLUMN_RELEASE_DATE);
+                                int runtimeColumnIndex = cursor.getColumnIndex(MovieDetailsEntry.COLUMN_RUNTIME);
+                                int titleColumnIndex = cursor.getColumnIndex(MovieDetailsEntry.COLUMN_TITLE);
 
-                        Log.v("LOAD FINISHED", "CURSOR HAS DATA");
+                                // Set the extracted value from the Cursor for the given column index and use each
+                                // value to create a Movie object
+                                mSelectedMovie = new MovieDetails(
+                                        cursor.getString(backdropColumnIndex),
+                                        TextUtils.split(cursor.getString(genresColumnIndex), ", "),
+                                        cursor.getInt(movieIdColumnIndex),
+                                        cursor.getString(languageColumnIndex),
+                                        cursor.getString(plotColumnIndex),
+                                        cursor.getString(posterColumnIndex),
+                                        cursor.getDouble(ratingsColumnIndex),
+                                        cursor.getString(releaseDateColumnIndex),
+                                        cursor.getInt(runtimeColumnIndex),
+                                        cursor.getString(titleColumnIndex)
+                                );
+                                cursor.close();
+                                // Populate movie details section
+                                populateMovieDetails(mSelectedMovie);
+                            }
+                            break;
 
-                        //cursor.moveToFirst();
-
-                        // Find the columns of movie attributes that we're interested in
-                        int movieIdColumnIndex = cursor.getColumnIndex(MovieDetailsEntry.COLUMN_MOVIE_ID);
-                        int backdropColumnIndex = cursor.getColumnIndex(MovieDetailsEntry.COLUMN_BACKDROP_PATH);
-                        int genresColumnIndex = cursor.getColumnIndex(MovieDetailsEntry.COLUMN_GENRES);
-                        int plotColumnIndex = cursor.getColumnIndex(MovieDetailsEntry.COLUMN_PLOT);
-                        int posterColumnIndex = cursor.getColumnIndex(MovieDetailsEntry.COLUMN_POSTER_PATH);
-                        int ratingsColumnIndex = cursor.getColumnIndex(MovieDetailsEntry.COLUMN_RATINGS);
-                        int releaseDateColumnIndex = cursor.getColumnIndex(MovieDetailsEntry.COLUMN_RELEASE_DATE);
-                        int titleColumnIndex = cursor.getColumnIndex(MovieDetailsEntry.COLUMN_TITLE);
-
-                        // Set the extracted value from the Cursor for the given column index and use each
-                        // value to create a Movie object
-                        mSelectedMovie = new Movie(
-                                cursor.getInt(movieIdColumnIndex),
-                                cursor.getDouble(ratingsColumnIndex),
-                                cursor.getString(titleColumnIndex),
-                                cursor.getString(posterColumnIndex),
-                                cursor.getString(backdropColumnIndex),
-                                cursor.getString(plotColumnIndex),
-                                cursor.getString(releaseDateColumnIndex),
-                                StringUtils.stringToIntArray(cursor.getString(genresColumnIndex))
-                        );
+                        case CHECK_IF_FAVOURITE_MOVIE_LOADER_ID:
+                            if (cursor != null && cursor.moveToFirst()) {
+                                mIsFavourite = true;
+                                cursor.close();
+                                // If it's a favourite movie, load data using a cursor
+                                getLoaderManager().restartLoader(FAVOURITE_LOADER_ID, null, favouriteMovieResultLoaderListener);
+                            } else {
+                                mIsFavourite = false;
+                                // Otherwise, use a movie details loader and download the movie details
+                                getLoaderManager().initLoader(MOVIE_DETAILS_LOADER_ID, null, movieDetailsResultLoaderListener);
+                            }
+                            break;
                     }
                 }
 
@@ -736,6 +695,61 @@ public class DetailsActivity extends AppCompatActivity implements
 
                 }
             };
+
+    private void populateMovieDetails(MovieDetails movieDetails) {
+        // BACKDROP
+        Picasso.with(getApplicationContext())
+                .load(ImageUtils.buildImageUrl(
+                        getApplicationContext(),
+                        movieDetails.getBackdropPath(),
+                        ImageUtils.BACKDROP))
+                .error(R.drawable.ic_landscape)
+                .into(mMovieBackdropImageView);
+
+        // MOVIE TITLE (set the title of our activity as the movie title)
+        setTitle(movieDetails.getMovieTitle());
+
+        // GENRE (generate and set movie genres)
+        mMovieGenreTextView.setText(TextUtils.join(", ", movieDetails.getGenreIds()));
+        // POSTER
+        // Fetch the movie poster, if it's available. If no poster is available or if no internet
+        // connection, poster error message will be used
+        Picasso.with(this)
+                .load(ImageUtils.buildImageUrl(
+                        this,
+                        movieDetails.getPosterPath(),
+                        ImageUtils.POSTER))
+                .placeholder(R.drawable.no_poster)
+                .error(R.drawable.ic_local_movies)
+                .into(mMoviePosterImageView, new Callback() {
+                    @Override
+                    public void onSuccess() {
+                        posterErrorTextView.setVisibility(View.GONE);
+                    }
+
+                    @Override
+                    public void onError() {
+                        posterErrorTextView.setVisibility(View.VISIBLE);
+                        // If there isn't a network connection, we show a "no connection" message
+                        if (!NetworkUtils.isConnected(getApplicationContext())) {
+                            posterErrorTextView.setText(getString(R.string.no_connection));
+                        } else {
+                            // Otherwise, we show "no_poster" message
+                            posterErrorTextView.setText(getString(R.string.no_poster));
+                        }
+                        // Set poster content description for error case
+                        mMoviePosterImageView.setContentDescription(getString(R.string.no_poster));
+                    }
+                });
+        // RATINGS
+        mMovieRatingTextView.setText(String.valueOf(movieDetails.getVoteAverage()).concat(getString(R.string.max_rating)));
+        // RUNTIME
+        mMovieRuntimeTextView.setText(String.valueOf(movieDetails.getRuntime()));
+        // RELEASE DATE
+        mMovieReleaseDateTextView.setText(movieDetails.getReleaseDate());
+        // PLOT
+        mMoviePlotTextView.setText(movieDetails.getOverview());
+    }
 
     private void populateCast(ArrayList<Cast> movieCast) {
         if (movieCast != null) {
@@ -770,9 +784,9 @@ public class DetailsActivity extends AppCompatActivity implements
                         @Override
                         public void onClick(View view) {
                             Intent reviewsIntent = new Intent(getApplicationContext(), ReviewsActivity.class);
-                            reviewsIntent.putParcelableArrayListExtra(MOVIE_REVIEWS, movieReviews);
-                            reviewsIntent.putExtra(MOVIE_TITLE, mSelectedMovie.getMovieTitle());
-                            reviewsIntent.putExtra(MOVIE_BACKDROP, mSelectedMovie.getBackdropPath());
+                            reviewsIntent.putParcelableArrayListExtra(MOVIE_REVIEWS_KEY, movieReviews);
+                            reviewsIntent.putExtra(MOVIE_TITLE_KEY, mSelectedMovie.getMovieTitle());
+                            reviewsIntent.putExtra(MOVIE_BACKDROP_KEY, mSelectedMovie.getBackdropPath());
                             startActivity(reviewsIntent);
                         }
                     });
@@ -820,15 +834,17 @@ public class DetailsActivity extends AppCompatActivity implements
         }
     }
 
-    private void insertMovie(Movie selectedMovie, MenuItem item) {
+    private void insertMovie(MovieDetails selectedMovie, MenuItem item) {
         ContentValues values = new ContentValues();
         values.put(MovieDetailsEntry.COLUMN_MOVIE_ID, selectedMovie.getMovieId());
         values.put(MovieDetailsEntry.COLUMN_BACKDROP_PATH, selectedMovie.getBackdropPath());
-        values.put(MovieDetailsEntry.COLUMN_GENRES, StringUtils.intArrayToString(selectedMovie.getGenreIds()));
+        values.put(MovieDetailsEntry.COLUMN_GENRES, TextUtils.join(", ", selectedMovie.getGenreIds()));
+        values.put(MovieDetailsEntry.COLUMN_LANGUAGE, selectedMovie.getLanguage());
         values.put(MovieDetailsEntry.COLUMN_PLOT, selectedMovie.getOverview());
         values.put(MovieDetailsEntry.COLUMN_POSTER_PATH, selectedMovie.getPosterPath());
         values.put(MovieDetailsEntry.COLUMN_RATINGS, selectedMovie.getVoteAverage());
         values.put(MovieDetailsEntry.COLUMN_RELEASE_DATE, selectedMovie.getReleaseDate());
+        values.put(MovieDetailsEntry.COLUMN_RUNTIME, selectedMovie.getRuntime());
         values.put(MovieDetailsEntry.COLUMN_TITLE, selectedMovie.getMovieTitle());
 
         Uri responseUri = getContentResolver().insert(MovieDetailsEntry.CONTENT_URI, values);
@@ -846,7 +862,7 @@ public class DetailsActivity extends AppCompatActivity implements
         }
     }
 
-    private void deleteFavourite(Movie mSelectedMovie, MenuItem item) {
+    private void deleteFavourite(MovieDetails mSelectedMovie, MenuItem item) {
         int rowsDeleted = getContentResolver().delete(MovieDetailsEntry.CONTENT_URI,
                 MovieDetailsEntry.COLUMN_MOVIE_ID + " =?",
                 new String[]{String.valueOf(mSelectedMovie.getMovieId())});
@@ -881,7 +897,6 @@ public class DetailsActivity extends AppCompatActivity implements
     public void onListItemClick(Cast castClicked) {
         Intent actorProfileIntent = new Intent(DetailsActivity.this, ProfileActivity.class);
         actorProfileIntent.putExtra(ACTOR_ID, castClicked.getActorId());
-        toastThis(String.valueOf(castClicked.getActorId()));
         startActivity(actorProfileIntent);
     }
 }

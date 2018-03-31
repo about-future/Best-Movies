@@ -11,6 +11,7 @@ import android.util.Log;
 import com.future.bestmovies.data.Actor;
 import com.future.bestmovies.data.Movie;
 import com.future.bestmovies.data.Cast;
+import com.future.bestmovies.data.MovieDetails;
 import com.future.bestmovies.data.MoviePreferences;
 import com.future.bestmovies.data.Review;
 import com.future.bestmovies.data.Video;
@@ -37,6 +38,7 @@ public class NetworkUtils {
     private static final String API_KEY = "api_key";
     private static final String API_ID = "xxx";
 
+    //https://api.themoviedb.org/3/movie/157336?api_key=
     //https://api.themoviedb.org/3/person/10297/movie_credits?api_key=
     //https://api.themoviedb.org/3/person/10297?api_key=
 
@@ -51,14 +53,14 @@ public class NetworkUtils {
     private static URL getUrl(Context context) {
         String queryType = MoviePreferences.getPreferredQueryType(context);
         int pageNumber = MoviePreferences.getLastPageNumber(context);
-        return buildMovieApiUrl(queryType, pageNumber);
+        return buildMoviesApiUrl(queryType, pageNumber);
     }
 
     /* Build and return the API Url for a category of movies
      * @param queryType is used to query a certain category of movies
      * @pram pageNumber is used to select the page with results
      */
-    private static URL buildMovieApiUrl(String queryType, int pageNumber) {
+    private static URL buildMoviesApiUrl(String queryType, int pageNumber) {
         Uri movieQueryUri = Uri.parse(API_MOVIE_BASE_URL).buildUpon()
                 .appendPath(MOVIE)
                 .appendPath(queryType)
@@ -76,13 +78,31 @@ public class NetworkUtils {
         }
     }
 
+    /* Build and return the API URL for movie details
+     * @param movieId is used to build the url
+     */
+    private static URL buildMovieDetailsApiUrl(int movieId) {
+        Uri movieQueryUri = Uri.parse(API_MOVIE_BASE_URL).buildUpon()
+                .appendPath(MOVIE)
+                .appendPath(String.valueOf(movieId))
+                .appendQueryParameter(API_KEY, API_ID)
+                .build();
+
+        try {
+            return new URL(movieQueryUri.toString());
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
     /* Build and return the API URL for movie cast(credits)
      * @param movieId is used to build the url
      */
-    private static URL buildMovieCastApiUrl(String movieId) {
+    private static URL buildMovieCastApiUrl(int movieId) {
         Uri movieQueryUri = Uri.parse(API_MOVIE_BASE_URL).buildUpon()
                 .appendPath(MOVIE)
-                .appendPath(movieId)
+                .appendPath(String.valueOf(movieId))
                 .appendPath(CREDITS)
                 .appendQueryParameter(API_KEY, API_ID)
                 .build();
@@ -98,10 +118,10 @@ public class NetworkUtils {
     /* Build and return the API URL for movie videos
      * @param movieId is used to build the url
      */
-    private static URL buildMovieVideosApiUrl(String movieId) {
+    private static URL buildMovieVideosApiUrl(int movieId) {
         Uri movieQueryUri = Uri.parse(API_MOVIE_BASE_URL).buildUpon()
                 .appendPath(MOVIE)
-                .appendPath(movieId)
+                .appendPath(String.valueOf(movieId))
                 .appendPath(VIDEOS)
                 .appendQueryParameter(API_KEY, API_ID)
                 .build();
@@ -117,10 +137,10 @@ public class NetworkUtils {
     /* Build and return the API URL for movie reviews
      * @param movieId is used to build the url
      */
-    private static URL buildMovieReviewsApiUrl(String movieId) {
+    private static URL buildMovieReviewsApiUrl(int movieId) {
         Uri movieQueryUri = Uri.parse(API_MOVIE_BASE_URL).buildUpon()
                 .appendPath(MOVIE)
-                .appendPath(movieId)
+                .appendPath(String.valueOf(movieId))
                 .appendPath(REVIEWS)
                 .appendQueryParameter(API_KEY, API_ID)
                 .build();
@@ -203,14 +223,33 @@ public class NetworkUtils {
      * of Movie objects.
      * @param context is used to access getUrl utility method
      */
-    public static ArrayList<Movie> fetchMovieData(Context context) {
+    public static ArrayList<Movie> fetchMovieCategory(Context context) {
         try {
             // Create and return Api url
             URL url = getUrl(context);
             // Use the URL to retrieve the JSON response from Movie API
             String jsonMovieResponse = NetworkUtils.getResponseFromHttpUrl(url);
             // Parse JSON response and return array of Movie objects
-            return JsonUtils.parseMoviesJson(jsonMovieResponse);
+            return JsonUtils.parseMovieCategoryJson(jsonMovieResponse);
+        } catch (Exception e) {
+            Log.e(TAG, "Error accessing the Server:", e);
+            // If something went wrong, we return an empty array of Movie objects
+            return null;
+        }
+    }
+
+    /* Perform a network request using a URL, parse the JSON from that request and return
+     * a Movie object.
+     * @param context is used to access getUrl utility method
+     */
+    public static MovieDetails fetchMovieDetails(int movieId) {
+        try {
+            // Create and return Api url
+            URL url = buildMovieDetailsApiUrl(movieId);
+            // Use the URL to retrieve the JSON response from Movie API
+            String jsonMovieDetailsResponse = NetworkUtils.getResponseFromHttpUrl(url);
+            // Parse JSON response and return array of Movie objects
+            return JsonUtils.parseMovieDetailsJson(jsonMovieDetailsResponse);
         } catch (Exception e) {
             Log.e(TAG, "Error accessing the Server:", e);
             // If something went wrong, we return an empty array of Movie objects
@@ -222,7 +261,7 @@ public class NetworkUtils {
      * list of Cast objects.
      * @param movieId is used to access buildMovieCastApiUrl utility method
      */
-    public static ArrayList<Cast> fetchMovieCast(String movieId) {
+    public static ArrayList<Cast> fetchMovieCast(int movieId) {
         try {
             // Create and return the Api URL for movie cast, based on movie id
             URL url = buildMovieCastApiUrl(movieId);
@@ -241,7 +280,7 @@ public class NetworkUtils {
      * list of Review objects.
      * @param movieId is used to access buildMovieReviewsApiUrl utility method
      */
-    public static ArrayList<Review> fetchMovieReviews(String movieId) {
+    public static ArrayList<Review> fetchMovieReviews(int movieId) {
         try {
             // Create and return the Api URL for movie reviews, based on movie id
             URL url = buildMovieReviewsApiUrl(movieId);
@@ -260,7 +299,7 @@ public class NetworkUtils {
      * list of Video objects.
      * @param movieId is used to access buildMovieVideosApiUrl utility method
      */
-    public static ArrayList<Video> fetchMovieVideos(String movieId) {
+    public static ArrayList<Video> fetchMovieVideos(int movieId) {
         try {
             // Create and return the Api URL for movie videos, based on movie id
             URL url = buildMovieVideosApiUrl(movieId);

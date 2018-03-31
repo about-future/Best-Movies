@@ -27,13 +27,16 @@ import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
-import static com.future.bestmovies.DetailsActivity.MOVIE_BACKDROP;
-import static com.future.bestmovies.DetailsActivity.MOVIE_REVIEWS;
-import static com.future.bestmovies.DetailsActivity.MOVIE_TITLE;
+import static com.future.bestmovies.DetailsActivity.MOVIE_BACKDROP_KEY;
+import static com.future.bestmovies.DetailsActivity.MOVIE_REVIEWS_KEY;
+import static com.future.bestmovies.DetailsActivity.MOVIE_TITLE_KEY;
 
 public class ReviewsActivity extends AppCompatActivity {
 
     private static final String REVIEWS_POSITION = "reviews_position";
+//    private static final String MOVIE_REVIEWS_KEY = "movie_reviews";
+//    private static final String MOVIE_TITLE_KEY = "movie_title";
+//    private static final String MOVIE_BACKDROP_KEY = "movie_backdrop";
     private int mReviewPosition = RecyclerView.NO_POSITION;
     private ArrayList<Review> mReviews;
     private ReviewAdapter mReviewAdapter;
@@ -63,31 +66,31 @@ public class ReviewsActivity extends AppCompatActivity {
         mReviewsRecyclerView.setHasFixedSize(true);
 
         // If we have an instance saved and contains our movie id, we use it to populate our UI
-        if (savedInstanceState != null && savedInstanceState.containsKey(MOVIE_REVIEWS)) {
-            mReviews = savedInstanceState.getParcelableArrayList(MOVIE_REVIEWS);
+        if (savedInstanceState != null && savedInstanceState.containsKey(MOVIE_REVIEWS_KEY)) {
+            mReviews = savedInstanceState.getParcelableArrayList(MOVIE_REVIEWS_KEY);
             if (savedInstanceState.containsKey(REVIEWS_POSITION)) {
                 mReviewPosition = savedInstanceState.getInt(REVIEWS_POSITION);
             }
 
-            if (savedInstanceState.containsKey(MOVIE_TITLE)) {
-                mMovieTitle = savedInstanceState.getString(MOVIE_TITLE);
+            if (savedInstanceState.containsKey(MOVIE_TITLE_KEY)) {
+                mMovieTitle = savedInstanceState.getString(MOVIE_TITLE_KEY);
             }
 
-            if (savedInstanceState.containsKey(MOVIE_BACKDROP)) {
-                mMovieBackdrop = savedInstanceState.getString(MOVIE_BACKDROP);
+            if (savedInstanceState.containsKey(MOVIE_BACKDROP_KEY)) {
+                mMovieBackdrop = savedInstanceState.getString(MOVIE_BACKDROP_KEY);
             }
         } else {
             // Otherwise, we check our intent and see if there is an ArrayList of Review objects
             // passed from DetailsActivity, so we can populate our reviews UI. If there isn't, we
             // close this activity and display a toast message.
             Intent intent = getIntent();
-            if (intent != null && intent.hasExtra(MOVIE_REVIEWS)) {
-                mReviews = intent.getParcelableArrayListExtra(MOVIE_REVIEWS);
-                if (intent.hasExtra(MOVIE_TITLE)) {
-                    mMovieTitle = intent.getStringExtra(MOVIE_TITLE);
+            if (intent != null && intent.hasExtra(MOVIE_REVIEWS_KEY)) {
+                mReviews = intent.getParcelableArrayListExtra(MOVIE_REVIEWS_KEY);
+                if (intent.hasExtra(MOVIE_TITLE_KEY)) {
+                    mMovieTitle = intent.getStringExtra(MOVIE_TITLE_KEY);
                 }
-                if (intent.hasExtra(MOVIE_BACKDROP)) {
-                    mMovieBackdrop = intent.getStringExtra(MOVIE_BACKDROP);
+                if (intent.hasExtra(MOVIE_BACKDROP_KEY)) {
+                    mMovieBackdrop = intent.getStringExtra(MOVIE_BACKDROP_KEY);
                 }
             } else {
                 closeOnError();
@@ -133,14 +136,14 @@ public class ReviewsActivity extends AppCompatActivity {
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        outState.putParcelableArrayList(MOVIE_REVIEWS, mReviews);
+        outState.putParcelableArrayList(MOVIE_REVIEWS_KEY, mReviews);
         if (mReviewLayoutManager.findFirstCompletelyVisibleItemPosition() != RecyclerView.NO_POSITION) {
             outState.putInt(REVIEWS_POSITION, mReviewLayoutManager.findFirstCompletelyVisibleItemPosition());
         } else {
             outState.putInt(REVIEWS_POSITION, mReviewLayoutManager.findFirstVisibleItemPosition());
         }
-        outState.putString(MOVIE_TITLE, mMovieTitle);
-        outState.putString(MOVIE_BACKDROP, mMovieBackdrop);
+        outState.putString(MOVIE_TITLE_KEY, mMovieTitle);
+        outState.putString(MOVIE_BACKDROP_KEY, mMovieBackdrop);
 
         super.onSaveInstanceState(outState);
     }

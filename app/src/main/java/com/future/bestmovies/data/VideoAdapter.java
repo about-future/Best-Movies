@@ -19,7 +19,7 @@ import java.util.ArrayList;
 
 public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHolder> {
     private final Context mContext;
-    private ArrayList<Video> mVideos;
+    private ArrayList<Video> mVideos = new ArrayList<Video>(){};
     private final ListItemClickListener mOnclickListener;
 
     public interface ListItemClickListener {

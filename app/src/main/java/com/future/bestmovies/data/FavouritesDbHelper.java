@@ -19,10 +19,12 @@ public class FavouritesDbHelper extends SQLiteOpenHelper {
                     MovieDetailsEntry.COLUMN_MOVIE_ID       + " INTEGER NOT NULL, "                     +
                     MovieDetailsEntry.COLUMN_BACKDROP_PATH  + " TEXT, "                                 +
                     MovieDetailsEntry.COLUMN_GENRES         + " TEXT, "                                 +
+                    MovieDetailsEntry.COLUMN_LANGUAGE       + " TEXT, "                                 +
                     MovieDetailsEntry.COLUMN_PLOT           + " TEXT, "                                 +
                     MovieDetailsEntry.COLUMN_POSTER_PATH    + " TEXT, "                                 +
                     MovieDetailsEntry.COLUMN_RATINGS        + " REAL, "                                 +
                     MovieDetailsEntry.COLUMN_RELEASE_DATE   + " TEXT, "                                 +
+                    MovieDetailsEntry.COLUMN_RUNTIME        + " INTEGER, "                              +
                     MovieDetailsEntry.COLUMN_TITLE          + " TEXT NOT NULL, "                        +
                     /*
                     * To ensure this table can only contain one movie entry per with a movie_id,

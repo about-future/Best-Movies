@@ -7,6 +7,7 @@ import org.json.JSONObject;
 import com.future.bestmovies.data.Actor;
 import com.future.bestmovies.data.Movie;
 import com.future.bestmovies.data.Cast;
+import com.future.bestmovies.data.MovieDetails;
 import com.future.bestmovies.data.Review;
 import com.future.bestmovies.data.Video;
 
@@ -18,16 +19,20 @@ public class JsonUtils {
     // Main label
     private static final String MOVIE_ID = "id";
 
-    //Movie labels
+    //Movie and MovieDetails labels
     private static final String RESULTS = "results";
+    private static final String RESULT_BACKDROP_PATH = "backdrop_path";
+    private static final String RESULT_GENRE_IDS = "genre_ids";
+    private static final String RESULT_GENRES = "genres";
+    private static final String RESULT_GENRE_NAME = "name";
     private static final String RESULT_ID = "id";
     private static final String RESULT_TITLE = "original_title";
-    private static final String RESULT_POSTER_PATH = "poster_path";
-    private static final String RESULT_BACKDROP_PATH = "backdrop_path";
+    private static final String RESULT_LANGUAGE = "original_language";
     private static final String RESULT_OVERVIEW = "overview";
-    private static final String RESULT_VOTE_AVERAGE = "vote_average";
+    private static final String RESULT_POSTER_PATH = "poster_path";
     private static final String RESULT_RELEASE_DATE = "release_date";
-    private static final String RESULT_GENRE_IDS = "genre_ids";
+    private static final String RESULT_RUNTIME = "runtime";
+    private static final String RESULT_VOTE_AVERAGE = "vote_average";
 
     //Cast labels
     private static final String CAST = "cast";
@@ -64,15 +69,10 @@ public class JsonUtils {
     //private static final String PROFILE_PATH = "profile_path";
 
     // Parses the JSON response for the list of movies and their details
-    public static ArrayList<Movie> parseMoviesJson(String moviesJsonStr) throws JSONException {
+    public static ArrayList<Movie> parseMovieCategoryJson(String moviesJsonStr) throws JSONException {
         int id;
-        double voteAverage;
-        String title;
         String posterPath;
-        String backdropPath;
-        String overview;
-        String releaseDate;
-        int[] genreIds;
+        String title;
 
         // Instantiate a JSON object so we can get data.
         JSONObject allMoviesJson = new JSONObject(moviesJsonStr);
@@ -83,23 +83,54 @@ public class JsonUtils {
             JSONObject movieJson = jsonResultsArray.getJSONObject(i);
 
             id = movieJson.getInt(RESULT_ID);
-            voteAverage = movieJson.getDouble(RESULT_VOTE_AVERAGE);
-            title = movieJson.getString(RESULT_TITLE);
             posterPath = movieJson.getString(RESULT_POSTER_PATH);
-            backdropPath = movieJson.getString(RESULT_BACKDROP_PATH);
-            overview = movieJson.getString(RESULT_OVERVIEW);
-            releaseDate = movieJson.getString(RESULT_RELEASE_DATE);
+            title = movieJson.getString(RESULT_TITLE);
 
-            JSONArray genreArray = movieJson.getJSONArray(RESULT_GENRE_IDS);
-            genreIds = new int[genreArray.length()];
-            for (int j = 0; j < genreArray.length(); j++) {
-                genreIds[j] = genreArray.getInt(j);
-            }
-
-            movies.add(i, new Movie(id, voteAverage, title, posterPath, backdropPath, overview, releaseDate, genreIds));
+            movies.add(i, new Movie(id, posterPath, title));
         }
 
         return movies;
+    }
+
+    // Parses the JSON response for the list of movies and their details
+    public static MovieDetails parseMovieDetailsJson(String movieDetailsJsonStr) throws JSONException {
+        String backdropPath;
+        String[] genres;
+        int id;
+        String language;
+        String title;
+        String overview;
+        String posterPath;
+        String releaseDate;
+        int runtime;
+        double voteAverage;
+
+        // Instantiate a JSON object so we can get data.
+        JSONObject movieDetailsJson = new JSONObject(movieDetailsJsonStr);
+
+        backdropPath = movieDetailsJson.getString(RESULT_BACKDROP_PATH);
+        JSONArray genreArray = movieDetailsJson.getJSONArray(RESULT_GENRES);
+        genres = new String[genreArray.length()];
+        for (int i = 0; i < genreArray.length(); i++) {
+            JSONObject genreObject = genreArray.getJSONObject(i);
+            genres[i] = genreObject.getString(RESULT_GENRE_NAME);
+        }
+        id = movieDetailsJson.getInt(RESULT_ID);
+        language = movieDetailsJson.getString(RESULT_LANGUAGE);
+        title = movieDetailsJson.getString(RESULT_TITLE);
+        overview = movieDetailsJson.getString(RESULT_OVERVIEW);
+        posterPath = movieDetailsJson.getString(RESULT_POSTER_PATH);
+        releaseDate = movieDetailsJson.getString(RESULT_RELEASE_DATE);
+        try {
+            runtime = movieDetailsJson.getInt(RESULT_RUNTIME);
+        } catch (JSONException e) {
+            runtime = 0;
+        }
+        voteAverage = movieDetailsJson.getDouble(RESULT_VOTE_AVERAGE);
+
+        return new MovieDetails(
+                backdropPath, genres, id, language, overview,
+                posterPath, voteAverage, releaseDate, runtime, title);
     }
 
     // Parses the JSON response for entire list of actors from selected movie
@@ -200,7 +231,11 @@ public class JsonUtils {
         deathday = actorDetailsJson.getString(DEATHDAY);
         name = actorDetailsJson.getString(NAME);
         biography = actorDetailsJson.getString(BIOGRAPHY);
-        placeOfBirth = actorDetailsJson.getString(PLACE_OF_BIRTH);
+        try {
+            placeOfBirth = actorDetailsJson.getString(PLACE_OF_BIRTH);
+        } catch (JSONException e) {
+            placeOfBirth = "Unknown";
+        }
         profilePath = actorDetailsJson.getString(PROFILE_PATH);
 
         return new Actor(id, birthday, deathday, name, biography, placeOfBirth, profilePath);

@@ -9,9 +9,9 @@ import java.util.ArrayList;
 
 
 public class ReviewLoader extends AsyncTaskLoader<ArrayList<Review>> {
-    private final String movieId;
+    private final int movieId;
 
-    public ReviewLoader(Context context, String movieId) {
+    public ReviewLoader(Context context, int movieId) {
         super(context);
         this.movieId = movieId;
     }

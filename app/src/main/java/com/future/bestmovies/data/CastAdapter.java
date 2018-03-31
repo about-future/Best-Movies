@@ -19,7 +19,7 @@ import java.util.ArrayList;
 
 public class CastAdapter extends RecyclerView.Adapter<CastAdapter.CastViewHolder> {
     private final Context mContext;
-    private ArrayList<Cast> mCast;
+    private ArrayList<Cast> mCast = new ArrayList<Cast>(){};
     private final ListItemClickListener mOnClickListener;
 
     public interface ListItemClickListener {

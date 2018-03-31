@@ -44,6 +44,8 @@ public class FavouritesContract {
         public final static String COLUMN_RATINGS =             "ratings";          // Type: DOUBLE
         public final static String COLUMN_RELEASE_DATE =        "release_date";     // Type: TEXT
         public final static String COLUMN_GENRES =              "genres";           // Type: TEXT
+        public final static String COLUMN_LANGUAGE =            "language";         // Type: TEXT
+        public final static String COLUMN_RUNTIME =             "runtime";          // Type: INTEGER
 
         public static Uri buildMovieUriWithId(int movieId) {
             return CONTENT_URI.buildUpon()

@@ -4,11 +4,11 @@ import android.content.Context;
 import android.database.Cursor;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.future.bestmovies.R;
 import com.future.bestmovies.data.FavouritesContract.MovieDetailsEntry;
@@ -18,7 +18,7 @@ import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
 
 
-public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHolder> {
+public class MovieCategoryAdapter extends RecyclerView.Adapter<MovieCategoryAdapter.MovieViewHolder> {
 
     private final Context mContext;
     private ArrayList<Movie> mMovies = new ArrayList<Movie>(){};
@@ -29,7 +29,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
         void onGridItemClick(Movie movieClicked, int movieId);
     }
 
-    public MovieAdapter(Context context, GridItemClickListener listener) {
+    public MovieCategoryAdapter(Context context, GridItemClickListener listener) {
         mContext = context;
         mOnClickListener = listener;
     }
@@ -65,7 +65,6 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
             return mMovies.size();
         else
             return mMoviesCursor.getCount();
-
     }
 
     // This method swaps the old movie result with the newly loaded ones and notify the change

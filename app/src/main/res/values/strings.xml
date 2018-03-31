@@ -43,8 +43,9 @@
     <string name="cast_label">Cast</string>
     <string name="videos_label">Videos</string>
     <string name="reviews_label">Reviews</string>
-    <string name="max_rating">\/\ 10</string>
+    <string name="max_rating">\ /\ 10</string>
     <string name="add_to_favourites">Add to favourites</string>
+    <string name="runtime_label">Runtime</string>
 
     <!-- Button Labels -->
     <string name="see_all">See all</string>

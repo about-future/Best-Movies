@@ -48,19 +48,7 @@
             android:textSize="22sp"
             app:layout_constraintStart_toEndOf="@id/details_poster_iv"
             app:layout_constraintTop_toTopOf="parent"
-            tools:text="8.6" />
-
-        <TextView
-            android:id="@+id/details_max_rating_label"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:fontFamily="sans-serif-condensed"
-            android:text="@string/max_rating"
-            android:textColor="@color/colorWhite"
-            android:textSize="22sp"
-            app:layout_constraintBottom_toBottomOf="@id/details_rating_tv"
-            app:layout_constraintStart_toEndOf="@id/details_rating_tv" />
+            tools:text="8.6 / 10" />
 
         <TextView
             android:id="@+id/details_rating_label"
@@ -75,7 +63,7 @@
             app:layout_constraintTop_toBottomOf="@id/details_rating_tv" />
 
         <TextView
-            android:id="@+id/details_release_date_tv"
+            android:id="@+id/details_runtime_tv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/details_horizontal_spacing"
@@ -85,6 +73,31 @@
             android:textSize="22sp"
             app:layout_constraintStart_toEndOf="@id/details_poster_iv"
             app:layout_constraintTop_toBottomOf="@id/details_rating_label"
+            tools:text="2h 49m" />
+
+        <TextView
+            android:id="@+id/details_runtime_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/details_horizontal_spacing"
+            android:fontFamily="sans-serif-condensed"
+            android:text="@string/runtime_label"
+            android:textColor="@color/colorAccent"
+            android:textSize="@dimen/details_font_size"
+            app:layout_constraintStart_toEndOf="@id/details_poster_iv"
+            app:layout_constraintTop_toBottomOf="@id/details_runtime_tv" />
+
+        <TextView
+            android:id="@+id/details_release_date_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/details_horizontal_spacing"
+            android:layout_marginTop="@dimen/details_vertical_spacing"
+            android:fontFamily="sans-serif-condensed"
+            android:textColor="@color/colorWhite"
+            android:textSize="22sp"
+            app:layout_constraintStart_toEndOf="@id/details_poster_iv"
+            app:layout_constraintTop_toBottomOf="@id/details_runtime_label"
             tools:text="2018-11-05" />
 
         <TextView

@@ -9,9 +9,9 @@ import java.util.ArrayList;
 
 
 public class VideoLoader extends AsyncTaskLoader<ArrayList<Video>> {
-    private final String movieId;
+    private final int movieId;
 
-    public VideoLoader(Context context, String movieId) {
+    public VideoLoader(Context context, int movieId) {
         super(context);
         this.movieId = movieId;
     }

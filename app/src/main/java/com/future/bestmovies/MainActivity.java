@@ -23,10 +23,11 @@ import android.widget.AbsListView;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.future.bestmovies.data.Movie;
-import com.future.bestmovies.data.MovieAdapter;
-import com.future.bestmovies.data.MovieLoader;
+import com.future.bestmovies.data.MovieCategoryAdapter;
+import com.future.bestmovies.data.MovieCategoryLoader;
 import com.future.bestmovies.data.MoviePreferences;
 import com.future.bestmovies.utils.ImageUtils;
 import com.future.bestmovies.utils.NetworkUtils;
@@ -38,7 +39,7 @@ import static com.future.bestmovies.data.FavouritesContract.*;
 
 
 public class MainActivity extends AppCompatActivity implements
-        MovieAdapter.GridItemClickListener, LoaderManager.LoaderCallbacks {
+        MovieCategoryAdapter.GridItemClickListener, LoaderManager.LoaderCallbacks {
 
     private static final String TAG = MainActivity.class.getSimpleName();
     private static final String TITLE = "title";
@@ -62,8 +63,7 @@ public class MainActivity extends AppCompatActivity implements
             MovieDetailsEntry.COLUMN_POSTER_PATH
     };
 
-
-    private MovieAdapter mAdapter;
+    private MovieCategoryAdapter mAdapter;
     private RecyclerView mMoviesRecyclerView;
     private GridLayoutManager mGridLayoutManager;
     private TextView mMessagesTextView;
@@ -93,7 +93,7 @@ public class MainActivity extends AppCompatActivity implements
         mGridLayoutManager = new GridLayoutManager(this, ScreenUtils.getNumberOfColumns(this));
         mMoviesRecyclerView.setLayoutManager(mGridLayoutManager);
         mMoviesRecyclerView.setHasFixedSize(true);
-        mAdapter = new MovieAdapter(this, this);
+        mAdapter = new MovieCategoryAdapter(this, this);
         mMoviesRecyclerView.setAdapter(mAdapter);
 
         // Check if preference "image_width" was create before, if not, proceed.
@@ -310,16 +310,17 @@ public class MainActivity extends AppCompatActivity implements
     public void onGridItemClick(Movie movieClicked, int movieId) {
         if (movieClicked != null && movieId == 0) {
             Intent movieDetailsIntent = new Intent(MainActivity.this, DetailsActivity.class);
-            movieDetailsIntent.putExtra(DetailsActivity.MOVIE_OBJECT, movieClicked);
+            movieDetailsIntent.putExtra(DetailsActivity.MOVIE_ID_KEY, movieClicked.getMovieId());
+            movieDetailsIntent.putExtra(DetailsActivity.MOVIE_TITLE_KEY, movieClicked.getTitle());
             startActivity(movieDetailsIntent);
         } else {
             Intent movieDetailsIntent = new Intent(MainActivity.this, DetailsActivity.class);
-            movieDetailsIntent.putExtra(DetailsActivity.MOVIE_ID, movieId);
+            movieDetailsIntent.putExtra(DetailsActivity.MOVIE_ID_KEY, movieId);
             startActivity(movieDetailsIntent);
         }
     }
 
-    // TODO: share info, save video and reviews, cast activity, cast click listener
+    // TODO: share info, save video and reviews, profile activity
 
     // Hide the movie data and loading indicator and show error message
     private void showError() {
@@ -335,16 +336,14 @@ public class MainActivity extends AppCompatActivity implements
     public Loader onCreateLoader(int loaderId, @Nullable Bundle args) {
         switch (loaderId) {
             case MOVIES_LOADER_ID:
-                // If the loaded id matches ours, return a new movie loader
-                Log.v("MOVIE LOADER", "CURRENT LOADER: " + String.valueOf(mCurrentLoaderId));
-                return new MovieLoader(getApplicationContext());
+                // If the loaded id matches movies loader, return a new movie category loader
+                return new MovieCategoryLoader(getApplicationContext());
 
             case FAVOURITES_LOADER_ID:
-                Uri uri = MovieDetailsEntry.CONTENT_URI;
-                Log.v("URI", uri.toString());
+                // If the loader id matches favourites loader, return a cursor loader
                 return new CursorLoader(
                         getApplicationContext(),
-                        uri,
+                        MovieDetailsEntry.CONTENT_URI,
                         FAVOURITES_MOVIE_PROJECTION,
                         null,
                         null,

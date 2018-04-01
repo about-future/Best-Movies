@@ -10,7 +10,7 @@
         android:layout_height="match_parent">
 
         <ImageView
-            android:id="@+id/details_poster_iv"
+            android:id="@+id/credit_actor_iv"
             android:layout_width="@dimen/poster_width"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
@@ -23,47 +23,47 @@
             app:srcCompat="@drawable/ic_local_movies" />
 
         <TextView
-            android:id="@+id/poster_error_tv"
+            android:id="@+id/credit_actor_error_tv"
             android:layout_width="@id/details_poster_iv"
             android:layout_height="wrap_content"
             android:layout_marginBottom="@dimen/details_message_spacing"
             android:fontFamily="sans-serif-condensed"
             android:gravity="center"
-            android:text="@string/no_poster"
+            android:text="@string/no_profile_picture"
             android:textAllCaps="true"
             android:textColor="@color/colorTransparentWhite"
             android:textSize="@dimen/details_font_size"
-            android:visibility="visible"
-            app:layout_constraintBottom_toBottomOf="@id/details_poster_iv"
-            app:layout_constraintEnd_toEndOf="@id/details_poster_iv"
-            app:layout_constraintStart_toStartOf="@id/details_poster_iv" />
+            android:visibility="invisible"
+            app:layout_constraintBottom_toBottomOf="@id/credit_actor_iv"
+            app:layout_constraintEnd_toEndOf="@id/credit_actor_iv"
+            app:layout_constraintStart_toStartOf="@id/credit_actor_iv" />
 
         <TextView
-            android:id="@+id/details_rating_tv"
+            android:id="@+id/credit_gender_tv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/details_horizontal_spacing"
             android:fontFamily="sans-serif-condensed"
             android:textColor="@color/colorWhite"
             android:textSize="22sp"
-            app:layout_constraintStart_toEndOf="@id/details_poster_iv"
+            app:layout_constraintStart_toEndOf="@id/credit_actor_iv"
             app:layout_constraintTop_toTopOf="parent"
-            tools:text="8.6 / 10" />
+            tools:text="Female" />
 
         <TextView
-            android:id="@+id/details_rating_label"
+            android:id="@+id/credit_gender_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/details_horizontal_spacing"
             android:fontFamily="sans-serif-condensed"
-            android:text="@string/ratings_label"
+            android:text="@string/credit_gender_label"
             android:textColor="@color/colorAccent"
             android:textSize="@dimen/details_font_size"
-            app:layout_constraintStart_toEndOf="@id/details_poster_iv"
-            app:layout_constraintTop_toBottomOf="@id/details_rating_tv" />
+            app:layout_constraintStart_toEndOf="@id/credit_actor_iv"
+            app:layout_constraintTop_toBottomOf="@id/credit_gender_tv" />
 
         <TextView
-            android:id="@+id/details_runtime_tv"
+            android:id="@+id/credit_birthday_tv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/details_horizontal_spacing"
@@ -71,24 +71,24 @@
             android:fontFamily="sans-serif-condensed"
             android:textColor="@color/colorWhite"
             android:textSize="22sp"
-            app:layout_constraintStart_toEndOf="@id/details_poster_iv"
-            app:layout_constraintTop_toBottomOf="@id/details_rating_label"
-            tools:text="2h 49m" />
+            app:layout_constraintStart_toEndOf="@id/credit_actor_iv"
+            app:layout_constraintTop_toBottomOf="@id/credit_gender_label"
+            tools:text="1985-04-30" />
 
         <TextView
-            android:id="@+id/details_runtime_label"
+            android:id="@+id/credit_birthday_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/details_horizontal_spacing"
             android:fontFamily="sans-serif-condensed"
-            android:text="@string/runtime_label"
+            android:text="@string/credit_birthday_label"
             android:textColor="@color/colorAccent"
             android:textSize="@dimen/details_font_size"
-            app:layout_constraintStart_toEndOf="@id/details_poster_iv"
-            app:layout_constraintTop_toBottomOf="@id/details_runtime_tv" />
+            app:layout_constraintStart_toEndOf="@id/credit_actor_iv"
+            app:layout_constraintTop_toBottomOf="@id/credit_birthday_tv" />
 
         <TextView
-            android:id="@+id/details_release_date_tv"
+            android:id="@+id/credit_place_of_birth_tv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/details_horizontal_spacing"
@@ -96,24 +96,25 @@
             android:fontFamily="sans-serif-condensed"
             android:textColor="@color/colorWhite"
             android:textSize="22sp"
-            app:layout_constraintStart_toEndOf="@id/details_poster_iv"
-            app:layout_constraintTop_toBottomOf="@id/details_runtime_label"
-            tools:text="2018-11-05" />
+            app:layout_constraintStart_toEndOf="@id/credit_actor_iv"
+            app:layout_constraintTop_toBottomOf="@id/credit_birthday_label"
+            tools:text="Rosh Ha'ayin, Israel" />
 
         <TextView
-            android:id="@+id/details_release_date_label"
-            android:layout_width="wrap_content"
+            android:id="@+id/credit_place_of_birth_label"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/details_horizontal_spacing"
             android:fontFamily="sans-serif-condensed"
-            android:text="@string/release_date_label"
+            android:text="@string/credit_place_of_birth_label"
             android:textColor="@color/colorAccent"
             android:textSize="@dimen/details_font_size"
-            app:layout_constraintStart_toEndOf="@id/details_poster_iv"
-            app:layout_constraintTop_toBottomOf="@id/details_release_date_tv" />
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/credit_actor_iv"
+            app:layout_constraintTop_toBottomOf="@id/credit_place_of_birth_tv" />
 
         <TextView
-            android:id="@+id/details_plot_tv"
+            android:id="@+id/credit_biography_tv"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/details_vertical_spacing"
@@ -123,8 +124,8 @@
             android:visibility="visible"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/details_poster_iv"
-            tools:text="Movie plot" />
+            app:layout_constraintTop_toBottomOf="@id/credit_actor_iv"
+            tools:text="Biography" />
 
     </android.support.constraint.ConstraintLayout>
 

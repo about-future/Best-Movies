@@ -9,6 +9,7 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.future.bestmovies.data.Actor;
+import com.future.bestmovies.data.Credits;
 import com.future.bestmovies.data.Movie;
 import com.future.bestmovies.data.Cast;
 import com.future.bestmovies.data.MovieDetails;
@@ -156,10 +157,10 @@ public class NetworkUtils {
     /* Build and return the API URL for an actor details
      * @param actorId is used to build the url
      */
-    private static URL buildActorApiUrl(String actorId) {
+    private static URL buildActorApiUrl(int actorId) {
         Uri actorQueryUri = Uri.parse(API_MOVIE_BASE_URL).buildUpon()
                 .appendPath(PERSON)
-                .appendPath(actorId)
+                .appendPath(Integer.toString(actorId))
                 .appendQueryParameter(API_KEY, API_ID)
                 .build();
 
@@ -176,10 +177,10 @@ public class NetworkUtils {
     /* Build and return the API URL for an actor details
      * @param actorId is used to build the url
      */
-    private static URL buildActorCreditsApiUrl(String actorId) {
+    private static URL buildActorCreditsApiUrl(int actorId) {
         Uri actorQueryUri = Uri.parse(API_MOVIE_BASE_URL).buildUpon()
                 .appendPath(PERSON)
-                .appendPath(actorId)
+                .appendPath(Integer.toString(actorId))
                 .appendPath(MOVIE_CREDITS)
                 .appendQueryParameter(API_KEY, API_ID)
                 .build();
@@ -318,7 +319,7 @@ public class NetworkUtils {
      * an Actor object.
      * @param actorId is used to access buildActorApiUrl utility method
      */
-    public static Actor fetchActorDetails(String actorId) {
+    public static Actor fetchActorDetails(int actorId) {
         try {
             // Create and return the Api URL for an actor details, based on an actor id
             URL url = buildActorApiUrl(actorId);
@@ -337,20 +338,20 @@ public class NetworkUtils {
      * an array list of Credits objects for a given actor.
      * @param actorId is used to access buildActorCreditsApiUrl utility method
      */
-//    public static Actor fetchActorCredits(String actorId) {
-//        try {
-//            // Create and return the Api URL for an actor credits, based on an actor id
-//            URL url = buildActorCreditsApiUrl(actorId);
-//            // Use the URL to retrieve the JSON response from Movie API
-//            String jsonActorCreditsResponse = NetworkUtils.getResponseFromHttpUrl(url);
-//            // Parse the JSON into an array list of Credits objects
-//            return JsonUtils.parseActorCreditsJson(jsonActorCreditsResponse);
-//        } catch (Exception e) {
-//            Log.e(TAG, "Error accessing the Server:", e);
-//            // If something went wrong, we return null
-//            return null;
-//        }
-//    }
+    public static ArrayList<Credits> fetchActorCredits(int actorId) {
+        try {
+            // Create and return the Api URL for an actor credits, based on an actor id
+            URL url = buildActorCreditsApiUrl(actorId);
+            // Use the URL to retrieve the JSON response from Movie API
+            String jsonActorCreditsResponse = NetworkUtils.getResponseFromHttpUrl(url);
+            // Parse the JSON into an array list of Credits objects
+            return JsonUtils.parseActorCreditsJson(jsonActorCreditsResponse);
+        } catch (Exception e) {
+            Log.e(TAG, "Error accessing the Server:", e);
+            // If something went wrong, we return null
+            return null;
+        }
+    }
 
     /* Perform a state of network connectivity test and return true or false.
      * @param context is used to create a reference to the ConnectivityManager

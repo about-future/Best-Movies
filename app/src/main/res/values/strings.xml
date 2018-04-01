@@ -1,4 +1,5 @@
-<resources>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+
     <!-- Activity titles -->
     <string name="app_name">Best Movies</string>
     <string name="activity_title_details">Movie Details</string>
@@ -13,6 +14,7 @@
     <string name="menu_now_playing">Now Playing</string>
     <string name="menu_favourites">Favourites</string>
     <string name="menu_details">Details</string>
+    <string name="menu_credits">Credits</string>
 
     <!-- Movie category options -->
     <string name="category_popular" translatable="false">popular</string>
@@ -46,7 +48,16 @@
     <string name="max_rating">\ /\ 10</string>
     <string name="add_to_favourites">Add to favourites</string>
     <string name="runtime_label">Runtime</string>
-
+    <string name="credits_label">Credits</string>
+    <string name="credit_gender_label">Gender</string>
+    <string name="credit_birthday_label">Birthday</string>
+    <string name="credit_death_day_label">Death day</string>
+    <string name="credit_place_of_birth_label">Place of birth</string>
+    <string name="credit_biography_label">Biography</string>
+    <string name="credit_format_release_year">( <xliff:g id="year">%2$s</xliff:g> )</string>
+    <string name="credit_format_character">As <xliff:g id="character">%2$s</xliff:g></string>
+    <string name="credit_age">Age:\ </string>
+    <string name="credit_date_unknown">Unknown</string>
     <!-- Button Labels -->
     <string name="see_all">See all</string>
 

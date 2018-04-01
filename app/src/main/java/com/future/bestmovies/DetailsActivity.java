@@ -84,7 +84,8 @@ public class DetailsActivity extends AppCompatActivity implements
     public static final String MOVIE_VIDEOS_KEY = "movie_videos";
 
     private static final String IS_FAVOURITE_KEY = "is_favourite";
-    public static final String ACTOR_ID = "actor_id";
+    public static final String ACTOR_ID_KEY = "actor_id";
+    public static final String ACTOR_NAME_KEY = "actor_name";
     private static final String CAST_POSITION_KEY = "cast_position";
     private static final String VIDEOS_POSITION_KEY = "videos_position";
 
@@ -896,7 +897,9 @@ public class DetailsActivity extends AppCompatActivity implements
     @Override
     public void onListItemClick(Cast castClicked) {
         Intent actorProfileIntent = new Intent(DetailsActivity.this, ProfileActivity.class);
-        actorProfileIntent.putExtra(ACTOR_ID, castClicked.getActorId());
+        actorProfileIntent.putExtra(ACTOR_ID_KEY, castClicked.getActorId());
+        actorProfileIntent.putExtra(ACTOR_NAME_KEY, castClicked.getActorName());
+        actorProfileIntent.putExtra(MOVIE_BACKDROP_KEY, mSelectedMovie.getBackdropPath());
         startActivity(actorProfileIntent);
     }
 }

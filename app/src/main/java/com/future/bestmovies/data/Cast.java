@@ -58,5 +58,4 @@ public class Cast implements Parcelable {
     public int getActorId() { return actorId; }
     public String getCharacter() { return character; }
     public String getProfilePath() { return profilePath; }
-
 }

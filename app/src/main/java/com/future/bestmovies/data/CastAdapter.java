@@ -32,7 +32,7 @@ public class CastAdapter extends RecyclerView.Adapter<CastAdapter.CastViewHolder
     }
 
     @Override @NonNull
-    public CastAdapter.CastViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public CastViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(mContext).inflate(R.layout.cast_list_item, parent, false);
         view.setFocusable(false);
         return new CastViewHolder(view);
@@ -40,7 +40,6 @@ public class CastAdapter extends RecyclerView.Adapter<CastAdapter.CastViewHolder
 
     @Override
     public void onBindViewHolder(@NonNull final CastAdapter.CastViewHolder holder, int position) {
-        //final int pos = position;
         Picasso.with(mContext)
                 .load(ImageUtils.buildImageUrl(
                         mContext,
@@ -50,7 +49,7 @@ public class CastAdapter extends RecyclerView.Adapter<CastAdapter.CastViewHolder
                 .into(holder.actorProfileImageView);
 
         holder.actorNameTextView.setText(mCast.get(position).getActorName());
-        //holder.characterTextView.setText(mCast.get(position).getCharacter());
+        holder.characterTextView.setText(mCast.get(position).getCharacter());
     }
 
     @Override
@@ -64,13 +63,13 @@ public class CastAdapter extends RecyclerView.Adapter<CastAdapter.CastViewHolder
     class CastViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         final ImageView actorProfileImageView;
         final TextView actorNameTextView;
-        //final TextView characterTextView;
+        final TextView characterTextView;
 
         CastViewHolder(View itemView) {
             super(itemView);
             actorProfileImageView = itemView.findViewById(R.id.actor_profile_iv);
             actorNameTextView = itemView.findViewById(R.id.actor_name_tv);
-            //characterTextView = itemView.findViewById(R.id.character_tv);
+            characterTextView = itemView.findViewById(R.id.character_tv);
             itemView.setOnClickListener(this);
         }
 

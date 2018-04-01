@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v4.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context="com.future.bestmovies.ProfileActivity"
+    tools:showIn="@layout/activity_profile">
+
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/movie_details_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:descendantFocusability="blocksDescendants"
+        android:orientation="vertical"
+        android:visibility="visible">
+
+        <include
+            android:id="@+id/actor_details"
+            layout="@layout/credits_actor_details"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/details_horizontal_spacing"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <View
+            android:id="@+id/separation_line"
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_marginEnd="@dimen/details_horizontal_spacing"
+            android:layout_marginStart="@dimen/details_horizontal_spacing"
+            android:layout_marginTop="@dimen/details_vertical_spacing"
+            android:background="@color/colorPrimary"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/actor_details"/>
+
+        <TextView
+            android:id="@+id/credits_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/details_vertical_spacing"
+            android:fontFamily="sans-serif-condensed"
+            android:text="@string/credits_label"
+            android:textColor="@color/colorWhite"
+            android:textSize="20sp"
+            app:layout_constraintStart_toStartOf="@id/separation_line"
+            app:layout_constraintTop_toBottomOf="@id/separation_line" />
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/credits_rv"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clipToPadding="false"
+            android:visibility="visible"
+            android:orientation="horizontal"
+            android:layout_marginTop="@dimen/details_vertical_spacing"
+            android:layout_marginStart="@dimen/details_horizontal_spacing"
+            android:layout_marginEnd="@dimen/activity_horizontal_margin"
+            app:layout_constraintTop_toBottomOf="@id/credits_label"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
+
+        <View
+            android:id="@+id/separation_line2"
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_marginEnd="@dimen/details_horizontal_spacing"
+            android:layout_marginStart="@dimen/details_horizontal_spacing"
+            android:layout_marginTop="@dimen/details_vertical_spacing"
+            android:background="@color/colorTransparent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/credits_rv"/>
+
+    </android.support.constraint.ConstraintLayout>
+
+</android.support.v4.widget.NestedScrollView>

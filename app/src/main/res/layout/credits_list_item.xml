@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:layout_marginTop="@dimen/activity_vertical_margin"
+    android:layout_marginEnd="@dimen/details_horizontal_spacing"
+    android:layout_marginBottom="@dimen/details_vertical_spacing">
+
+    <ImageView
+        android:id="@+id/credit_poster_iv"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:contentDescription="@string/movie_poster"
+        android:scaleType="centerCrop"
+        tools:srcCompat="@drawable/poster" />
+
+    <TextView
+        android:id="@+id/credit_title_tv"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/video_spacing"
+        android:fontFamily="sans-serif-condensed"
+        android:gravity="center"
+        android:textColor="@color/colorWhite"
+        android:textSize="@dimen/details_font_size"
+        tools:text="Wonder Woman" />
+
+    <TextView
+        android:id="@+id/credit_release_date_tv"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fontFamily="sans-serif-condensed"
+        android:gravity="center"
+        android:textColor="@color/colorAccent"
+        android:textSize="@dimen/details_font_size"
+        tools:text="(2018)" />
+
+    <TextView
+        android:id="@+id/credit_character_tv"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fontFamily="sans-serif-condensed"
+        android:gravity="center"
+        android:textColor="@color/colorWhite"
+        android:textSize="@dimen/details_font_size"
+        tools:text="as Wonder Woman" />
+
+</LinearLayout>

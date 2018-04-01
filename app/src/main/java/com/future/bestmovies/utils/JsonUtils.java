@@ -5,6 +5,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.future.bestmovies.data.Actor;
+import com.future.bestmovies.data.Credits;
 import com.future.bestmovies.data.Movie;
 import com.future.bestmovies.data.Cast;
 import com.future.bestmovies.data.MovieDetails;
@@ -61,12 +62,21 @@ public class JsonUtils {
 
     // Actor labels
     private static final String BIRTHDAY = "birthday";
-    private static final String DEATHDAY = "deathday";
+    private static final String DEATH_DAY = "deathday";
+    private static final String GENDER = "gender";
     //private static final String ACTOR_ID = "id";
     //private static final String NAME = "name";
     private static final String BIOGRAPHY = "biography";
     private static final String PLACE_OF_BIRTH = "place_of_birth";
     //private static final String PROFILE_PATH = "profile_path";
+
+    // Actor credits labels
+    private static final String CREDIT_BACKDROP_PATH = "backdrop_path";
+    private static final String CREDIT_CHARACTER = "character";
+    private static final String CREDIT_ID = "id";
+    private static final String CREDIT_TITLE = "original_title";
+    private static final String CREDIT_POSTER_PATH = "poster_path";
+    private static final String CREDIT_RELEASE_DATE = "release_date";
 
     // Parses the JSON response for the list of movies and their details
     public static ArrayList<Movie> parseMovieCategoryJson(String moviesJsonStr) throws JSONException {
@@ -214,10 +224,12 @@ public class JsonUtils {
         return videos;
     }
 
+    // Parses the JSON response for the actor details
     public static Actor parseActorDetailsJson (String actorDetailsJsonStr) throws JSONException {
         int id;
         String birthday;
         String deathday;
+        int gender;
         String name;
         String biography;
         String placeOfBirth;
@@ -228,7 +240,8 @@ public class JsonUtils {
 
         id = actorDetailsJson.getInt(ACTOR_ID);
         birthday = actorDetailsJson.getString(BIRTHDAY);
-        deathday = actorDetailsJson.getString(DEATHDAY);
+        deathday = actorDetailsJson.getString(DEATH_DAY);
+        gender = actorDetailsJson.getInt(GENDER);
         name = actorDetailsJson.getString(NAME);
         biography = actorDetailsJson.getString(BIOGRAPHY);
         try {
@@ -238,6 +251,42 @@ public class JsonUtils {
         }
         profilePath = actorDetailsJson.getString(PROFILE_PATH);
 
-        return new Actor(id, birthday, deathday, name, biography, placeOfBirth, profilePath);
+        return new Actor(id, birthday, deathday, gender, name, biography, placeOfBirth, profilePath);
+    }
+
+    // Parses the JSON response for the list of Credits of an actor
+    public static ArrayList<Credits> parseActorCreditsJson (String actorCreditsJsonStr) throws JSONException {
+        String backdropPath;
+        String character;
+        int movieId;
+        String posterPath;
+        String releaseDate;
+        String title;
+
+        // Instantiate a JSON object so we can get data.
+        JSONObject actorDetailsJson = new JSONObject(actorCreditsJsonStr);
+
+        JSONArray jsonResultsArray = actorDetailsJson.getJSONArray(CAST);
+
+        ArrayList<Credits> credits = new ArrayList<>(jsonResultsArray.length());
+        for (int i = 0; i < jsonResultsArray.length(); i++) {
+            JSONObject creditJson = jsonResultsArray.getJSONObject(i);
+
+            backdropPath = creditJson.getString(CREDIT_BACKDROP_PATH);
+            character = creditJson.getString(CREDIT_CHARACTER);
+            movieId = creditJson.getInt(CREDIT_ID);
+            posterPath = creditJson.getString(CREDIT_POSTER_PATH);
+            try {
+                releaseDate = creditJson.getString(CREDIT_RELEASE_DATE);
+            } catch (JSONException e) {
+                releaseDate = "Unknown";
+            }
+
+            title = creditJson.getString(CREDIT_TITLE);
+
+            credits.add(i, new Credits(character, movieId, posterPath, releaseDate, title));
+        }
+
+        return credits;
     }
 }

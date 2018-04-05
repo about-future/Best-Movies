@@ -36,6 +36,7 @@
     <string name="add_favourites_icon">Add to favourites icon</string>
     <string name="video_thumbnail">Video thumbnail</string>
     <string name="video_play">Play button</string>
+    <string name="no_credits_icon">No cast icon</string>
 
     <!-- Activity Labels -->
     <string name="original_title_label">Original Title</string>
@@ -54,10 +55,20 @@
     <string name="credit_death_day_label">Death day</string>
     <string name="credit_place_of_birth_label">Place of birth</string>
     <string name="credit_biography_label">Biography</string>
-    <string name="credit_format_release_year">( <xliff:g id="year">%2$s</xliff:g> )</string>
-    <string name="credit_format_character">As <xliff:g id="character">%2$s</xliff:g></string>
+    <string name="credit_as_character">As\ </string>
     <string name="credit_age">Age:\ </string>
     <string name="credit_date_unknown">Unknown</string>
+
+    <string name="format_runtime">
+        <xliff:g id="hours">%1$1.0f</xliff:g>h
+        <xliff:g id="minutes">%2$2.0f</xliff:g>m
+    </string>
+
+    <string name="format_minutes">
+        <xliff:g id="minutes">%1.0f</xliff:g> min
+    </string>
+
+
     <!-- Button Labels -->
     <string name="see_all">See all</string>
 
@@ -73,6 +84,7 @@
     <string name="no_reviews">No reviews available</string>
     <string name="no_videos">No videos available</string>
     <string name="no_favourites">I\'m a favourite movie list\nand I feel so empty&#8230;</string>
+    <string name="no_credits">No credits available</string>
 
     <!-- Toast messages -->
     <string name="favourite_insert_successful">Movie added to favourites</string>

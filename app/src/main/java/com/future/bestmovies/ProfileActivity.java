@@ -15,10 +15,13 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -45,7 +48,11 @@ public class ProfileActivity extends AppCompatActivity implements CreditsAdapter
     private static final int ACTOR_LOADER_ID = 136;
     private static final int CREDITS_LOADER_ID = 354;
     private static final String IS_FAVOURITE_ACTOR_KEY = "is_favourite_actor";
+    public static final String ACTOR_DETAILS_KEY = "actor";
+    private static final String MOVIE_CREDITS_KEY = "movie_credits";
 
+    private Actor mActor;
+    private ArrayList<Credits> mCredits;
     private int mActorId;
     private String mActorName;
     private String mBackdropPath;
@@ -61,6 +68,13 @@ public class ProfileActivity extends AppCompatActivity implements CreditsAdapter
     private CreditsAdapter mCreditsAdapter;
     private RecyclerView mCreditsRecyclerView;
     private GridLayoutManager mCreditsLayoutManager;
+
+    private TextView mCreditsMessagesTextView;
+    private ProgressBar mCreditsProgressBar;
+    private ImageView mNoCreditsImageView;
+    private ImageView mNoCreditsConnectionImageView;
+
+    private MenuItem mFavouriteActorMenuItem;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,76 +96,102 @@ public class ProfileActivity extends AppCompatActivity implements CreditsAdapter
         biographyTextView = findViewById(R.id.credit_biography_tv);
 
         mCreditsRecyclerView = findViewById(R.id.credits_rv);
-        mCreditsLayoutManager = new GridLayoutManager(this, 3);
+        mCreditsLayoutManager = new GridLayoutManager(
+                this,
+                ScreenUtils.getNumberOfColumns(this, 120, 3));
         mCreditsRecyclerView.setLayoutManager(mCreditsLayoutManager);
-        mCreditsRecyclerView.setHasFixedSize(true);
+        mCreditsRecyclerView.setHasFixedSize(false);
         mCreditsAdapter = new CreditsAdapter(this, this);
         mCreditsRecyclerView.setAdapter(mCreditsAdapter);
+        mCreditsRecyclerView.setNestedScrollingEnabled(false);
 
-        //mIsFavouriteActor = false;
+        mCreditsMessagesTextView = findViewById(R.id.credits_messages_tv);
+        mCreditsMessagesTextView.setText(R.string.loading);
+        mCreditsProgressBar = findViewById(R.id.loading_credits_pb);
+        mNoCreditsImageView = findViewById(R.id.no_credits_iv);
+        mNoCreditsConnectionImageView = findViewById(R.id.no_credits_connection_iv);
 
-        // If we have an instance saved and contains our movie object, we use it to populate our UI
-        if (savedInstanceState != null && savedInstanceState.containsKey(ACTOR_ID_KEY)) {
-            mActorId = savedInstanceState.getInt(ACTOR_ID_KEY);
-        } else {
-            // Otherwise, we check our intent and see if there is a Movie object or a movieId passed
-            // from DetailsActivity, so we can populate our UI. If there isn't we close this activity
-            // and display a toast message.
+        if (savedInstanceState == null) {
+            // Check our intent and see if there is an actor ID passed from DetailsActivity, so we
+            // can populate our UI. If there isn't we close this activity and display a toast message.
             Intent intent = getIntent();
             if (intent != null && intent.hasExtra(ACTOR_ID_KEY)) {
                 // If DetailsActivity passed an actor id
                 mActorId = intent.getIntExtra(ACTOR_ID_KEY, 10297);
                 mActorName = intent.getStringExtra(ACTOR_NAME_KEY);
-                mBackdropPath = intent.getStringExtra(MOVIE_BACKDROP_KEY);
+                setTitle(mActorName);
 
+                mBackdropPath = intent.getStringExtra(MOVIE_BACKDROP_KEY);
+                Picasso.with(this)
+                        .load(ImageUtils.buildImageUrl(
+                                this,
+                                mBackdropPath,
+                                ImageUtils.BACKDROP))
+                        .error(R.drawable.ic_landscape)
+                        .into(profileBackdropImageView);
+
+                getSupportLoaderManager().restartLoader(ACTOR_LOADER_ID, null, actorResultLoaderListener);
+                hideCredits();
+                getSupportLoaderManager().restartLoader(CREDITS_LOADER_ID, null, actorCreditsResultLoaderListener);
             } else {
                 closeOnError();
             }
         }
-
-        setTitle(mActorName);
-
-        Picasso.with(this)
-                .load(ImageUtils.buildImageUrl(
-                        this,
-                        mBackdropPath,
-                        ImageUtils.BACKDROP))
-                .error(R.drawable.ic_landscape)
-                .into(profileBackdropImageView);
-
-        getSupportLoaderManager().restartLoader(ACTOR_LOADER_ID, null, actorResultLoaderListener);
-        getSupportLoaderManager().restartLoader(CREDITS_LOADER_ID, null, actorCreditsResultLoaderListener);
-
     }
 
     @Override
-    public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
+    public void onSaveInstanceState(Bundle outState) {
         outState.putString(MOVIE_BACKDROP_KEY, mBackdropPath);
         outState.putInt(ACTOR_ID_KEY, mActorId);
         outState.putString(ACTOR_NAME_KEY, mActorName);
+        outState.putParcelable(ACTOR_DETAILS_KEY, mActor);
+        outState.putParcelableArrayList(MOVIE_CREDITS_KEY, mCredits);
         outState.putBoolean(IS_FAVOURITE_ACTOR_KEY, mIsFavouriteActor);
 
-        super.onSaveInstanceState(outState, outPersistentState);
+        super.onSaveInstanceState(outState);
     }
 
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        mBackdropPath = savedInstanceState.getString(MOVIE_BACKDROP_KEY);
-        mActorId = savedInstanceState.getInt(ACTOR_ID_KEY);
-        mActorName = savedInstanceState.getString(ACTOR_NAME_KEY);
-        mIsFavouriteActor = savedInstanceState.getBoolean(IS_FAVOURITE_ACTOR_KEY);
         super.onRestoreInstanceState(savedInstanceState);
+        if (savedInstanceState.containsKey(MOVIE_BACKDROP_KEY)) {
+            mBackdropPath = savedInstanceState.getString(MOVIE_BACKDROP_KEY);
+            Picasso.with(this)
+                    .load(ImageUtils.buildImageUrl(
+                            this,
+                            mBackdropPath,
+                            ImageUtils.BACKDROP))
+                    .error(R.drawable.ic_landscape)
+                    .into(profileBackdropImageView);
+        }
+        if (savedInstanceState.containsKey(ACTOR_ID_KEY))
+            mActorId = savedInstanceState.getInt(ACTOR_ID_KEY);
+        if (savedInstanceState.containsKey(ACTOR_NAME_KEY))
+            mActorName = savedInstanceState.getString(ACTOR_NAME_KEY);
+        if (savedInstanceState.containsKey(ACTOR_DETAILS_KEY)) {
+            mActor = savedInstanceState.getParcelable(ACTOR_DETAILS_KEY);
+            if (mActor != null)
+                populateActorDetails(mActor);
+        }
+        if (savedInstanceState.containsKey(MOVIE_CREDITS_KEY)) {
+            mCredits = savedInstanceState.getParcelableArrayList(MOVIE_CREDITS_KEY);
+            if (mCredits != null)
+                populateCredits(mCredits);
+        }
+        if (savedInstanceState.containsKey(IS_FAVOURITE_ACTOR_KEY))
+            mIsFavouriteActor = savedInstanceState.getBoolean(IS_FAVOURITE_ACTOR_KEY);
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.profile_menu, menu);
 
-        MenuItem favouritesMenuItem = menu.findItem(R.id.action_favourite_actor);
+        MenuItem favouriteActorMenuItem = menu.findItem(R.id.action_favourite_actor);
+        mFavouriteActorMenuItem = favouriteActorMenuItem;
         if (mIsFavouriteActor) {
-            DrawableCompat.setTint(favouritesMenuItem.getIcon(), ContextCompat.getColor(getApplicationContext(), R.color.colorAccent));
+            DrawableCompat.setTint(favouriteActorMenuItem.getIcon(), ContextCompat.getColor(getApplicationContext(), R.color.colorAccent));
         } else {
-            DrawableCompat.setTint(favouritesMenuItem.getIcon(), ContextCompat.getColor(getApplicationContext(), R.color.colorWhite));
+            DrawableCompat.setTint(favouriteActorMenuItem.getIcon(), ContextCompat.getColor(getApplicationContext(), R.color.colorWhite));
         }
 
         return true;
@@ -174,7 +214,6 @@ public class ProfileActivity extends AppCompatActivity implements CreditsAdapter
             }
 
             mIsFavouriteActor = !mIsFavouriteActor;
-            Log.v("FAVOURITE", "ACTOR " + mIsFavouriteActor);
 
             return true;
         }
@@ -185,6 +224,24 @@ public class ProfileActivity extends AppCompatActivity implements CreditsAdapter
     private void closeOnError() {
         finish();
         toastThis(getString(R.string.details_error_message));
+    }
+
+    // Hide the progress bar and show credits
+    private void showCredits() {
+        mCreditsRecyclerView.setVisibility(View.VISIBLE);
+        mCreditsProgressBar.setVisibility(View.INVISIBLE);
+        mCreditsMessagesTextView.setVisibility(View.INVISIBLE);
+        mNoCreditsImageView.setVisibility(View.INVISIBLE);
+        mNoCreditsConnectionImageView.setVisibility(View.INVISIBLE);
+    }
+
+    // Show progress bar and hide credits
+    private void hideCredits() {
+        mCreditsRecyclerView.setVisibility(View.GONE);
+        mCreditsProgressBar.setVisibility(View.VISIBLE);
+        mCreditsMessagesTextView.setVisibility(View.VISIBLE);
+        mNoCreditsImageView.setVisibility(View.INVISIBLE);
+        mNoCreditsConnectionImageView.setVisibility(View.INVISIBLE);
     }
 
     public void toastThis(String toastMessage) {
@@ -209,30 +266,8 @@ public class ProfileActivity extends AppCompatActivity implements CreditsAdapter
 
                 @Override
                 public void onLoadFinished(@NonNull Loader<Actor> loader, Actor actorDetails) {
-                    Picasso.with(getApplicationContext())
-                            .load(ImageUtils.buildImageUrl(
-                                    getApplicationContext(),
-                                    actorDetails.getProfilePath(),
-                                    ImageUtils.POSTER))
-                            .error(R.drawable.ic_person)
-                            .into(profilePictureImageView);
-
-                    genderTextView.setText(actorDetails.getGender());
-                    birthdayTextView.setText(actorDetails.getBirthday());
-                    if (actorDetails.getBirthday().length() > 4) {
-                        int birthYear = Integer.valueOf(TextUtils.substring(actorDetails.getBirthday(), 0, 4));
-                        int currentYear = Calendar.getInstance().get(Calendar.YEAR);
-                        ageTextView.setText(getString(R.string.credit_age).concat(Integer.toString(currentYear - birthYear)));
-                    } else {
-                        ageTextView.setText(getString(R.string.credit_age).concat("unknown"));
-                    }
-
-                    birthPlaceTextView.setText(actorDetails.getPlaceOfBirth());
-                    biographyTextView.setText(actorDetails.getBiography());
-
-                    setTitle(actorDetails.getActorName());
-                    // Populate actor details section
-                    //populateActorDetails(actorDetails);
+                    mActor = actorDetails;
+                    populateActorDetails(actorDetails);
                 }
 
                 @Override
@@ -256,8 +291,9 @@ public class ProfileActivity extends AppCompatActivity implements CreditsAdapter
                 }
 
                 @Override
-                public void onLoadFinished(@NonNull Loader<ArrayList<Credits>> loader, ArrayList<Credits> credits) {
-                    mCreditsAdapter.swapCredits(credits);
+                public void onLoadFinished(@NonNull Loader<ArrayList<Credits>> loader, ArrayList<Credits> movieCredits) {
+                    mCredits = movieCredits;
+                    populateCredits(movieCredits);
                 }
 
                 @Override
@@ -265,6 +301,64 @@ public class ProfileActivity extends AppCompatActivity implements CreditsAdapter
 
                 }
             };
+
+    private void populateActorDetails(Actor actorDetails) {
+        // Profile picture
+        Picasso.with(getApplicationContext())
+                .load(ImageUtils.buildImageUrl(
+                        getApplicationContext(),
+                        actorDetails.getProfilePath(),
+                        ImageUtils.POSTER))
+                .placeholder(R.drawable.no_picture)
+                .error(R.drawable.no_picture)
+                .into(profilePictureImageView);
+
+        // Gender
+        genderTextView.setText(actorDetails.getGender());
+
+        // Birthday
+        birthdayTextView.setText(actorDetails.getBirthday());
+
+        // Age
+        if (actorDetails.getBirthday().length() > 4 &&
+                !actorDetails.getBirthday().equals(getString(R.string.credit_date_unknown))) {
+            int birthYear = Integer.valueOf(actorDetails.getBirthday().substring(0, 4));
+            int currentYear = Calendar.getInstance().get(Calendar.YEAR);
+            ageTextView.setText(getString(R.string.credit_age).concat(Integer.toString(currentYear - birthYear)));
+        } else {
+            ageTextView.setText(getString(R.string.credit_age).concat("unknown"));
+        }
+
+        // Birthplace
+        birthPlaceTextView.setText(actorDetails.getPlaceOfBirth());
+
+        // Biography
+        if (!actorDetails.getBiography().isEmpty()) {
+            biographyTextView.setText(actorDetails.getBiography());
+        } else {
+            biographyTextView.setVisibility(View.INVISIBLE);
+        }
+
+        // Set title as the name of the actor
+        setTitle(actorDetails.getActorName());
+    }
+
+    private void populateCredits(ArrayList<Credits> movieCredits) {
+        mCreditsAdapter.swapCredits(movieCredits);
+
+        // If movieCredits has data
+        if (movieCredits.size() != 0) {
+            // Show movie credits
+            showCredits();
+        } else {
+            // Otherwise, hide progress bar and show "No credits available" message
+            mCreditsMessagesTextView.setVisibility(View.VISIBLE);
+            mCreditsMessagesTextView.setText(R.string.no_credits);
+            mCreditsProgressBar.setVisibility(View.INVISIBLE);
+            mNoCreditsImageView.setVisibility(View.VISIBLE);
+            mNoCreditsConnectionImageView.setVisibility(View.INVISIBLE);
+        }
+    }
 
     @Override
     public void onListItemClick(Credits creditsClicked) {

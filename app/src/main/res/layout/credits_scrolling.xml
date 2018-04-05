@@ -35,7 +35,7 @@
             android:background="@color/colorPrimary"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/actor_details"/>
+            app:layout_constraintTop_toBottomOf="@id/actor_details" />
 
         <TextView
             android:id="@+id/credits_label"
@@ -49,19 +49,67 @@
             app:layout_constraintStart_toStartOf="@id/separation_line"
             app:layout_constraintTop_toBottomOf="@id/separation_line" />
 
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/credits_rv"
+        <FrameLayout xmlns:app="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/credits_frame"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:clipToPadding="false"
-            android:visibility="visible"
-            android:orientation="horizontal"
-            android:layout_marginTop="@dimen/details_vertical_spacing"
-            android:layout_marginStart="@dimen/details_horizontal_spacing"
-            android:layout_marginEnd="@dimen/activity_horizontal_margin"
-            app:layout_constraintTop_toBottomOf="@id/credits_label"
+            android:minHeight="@dimen/min_height"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"/>
+            app:layout_constraintTop_toBottomOf="@id/credits_label">
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/credits_rv"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/activity_horizontal_margin"
+                android:layout_marginStart="@dimen/details_horizontal_spacing"
+                android:layout_marginTop="@dimen/details_vertical_spacing"
+                android:clipToPadding="false"
+                android:visibility="visible"
+                app:layout_behavior="@string/appbar_scrolling_view_behavior"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/credits_label" />
+
+            <ProgressBar
+                android:id="@+id/loading_credits_pb"
+                android:layout_width="@dimen/icon"
+                android:layout_height="@dimen/icon"
+                android:layout_gravity="center_horizontal"
+                android:visibility="invisible" />
+
+            <ImageView
+                android:id="@+id/no_credits_iv"
+                android:layout_width="@dimen/icon"
+                android:layout_height="@dimen/icon"
+                android:layout_gravity="center_horizontal"
+                android:contentDescription="@string/no_credits_icon"
+                android:visibility="invisible"
+                app:srcCompat="@drawable/ic_grid_off" />
+
+            <ImageView
+                android:id="@+id/no_credits_connection_iv"
+                android:layout_width="@dimen/icon"
+                android:layout_height="@dimen/icon"
+                android:layout_gravity="center_horizontal"
+                android:contentDescription="@string/no_connection_icon"
+                android:visibility="invisible"
+                app:srcCompat="@drawable/ic_cloud_off" />
+
+            <TextView
+                android:id="@+id/credits_messages_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="@dimen/message_top_margin"
+                android:fontFamily="sans-serif-condensed"
+                android:gravity="center"
+                android:text="@string/loading"
+                android:textSize="@dimen/details_font_size"
+                android:visibility="invisible" />
+
+        </FrameLayout>
 
         <View
             android:id="@+id/separation_line2"
@@ -69,11 +117,16 @@
             android:layout_height="1dp"
             android:layout_marginEnd="@dimen/details_horizontal_spacing"
             android:layout_marginStart="@dimen/details_horizontal_spacing"
-            android:layout_marginTop="@dimen/details_vertical_spacing"
-            android:background="@color/colorTransparent"
+            android:background="@color/colorPrimary"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/credits_rv"/>
+            app:layout_constraintTop_toBottomOf="@id/credits_frame" />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="@dimen/details_vertical_spacing"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/separation_line2" />
 
     </android.support.constraint.ConstraintLayout>
 

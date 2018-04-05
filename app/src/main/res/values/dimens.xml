@@ -6,7 +6,6 @@
     <dimen name="details_horizontal_spacing">16dp</dimen>
     <dimen name="details_vertical_spacing">16dp</dimen>
     <dimen name="details_font_size">15sp</dimen>
-    <dimen name="details_caracter_size">12sp</dimen>
     <dimen name="details_message_spacing">16dp</dimen>
     <dimen name="review_author_font_size">18sp</dimen>
     <dimen name="min_height">79dp</dimen>
@@ -17,4 +16,6 @@
     <dimen name="video_spacing">8dp</dimen>
     <dimen name="video_height">200dp</dimen>
     <dimen name="video_layout_height">250dp</dimen>
+    <dimen name="cast_member_name_size">15sp</dimen>
+    <dimen name="cast_character_name_size">12sp</dimen>
 </resources>

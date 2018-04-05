@@ -61,31 +61,19 @@ public class ScreenUtils {
         }
     }
 
-    /* Return the number of columns that will be used for our MainActivity RecyclerView.
-     * The return value is based on the smallest screen width and the orientation of the device.
-     * @param context is used to call getSmallestScreenWidthInDps method
+    /* Return the number of columns that will be used for our RecyclerViews that use a GridLayoutManager.
+     * The return value is based on the screen width in dps.
+     * @param context is used to call getScreenSize method
+     * @param withDivider is used to divide the screen size. It's size depends on each use case
+     * (i.e. in MainActivity the min is 200dps and in ProfileActivity the min is 120dps)
+     * @param minNumberOfColumns is used to set the minimum number of columns on each use case
+     * (i.e. in MainActivity the min is 2 and in ProfileActivity the min is 3)
      */
-    public static int getNumberOfColumns (Context context) {
-        // If the user has a phone
-        if (getSmallestScreenWidthInDps(context) < 600) {
-            // If the phone is in landscape
-            if (isLandscapeMode(context)) {
-                // We have 3 columns
-                return 3;
-            } else {
-                // Otherwise, in portrait, we have 2 columns
-                return 2;
-            }
-        } else {
-            // Otherwise, user must have a tablet
-            // If the tablet is in landscape
-            if (isLandscapeMode(context)) {
-                // We have 5 columns
-                return 5;
-            } else {
-                // Otherwise, in portrait, we have 4 columns
-                return 4;
-            }
-        }
+    public static int getNumberOfColumns (Context context, int widthDivider, int minNumberOfColumns) {
+        // Get screen width in dps
+        int width = getScreenWidthInDps(context);
+        int numberOfColumns = width / widthDivider;
+        if (numberOfColumns < minNumberOfColumns) return minNumberOfColumns;
+        return numberOfColumns;
     }
 }

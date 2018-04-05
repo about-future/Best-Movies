@@ -80,17 +80,17 @@ public class FavouritesDbHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(SQL_CREATE_MOVIE_DETAILS_TABLE);
-        //db.execSQL(SQL_CREATE_CAST_TABLE);
-        //db.execSQL(SQL_CREATE_REVIEWS_TABLE);
-        //db.execSQL(SQL_CREATE_VIDEOS_TABLE);
+        db.execSQL(SQL_CREATE_CAST_TABLE);
+        db.execSQL(SQL_CREATE_REVIEWS_TABLE);
+        db.execSQL(SQL_CREATE_VIDEOS_TABLE);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL(SQL_DELETE_MOVIE_DETAILS_ENTRIES);
-        //db.execSQL(SQL_DELETE_CAST_ENTRIES);
-        //db.execSQL(SQL_DELETE_REVIEWS_ENTRIES);
-        //db.execSQL(SQL_DELETE_VIDEOS_ENTRIES);
+        db.execSQL(SQL_DELETE_CAST_ENTRIES);
+        db.execSQL(SQL_DELETE_REVIEWS_ENTRIES);
+        db.execSQL(SQL_DELETE_VIDEOS_ENTRIES);
         onCreate(db);
     }
 }

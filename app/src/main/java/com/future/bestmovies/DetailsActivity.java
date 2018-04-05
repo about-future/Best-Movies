@@ -12,6 +12,7 @@ import android.support.constraint.ConstraintLayout;
 import android.support.v4.content.ContextCompat;
 import android.content.CursorLoader;
 import android.support.v4.graphics.drawable.DrawableCompat;
+import android.support.v4.util.TimeUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -47,6 +48,7 @@ import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
 
 import static com.future.bestmovies.data.FavouritesContract.*;
 
@@ -93,10 +95,11 @@ public class DetailsActivity extends AppCompatActivity implements
     public static final String MOVIE_TITLE_KEY = "movie_title";
     public static final String MOVIE_BACKDROP_KEY = "movie_backdrop";
 
-
     private Bundle mBundleState;
-    private MovieDetails mSelectedMovie;
     private int mMovieId;
+    private MovieDetails mSelectedMovie;
+
+    // Movie details variables
     private ImageView mMovieBackdropImageView;
     private ImageView mMoviePosterImageView;
     private TextView posterErrorTextView;
@@ -106,6 +109,7 @@ public class DetailsActivity extends AppCompatActivity implements
     private TextView mMoviePlotTextView;
     private TextView mMovieRuntimeTextView;
 
+    // Cast variables
     private TextView mCastMessagesTextView;
     private int mCastPosition = RecyclerView.NO_POSITION;
     private CastAdapter mCastAdapter;
@@ -116,6 +120,7 @@ public class DetailsActivity extends AppCompatActivity implements
     private ImageView mNoCastImageView;
     private ImageView mNoCastConnectionImageView;
 
+    // Reviews variables
     private ConstraintLayout mFirstReviewLayout;
     private TextView mFirstReviewAuthorTextView;
     private TextView mFirstReviewContentTextView;
@@ -126,6 +131,7 @@ public class DetailsActivity extends AppCompatActivity implements
     private ImageView mNoReviewsImageView;
     private ImageView mNoReviewsConnectionImageView;
 
+    // Videos variables
     private ArrayList<Video> mVideos;
     private RecyclerView mVideosRecyclerView;
     private LinearLayoutManager mVideosLayoutManager;
@@ -136,6 +142,7 @@ public class DetailsActivity extends AppCompatActivity implements
     private ImageView mNoVideosImageView;
 
     private boolean mIsFavourite;
+    private MenuItem mFavouriteMovieMenuItem;
     private Toast mToast;
 
 
@@ -162,16 +169,16 @@ public class DetailsActivity extends AppCompatActivity implements
         mMovieRuntimeTextView = findViewById(R.id.details_runtime_tv);
 
         if (savedInstanceState == null) {
-            // Otherwise, we check our intent and see if there is a Movie object or a movieId passed
-            // from MainActivity, so we can populate our UI. If there isn't we close this activity
+            // Check intent and see if there is a movieId passed from MainActivity or
+            // ProfileActivity, so we can populate our UI. If there isn't we close this activity
             // and display a toast message.
             Intent intent = getIntent();
             if (intent != null) {
-                // If MainActivity passed a movie id
+                // If MainActivity or ProfileActivity passed a movie id
                 if (intent.hasExtra(MOVIE_ID_KEY)) {
                     // Save the passed movieId
                     mMovieId = intent.getIntExtra(MOVIE_ID_KEY, 297762);
-                    // MOVIE TITLE (set the title of our activity as the movie title)
+                    // Set the title of our activity as the movie title, passed from the other activity
                     setTitle(intent.getStringExtra(MOVIE_TITLE_KEY));
                     // Check if this movie is a favourite or not
                     getLoaderManager().restartLoader(CHECK_IF_FAVOURITE_MOVIE_LOADER_ID,null, favouriteMovieResultLoaderListener);
@@ -193,7 +200,7 @@ public class DetailsActivity extends AppCompatActivity implements
         mCastLayoutManager =
                 new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
         mCastRecyclerView.setLayoutManager(mCastLayoutManager);
-        mCastRecyclerView.setHasFixedSize(true);
+        mCastRecyclerView.setHasFixedSize(false);
         mCastAdapter = new CastAdapter(this, this);
         mCastRecyclerView.setAdapter(mCastAdapter);
         mNoCastImageView = findViewById(R.id.no_cast_iv);
@@ -303,24 +310,30 @@ public class DetailsActivity extends AppCompatActivity implements
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.details_menu, menu);
 
-        MenuItem favouritesMenuItem = menu.findItem(R.id.action_favourite_movie);
+        MenuItem favouriteMovieMenuItem = menu.findItem(R.id.action_favourite_movie);
+        mFavouriteMovieMenuItem = favouriteMovieMenuItem;
         if (mIsFavourite) {
-            DrawableCompat.setTint(favouritesMenuItem.getIcon(), ContextCompat.getColor(getApplicationContext(), R.color.colorHeart));
+            DrawableCompat.setTint(favouriteMovieMenuItem.getIcon(), ContextCompat.getColor(getApplicationContext(), R.color.colorHeart));
         } else {
-            DrawableCompat.setTint(favouritesMenuItem.getIcon(), ContextCompat.getColor(getApplicationContext(), R.color.colorWhite));
+            DrawableCompat.setTint(favouriteMovieMenuItem.getIcon(), ContextCompat.getColor(getApplicationContext(), R.color.colorWhite));
         }
 
         return true;
     }
 
     @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        return super.onPrepareOptionsMenu(menu);
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
 
-        if (id == android.R.id.home) {
-            onBackPressed();
-            return true;
-        }
+//        if (id == android.R.id.home) {
+//            onBackPressed();
+//            return true;
+//        }
 
         if (id == R.id.action_favourite_movie) {
             if (mIsFavourite) deleteFavourite(mSelectedMovie, item);
@@ -390,6 +403,8 @@ public class DetailsActivity extends AppCompatActivity implements
         // Save Video position
         mVideosPosition = mVideosLayoutManager.findFirstCompletelyVisibleItemPosition();
         mBundleState.putInt(VIDEOS_POSITION_KEY, mVideosPosition);
+
+        mBundleState.putBoolean(IS_FAVOURITE_KEY, mIsFavourite);
     }
 
     @Override
@@ -409,6 +424,8 @@ public class DetailsActivity extends AppCompatActivity implements
             if (mVideosPosition == RecyclerView.NO_POSITION) mVideosPosition = 0;
             // Scroll the RecyclerView to mVideosPosition
             mVideosRecyclerView.smoothScrollToPosition(mVideosPosition);
+
+            mIsFavourite = mBundleState.getBoolean(IS_FAVOURITE_KEY);
         }
     }
 
@@ -679,6 +696,9 @@ public class DetailsActivity extends AppCompatActivity implements
                         case CHECK_IF_FAVOURITE_MOVIE_LOADER_ID:
                             if (cursor != null && cursor.moveToFirst()) {
                                 mIsFavourite = true;
+                                // As soon as we know the movie is a favourite, color the heart, so the user will know it too
+                                if (mFavouriteMovieMenuItem != null)
+                                    DrawableCompat.setTint(mFavouriteMovieMenuItem.getIcon(), ContextCompat.getColor(getApplicationContext(), R.color.colorHeart));
                                 cursor.close();
                                 // If it's a favourite movie, load data using a cursor
                                 getLoaderManager().restartLoader(FAVOURITE_LOADER_ID, null, favouriteMovieResultLoaderListener);
@@ -744,8 +764,18 @@ public class DetailsActivity extends AppCompatActivity implements
                 });
         // RATINGS
         mMovieRatingTextView.setText(String.valueOf(movieDetails.getVoteAverage()).concat(getString(R.string.max_rating)));
+
         // RUNTIME
-        mMovieRuntimeTextView.setText(String.valueOf(movieDetails.getRuntime()));
+        int runtime = movieDetails.getRuntime();
+        long hours = TimeUnit.MINUTES.toHours(runtime);
+        long minutes = runtime - TimeUnit.HOURS.toMinutes(hours);
+
+        if (hours > 0) {
+            mMovieRuntimeTextView.setText(String.format(getString(R.string.format_runtime), (float) hours, (float) minutes));
+        } else {
+            mMovieRuntimeTextView.setText(String.format(getString(R.string.format_minutes), (float) minutes));
+        }
+
         // RELEASE DATE
         mMovieReleaseDateTextView.setText(movieDetails.getReleaseDate());
         // PLOT
@@ -836,30 +866,98 @@ public class DetailsActivity extends AppCompatActivity implements
     }
 
     private void insertMovie(MovieDetails selectedMovie, MenuItem item) {
-        ContentValues values = new ContentValues();
-        values.put(MovieDetailsEntry.COLUMN_MOVIE_ID, selectedMovie.getMovieId());
-        values.put(MovieDetailsEntry.COLUMN_BACKDROP_PATH, selectedMovie.getBackdropPath());
-        values.put(MovieDetailsEntry.COLUMN_GENRES, TextUtils.join(", ", selectedMovie.getGenreIds()));
-        values.put(MovieDetailsEntry.COLUMN_LANGUAGE, selectedMovie.getLanguage());
-        values.put(MovieDetailsEntry.COLUMN_PLOT, selectedMovie.getOverview());
-        values.put(MovieDetailsEntry.COLUMN_POSTER_PATH, selectedMovie.getPosterPath());
-        values.put(MovieDetailsEntry.COLUMN_RATINGS, selectedMovie.getVoteAverage());
-        values.put(MovieDetailsEntry.COLUMN_RELEASE_DATE, selectedMovie.getReleaseDate());
-        values.put(MovieDetailsEntry.COLUMN_RUNTIME, selectedMovie.getRuntime());
-        values.put(MovieDetailsEntry.COLUMN_TITLE, selectedMovie.getMovieTitle());
+        int INITIAL_VALUE = -1;
 
-        Uri responseUri = getContentResolver().insert(MovieDetailsEntry.CONTENT_URI, values);
+        //Movie details insertion
+        ContentValues movieValues = new ContentValues();
+        movieValues.put(MovieDetailsEntry.COLUMN_MOVIE_ID, selectedMovie.getMovieId());
+        movieValues.put(MovieDetailsEntry.COLUMN_BACKDROP_PATH, selectedMovie.getBackdropPath());
+        movieValues.put(MovieDetailsEntry.COLUMN_GENRES, TextUtils.join(", ", selectedMovie.getGenreIds()));
+        movieValues.put(MovieDetailsEntry.COLUMN_LANGUAGE, selectedMovie.getLanguage());
+        movieValues.put(MovieDetailsEntry.COLUMN_PLOT, selectedMovie.getOverview());
+        movieValues.put(MovieDetailsEntry.COLUMN_POSTER_PATH, selectedMovie.getPosterPath());
+        movieValues.put(MovieDetailsEntry.COLUMN_RATINGS, selectedMovie.getVoteAverage());
+        movieValues.put(MovieDetailsEntry.COLUMN_RELEASE_DATE, selectedMovie.getReleaseDate());
+        movieValues.put(MovieDetailsEntry.COLUMN_RUNTIME, selectedMovie.getRuntime());
+        movieValues.put(MovieDetailsEntry.COLUMN_TITLE, selectedMovie.getMovieTitle());
+        Uri movieResponseUri = getContentResolver().insert(MovieDetailsEntry.CONTENT_URI, movieValues);
+
+        // Cast insertion
+        ContentValues[] allCastValues = new ContentValues[mCast.size()];
+        // For each cast member, get the data and put it in castValue
+        for (int i=0; i < mCast.size(); i++) {
+            ContentValues castValues = new ContentValues();
+            castValues.put(CastEntry.COLUMN_MOVIE_ID, selectedMovie.getMovieId());
+            castValues.put(CastEntry.COLUMN_ACTOR_ID, mCast.get(i).getActorId());
+            castValues.put(CastEntry.COLUMN_ACTOR_NAME, mCast.get(i).getActorName());
+            castValues.put(CastEntry.COLUMN_CHARACTER_NAME, mCast.get(i).getCharacter());
+            castValues.put(CastEntry.COLUMN_IMAGE_PROFILE_PATH, mCast.get(i).getProfilePath());
+
+            // Add each castValues to the array
+            allCastValues[i] = castValues;
+        }
+
+        // Initialize the value of castResponse
+        int castResponse = INITIAL_VALUE;
+        // If we have cast values to insert, insert them and update the value of castResponse
+        if (allCastValues.length != 0) {
+            castResponse = getContentResolver().bulkInsert(CastEntry.CONTENT_URI, allCastValues);
+        }
+
+        // Reviews insertion
+        ContentValues[] allReviewsValues = new ContentValues[mReviews.size()];
+        // For each review, get it's data and put it in reviewValues
+        for (int i=0; i < mReviews.size(); i++) {
+            ContentValues reviewValues = new ContentValues();
+            reviewValues.put(ReviewsEntry.COLUMN_MOVIE_ID, selectedMovie.getMovieId());
+            reviewValues.put(ReviewsEntry.COLUMN_AUTHOR, mReviews.get(i).getReviewAuthor());
+            reviewValues.put(ReviewsEntry.COLUMN_CONTENT, mReviews.get(i).getReviewContent());
+
+            // Add each reviewValues to the array
+            allReviewsValues[i] = reviewValues;
+        }
+
+        // Initialize the value of reviewsResponse
+        int reviewsResponse = INITIAL_VALUE;
+        // If we have review values to insert, insert them and update the value of reviewsResponse
+        if (allReviewsValues.length != 0) {
+            reviewsResponse = getContentResolver().bulkInsert(ReviewsEntry.CONTENT_URI, allReviewsValues);
+        }
+
+        // Videos insertion
+        ContentValues[] allVideoValues = new ContentValues[mVideos.size()];
+        // For each video, get it's data and put it in videoValues
+        for (int i=0; i < mVideos.size(); i++) {
+            ContentValues videoValue = new ContentValues();
+            videoValue.put(VideosEntry.COLUMN_MOVIE_ID, selectedMovie.getMovieId());
+            videoValue.put(VideosEntry.COLUMN_VIDEO_KEY, mVideos.get(i).getVideoKey());
+            videoValue.put(VideosEntry.COLUMN_VIDEO_NAME, mVideos.get(i).getVideoName());
+            videoValue.put(VideosEntry.COLUMN_VIDEO_TYPE, mVideos.get(i).getVideoType());
+
+            // Add each videoValues to the array
+            allVideoValues[i] = videoValue;
+        }
+
+        // Initialize the value of videosResponse
+        int videosResponse = INITIAL_VALUE;
+        // If we have video values to insert, insert them and update the value of videosResponse
+        if (allVideoValues.length != 0) {
+            videosResponse = getContentResolver().bulkInsert(VideosEntry.CONTENT_URI, allVideoValues);
+        }
 
         // Show a toast message depending on whether or not the insertion was successful
-        if (responseUri == null) {
-            // If the new content URI is null, then there was an error with insertion.
-            DrawableCompat.setTint(item.getIcon(), ContextCompat.getColor(getApplicationContext(), R.color.colorWhite));
-            toastThis(getString(R.string.favourite_insert_failed));
-        } else {
-            // Otherwise, the insertion was successful and we can display a toast.
+        if (movieResponseUri != null &&
+                (castResponse == INITIAL_VALUE || castResponse > 0) &&
+                (reviewsResponse == INITIAL_VALUE || reviewsResponse > 0) &&
+                (videosResponse == INITIAL_VALUE || videosResponse > 0)) {
+            // The insertion was successful and we can display a toast.
             DrawableCompat.setTint(item.getIcon(), ContextCompat.getColor(getApplicationContext(), R.color.colorHeart));
             toastThis(getString(R.string.favourite_insert_successful));
             mIsFavourite = true;
+        } else {
+            // Otherwise, if the new content URI is null, then there was an error with insertion.
+            DrawableCompat.setTint(item.getIcon(), ContextCompat.getColor(getApplicationContext(), R.color.colorWhite));
+            toastThis(getString(R.string.favourite_insert_failed));
         }
     }
 
@@ -868,16 +966,28 @@ public class DetailsActivity extends AppCompatActivity implements
                 MovieDetailsEntry.COLUMN_MOVIE_ID + " =?",
                 new String[]{String.valueOf(mSelectedMovie.getMovieId())});
 
+        getContentResolver().delete(CastEntry.CONTENT_URI,
+                CastEntry.COLUMN_MOVIE_ID + " =?",
+                new String[]{String.valueOf(mSelectedMovie.getMovieId())});
+
+        getContentResolver().delete(ReviewsEntry.CONTENT_URI,
+                ReviewsEntry.COLUMN_MOVIE_ID + " =?",
+                new String[]{String.valueOf(mSelectedMovie.getMovieId())});
+
+        getContentResolver().delete(VideosEntry.CONTENT_URI,
+                VideosEntry.COLUMN_MOVIE_ID + " =?",
+                new String[]{String.valueOf(mSelectedMovie.getMovieId())});
+
         // Show a toast message depending on whether or not the delete was successful.
-        if (rowsDeleted == 0) {
-            // If no rows were affected, then there was an error with the delete.
-            DrawableCompat.setTint(item.getIcon(), ContextCompat.getColor(getApplicationContext(), R.color.colorHeart));
-            toastThis(getString(R.string.favourite_delete_failed));
-        } else {
+        if (rowsDeleted != 0) {
             // Otherwise, the delete was successful and we can display a toast.
             DrawableCompat.setTint(item.getIcon(), ContextCompat.getColor(getApplicationContext(), R.color.colorWhite));
             toastThis(getString(R.string.favourite_delete_successful));
             mIsFavourite = false;
+        } else {
+            // Otherwise, if no rows were affected, then there was an error with the delete.
+            DrawableCompat.setTint(item.getIcon(), ContextCompat.getColor(getApplicationContext(), R.color.colorHeart));
+            toastThis(getString(R.string.favourite_delete_failed));
         }
     }
 

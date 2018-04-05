@@ -63,6 +63,8 @@
 
     </android.support.design.widget.AppBarLayout>
 
-    <include layout="@layout/credits_scrolling"/>
+    <include
+        android:id="@+id/actor_credits"
+        layout="@layout/credits_scrolling"/>
 
 </android.support.design.widget.CoordinatorLayout>

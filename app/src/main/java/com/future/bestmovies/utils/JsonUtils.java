@@ -225,11 +225,11 @@ public class JsonUtils {
     }
 
     // Parses the JSON response for the actor details
-    public static Actor parseActorDetailsJson (String actorDetailsJsonStr) throws JSONException {
+    public static Actor parseActorDetailsJson(String actorDetailsJsonStr) throws JSONException {
         int id;
         String birthday;
         String deathday;
-        int gender;
+        String gender;
         String name;
         String biography;
         String placeOfBirth;
@@ -239,23 +239,51 @@ public class JsonUtils {
         JSONObject actorDetailsJson = new JSONObject(actorDetailsJsonStr);
 
         id = actorDetailsJson.getInt(ACTOR_ID);
-        birthday = actorDetailsJson.getString(BIRTHDAY);
-        deathday = actorDetailsJson.getString(DEATH_DAY);
-        gender = actorDetailsJson.getInt(GENDER);
+        try {
+            if (!actorDetailsJson.getString(BIRTHDAY).equals("null"))
+                birthday = actorDetailsJson.getString(BIRTHDAY);
+            else
+                birthday = "Unknown";
+        } catch (JSONException e) {
+            birthday = "Unknown";
+        }
+        try {
+            deathday = actorDetailsJson.getString(DEATH_DAY);
+        } catch (JSONException e) {
+            deathday = "Unknown";
+        }
+
+        if (actorDetailsJson.getInt(GENDER) == 1)
+            gender = "Female";
+        else if (actorDetailsJson.getInt(GENDER) == 2)
+            gender = "Male";
+        else gender = "Unknown";
+
         name = actorDetailsJson.getString(NAME);
         biography = actorDetailsJson.getString(BIOGRAPHY);
+
         try {
-            placeOfBirth = actorDetailsJson.getString(PLACE_OF_BIRTH);
+            if (!actorDetailsJson.getString(PLACE_OF_BIRTH).equals("null"))
+                placeOfBirth = actorDetailsJson.getString(PLACE_OF_BIRTH);
+            else
+                placeOfBirth = "Unknown";
         } catch (JSONException e) {
             placeOfBirth = "Unknown";
         }
-        profilePath = actorDetailsJson.getString(PROFILE_PATH);
+
+        try {
+            if (actorDetailsJson.getString(PROFILE_PATH) != null)
+                profilePath = actorDetailsJson.getString(PROFILE_PATH);
+            else profilePath = "none";
+        } catch (JSONException e) {
+            profilePath = "none";
+        }
 
         return new Actor(id, birthday, deathday, gender, name, biography, placeOfBirth, profilePath);
     }
 
     // Parses the JSON response for the list of Credits of an actor
-    public static ArrayList<Credits> parseActorCreditsJson (String actorCreditsJsonStr) throws JSONException {
+    public static ArrayList<Credits> parseActorCreditsJson(String actorCreditsJsonStr) throws JSONException {
         String backdropPath;
         String character;
         int movieId;
@@ -273,7 +301,12 @@ public class JsonUtils {
             JSONObject creditJson = jsonResultsArray.getJSONObject(i);
 
             backdropPath = creditJson.getString(CREDIT_BACKDROP_PATH);
-            character = creditJson.getString(CREDIT_CHARACTER);
+            try {
+                character = creditJson.getString(CREDIT_CHARACTER);
+            } catch (JSONException e) {
+                character = "Unknown";
+            }
+
             movieId = creditJson.getInt(CREDIT_ID);
             posterPath = creditJson.getString(CREDIT_POSTER_PATH);
             try {

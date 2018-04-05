@@ -1,52 +1,57 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
+    android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:layout_marginTop="@dimen/activity_vertical_margin"
-    android:layout_marginEnd="@dimen/details_horizontal_spacing"
-    android:layout_marginBottom="@dimen/details_vertical_spacing">
+    android:paddingEnd="@dimen/details_horizontal_spacing"
+    android:paddingStart="@dimen/activity_horizontal_margin"
+    android:paddingBottom="@dimen/details_vertical_spacing">
 
     <ImageView
         android:id="@+id/credit_poster_iv"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_width="100dp"
+        android:layout_height="150dp"
         android:contentDescription="@string/movie_poster"
         android:scaleType="centerCrop"
         tools:srcCompat="@drawable/poster" />
 
     <TextView
         android:id="@+id/credit_title_tv"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/video_spacing"
         android:fontFamily="sans-serif-condensed"
         android:gravity="center"
         android:textColor="@color/colorWhite"
         android:textSize="@dimen/details_font_size"
+        app:layout_constraintEnd_toEndOf="@id/credit_poster_iv"
+        app:layout_constraintStart_toStartOf="@id/credit_poster_iv"
+        app:layout_constraintTop_toBottomOf="@id/credit_poster_iv"
         tools:text="Wonder Woman" />
 
     <TextView
         android:id="@+id/credit_release_date_tv"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:fontFamily="sans-serif-condensed"
         android:gravity="center"
-        android:textColor="@color/colorAccent"
-        android:textSize="@dimen/details_font_size"
+        android:textSize="14sp"
+        app:layout_constraintEnd_toEndOf="@id/credit_poster_iv"
+        app:layout_constraintStart_toStartOf="@id/credit_poster_iv"
+        app:layout_constraintTop_toBottomOf="@id/credit_title_tv"
         tools:text="(2018)" />
 
     <TextView
         android:id="@+id/credit_character_tv"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:fontFamily="sans-serif-condensed"
         android:gravity="center"
-        android:textColor="@color/colorWhite"
-        android:textSize="@dimen/details_font_size"
+        android:textColor="@color/colorAccent"
+        android:textSize="@dimen/cast_character_name_size"
+        app:layout_constraintEnd_toEndOf="@id/credit_poster_iv"
+        app:layout_constraintStart_toStartOf="@id/credit_poster_iv"
+        app:layout_constraintTop_toBottomOf="@id/credit_release_date_tv"
         tools:text="as Wonder Woman" />
 
-</LinearLayout>
+</android.support.constraint.ConstraintLayout>

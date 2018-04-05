@@ -84,8 +84,7 @@ public class FavouritesProvider extends ContentProvider {
         Cursor cursor = null;
 
         // Figure out if the URI matcher can match the URI to a specific code
-        int match = sUriMatcher.match(uri);
-        switch (match) {
+        switch (sUriMatcher.match(uri)) {
             case MOVIES:
                 // For the MOVIES code, query the movies table directly with the given
                 // projection, selection, selection arguments, and sort order. The cursor
@@ -93,6 +92,7 @@ public class FavouritesProvider extends ContentProvider {
                 cursor = database.query(MovieDetailsEntry.TABLE_NAME, projection, selection, selectionArgs,
                         null, null, sortOrder);
                 break;
+
             case MOVIE_ID:
                 // For the MOVIE_ID code, extract out the ID from the URI.
                 // For an example URI such as "content://com.future.bestmovies/movies/157336",
@@ -110,17 +110,42 @@ public class FavouritesProvider extends ContentProvider {
                 cursor = database.query(MovieDetailsEntry.TABLE_NAME, projection, selection, selectionArgs,
                         null, null, sortOrder);
                 break;
+
             case CAST:
                 cursor = database.query(CastEntry.TABLE_NAME, projection, selection, selectionArgs,
                         null, null, sortOrder);
                 break;
+
             case CAST_ID:
                 selection = CastEntry.COLUMN_MOVIE_ID + "=?";
                 selectionArgs = new String[]{String.valueOf(ContentUris.parseId(uri))};
-
-                // This will perform a query on the cast table where the movie_id equals 157336 to return a
-                // Cursor containing that row of the table.
+                // This will perform a query on the cast table where the movie_id equals (i.e. 157336) to return a
+                // Cursor containing those rows of the table.
                 cursor = database.query(CastEntry.TABLE_NAME, projection, selection, selectionArgs,
+                        null, null, sortOrder);
+                break;
+
+            case REVIEWS:
+                cursor = database.query(ReviewsEntry.TABLE_NAME, projection, selection, selectionArgs,
+                        null, null, sortOrder);
+                break;
+
+            case REVIEW_ID:
+                selection = ReviewsEntry.COLUMN_MOVIE_ID + "=?";
+                selectionArgs = new String[]{String.valueOf(ContentUris.parseId(uri))};
+                cursor = database.query(ReviewsEntry.TABLE_NAME, projection, selection, selectionArgs,
+                        null, null, sortOrder);
+                break;
+
+            case VIDEOS:
+                cursor = database.query(VideosEntry.TABLE_NAME, projection, selection, selectionArgs,
+                        null, null, sortOrder);
+                break;
+
+            case VIDEO_ID:
+                selection = VideosEntry.COLUMN_MOVIE_ID + "=?";
+                selectionArgs = new String[]{String.valueOf(ContentUris.parseId(uri))};
+                cursor = database.query(VideosEntry.TABLE_NAME, projection, selection, selectionArgs,
                         null, null, sortOrder);
                 break;
             default:
@@ -138,8 +163,7 @@ public class FavouritesProvider extends ContentProvider {
     @Nullable
     @Override
     public String getType(@NonNull Uri uri) {
-        final int match = sUriMatcher.match(uri);
-        switch (match) {
+        switch (sUriMatcher.match(uri)) {
             case MOVIES:
                 return MovieDetailsEntry.CONTENT_LIST_TYPE;
             case MOVIE_ID:
@@ -148,61 +172,128 @@ public class FavouritesProvider extends ContentProvider {
                 return CastEntry.CONTENT_LIST_TYPE;
             case CAST_ID:
                 return CastEntry.CONTENT_ITEM_TYPE;
+            case REVIEWS:
+                return ReviewsEntry.CONTENT_LIST_TYPE;
+            case REVIEW_ID:
+                return ReviewsEntry.CONTENT_ITEM_TYPE;
+            case VIDEOS:
+                return VideosEntry.CONTENT_LIST_TYPE;
+            case VIDEO_ID:
+                return VideosEntry.CONTENT_ITEM_TYPE;
             default:
-                throw new IllegalStateException("Unknown URI " + uri + " with match " + match);
+                throw new IllegalStateException("Unknown URI " + uri + " with match " + sUriMatcher.match(uri));
         }
     }
 
     @Nullable
     @Override
     public Uri insert(@NonNull Uri uri, ContentValues contentValues) {
-        final int match = sUriMatcher.match(uri);
-        switch (match) {
+        switch (sUriMatcher.match(uri)) {
             case MOVIES:
-                return insertFavourite(uri, contentValues);
+                return insertFavourite(MovieDetailsEntry.TABLE_NAME, uri, contentValues);
+
+            // In the present, the bellow cases are not used, but in the future they might be used,
+            // so it's good to have all cases created
+            case CAST:
+                return insertFavourite(CastEntry.TABLE_NAME, uri, contentValues);
+            case VIDEOS:
+                return insertFavourite(VideosEntry.TABLE_NAME, uri, contentValues);
+            case REVIEWS:
+                return insertFavourite(ReviewsEntry.TABLE_NAME, uri, contentValues);
             default:
                 throw new IllegalArgumentException("Insertion is not supported for " + uri);
         }
     }
 
-    // Insert a movie into the database with the given content values. Return the new content URI
-    // for that specific row in the database.
-    private Uri insertFavourite(Uri uri, ContentValues contentValues) {
-
-        // Get writable database and insert the new movie with the given values
-        long id = mDbHelper.getWritableDatabase().insert(MovieDetailsEntry.TABLE_NAME, null, contentValues);
-
+    // Insert a movie/cast member/review or video into the database with the given content values.
+    // Return the new content URI for that specific row in the database.
+    private Uri insertFavourite(String tableName, Uri uri, ContentValues contentValues) {
+        // Get writable database and insert the given values
+        long id = mDbHelper.getWritableDatabase().insert(tableName, null, contentValues);
         // Notify all listeners that the data has changed
         if (id > 0) getContext().getContentResolver().notifyChange(uri, null);
-
         // Return the id appended to the uri
         return ContentUris.withAppendedId(uri, id);
     }
 
+    // Handles requests to insert a set of new rows in a selected table. In this app, we are going
+    // to be inserting multiple rows of cast members, reviews or video data.
+    @Override
+    public int bulkInsert(@NonNull Uri uri, @NonNull ContentValues[] values) {
+        switch (sUriMatcher.match(uri)) {
+            case CAST:
+                return bulkInsertData(CastEntry.TABLE_NAME, uri, values);
+
+            case REVIEWS:
+                return bulkInsertData(ReviewsEntry.TABLE_NAME, uri, values);
+
+            case VIDEOS:
+                return bulkInsertData(VideosEntry.TABLE_NAME, uri, values);
+
+            default:
+                return super.bulkInsert(uri, values);
+        }
+    }
+
+    private int bulkInsertData (String tableName, Uri uri, ContentValues[] values) {
+        SQLiteDatabase db = mDbHelper.getWritableDatabase();
+
+        db.beginTransaction();
+        int rowsInserted = 0;
+        try {
+            for (ContentValues value : values) {
+                long _id = db.insert(tableName, null, value);
+                if (_id != -1) {
+                    rowsInserted++;
+                }
+            }
+            db.setTransactionSuccessful();
+        } finally {
+            db.endTransaction();
+        }
+
+        if (rowsInserted > 0)
+            getContext().getContentResolver().notifyChange(uri, null);
+
+        return rowsInserted;
+    }
+
     @Override
     public int delete(@NonNull Uri uri, String selection, String[] selectionArgs) {
-        final int match = sUriMatcher.match(uri);
-        switch (match) {
+        switch (sUriMatcher.match(uri)) {
             case MOVIES:
                 // Delete all rows that match the selection and selection args
-                return deleteFavourite(uri, selection, selectionArgs);
+                return deleteFavourite(MovieDetailsEntry.TABLE_NAME, uri, selection, selectionArgs);
+
             case MOVIE_ID:
                 // For the MOVIE_ID code, extract out the ID from the URI,
                 // so we know which row to delete. Selection will be "_id=?" and selection
                 // arguments will be a String array containing the actual ID.
-                selection = MovieDetailsEntry.COLUMN_MOVIE_ID + "=?";
-                selectionArgs = new String[] { String.valueOf(ContentUris.parseId(uri)) };
-
+                selection = MovieDetailsEntry._ID + "=?";
+                selectionArgs = new String[]{String.valueOf(ContentUris.parseId(uri))};
                 // Delete a single row given by the ID in the URI
-                return deleteFavourite(uri, selection, selectionArgs);
+                return deleteFavourite(MovieDetailsEntry.TABLE_NAME, uri, selection, selectionArgs);
+
+            case CAST:
+                // Delete all rows that match the selection and selection args
+                return deleteFavourite(CastEntry.TABLE_NAME, uri, selection, selectionArgs);
+
+            case REVIEWS:
+                // Delete all rows that match the selection and selection args
+                return deleteFavourite(ReviewsEntry.TABLE_NAME, uri, selection, selectionArgs);
+
+            case VIDEOS:
+                // Delete all rows that match the selection and selection args
+                return deleteFavourite(VideosEntry.TABLE_NAME, uri, selection, selectionArgs);
+
             default:
                 throw new IllegalArgumentException("Delete is not supported for " + uri);
         }
     }
 
-    private int deleteFavourite(Uri uri, String selection, String[] selectionArgs) {
+    private int deleteFavourite(String tableName, Uri uri, String selection, String[] selectionArgs) {
         // Get writable database, delete and return the number of database rows affected by the delete statement
-        int rowsDeleted = mDbHelper.getWritableDatabase().delete(MovieDetailsEntry.TABLE_NAME, selection, selectionArgs);
+        int rowsDeleted = mDbHelper.getWritableDatabase().delete(tableName, selection, selectionArgs);
 
         // If 1 or more rows were deleted, then notify all listeners that the data at the given URI has changed
         if (rowsDeleted != 0) getContext().getContentResolver().notifyChange(uri, null);

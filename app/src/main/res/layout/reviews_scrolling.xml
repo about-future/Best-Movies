@@ -12,8 +12,9 @@
         android:id="@+id/reviews_rv"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginStart="@dimen/details_horizontal_spacing"
+        android:layout_marginBottom="@dimen/details_vertical_spacing"
         android:layout_marginEnd="@dimen/details_horizontal_spacing"
+        android:layout_marginStart="@dimen/details_horizontal_spacing"
         android:clipToPadding="false"
         android:visibility="visible" />
 

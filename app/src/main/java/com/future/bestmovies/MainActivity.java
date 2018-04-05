@@ -90,7 +90,9 @@ public class MainActivity extends AppCompatActivity implements
         mMoviesRecyclerView = findViewById(R.id.movies_rv);
         // The layout manager for our RecyclerView will be a GridLayout, so we can display our movies
         // on columns. The number of columns is dictated by the orientation and size of the device
-        mGridLayoutManager = new GridLayoutManager(this, ScreenUtils.getNumberOfColumns(this));
+        mGridLayoutManager = new GridLayoutManager(
+                this,
+                ScreenUtils.getNumberOfColumns(this, 200, 2));
         mMoviesRecyclerView.setLayoutManager(mGridLayoutManager);
         mMoviesRecyclerView.setHasFixedSize(true);
         mAdapter = new MovieCategoryAdapter(this, this);
@@ -320,7 +322,7 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
-    // TODO: share info, save video and reviews, profile activity
+    // TODO: share info, save video and reviews
 
     // Hide the movie data and loading indicator and show error message
     private void showError() {

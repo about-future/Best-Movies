@@ -68,7 +68,7 @@ public class FavouritesContract {
         public static final String CONTENT_ITEM_TYPE =
                 ContentResolver.CURSOR_ITEM_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_CAST;
 
-        public final static String TABLE_NAME =                 "cast";
+        public final static String TABLE_NAME =                 "movie_cast";
         public final static String _ID = BaseColumns._ID;                           // Type: INTEGER (Unique ID)
         public final static String COLUMN_MOVIE_ID =            "movie_id";         // Type: INTEGER
         public final static String COLUMN_ACTOR_NAME =          "actor_name";       // Type: TEXT
@@ -91,7 +91,7 @@ public class FavouritesContract {
         public static final String CONTENT_ITEM_TYPE =
                 ContentResolver.CURSOR_ITEM_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_REVIEWS;
 
-        public final static String TABLE_NAME =                 "reviews";
+        public final static String TABLE_NAME =                 "movie_reviews";
         public final static String _ID = BaseColumns._ID;                           // Type: INTEGER (Unique ID)
         public final static String COLUMN_MOVIE_ID =            "movie_id";         // Type: INTEGER
         public final static String COLUMN_AUTHOR =              "author";           // Type: TEXT
@@ -112,7 +112,7 @@ public class FavouritesContract {
         public static final String CONTENT_ITEM_TYPE =
                 ContentResolver.CURSOR_ITEM_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_VIDEOS;
 
-        public final static String TABLE_NAME =                 "videos";
+        public final static String TABLE_NAME =                 "movie_videos";
         public final static String _ID = BaseColumns._ID;                           // Type: INTEGER (Unique ID)
         public final static String COLUMN_MOVIE_ID =            "movie_id";         // Type: INTEGER
         public final static String COLUMN_VIDEO_KEY =           "video_key";        // Type: TEXT

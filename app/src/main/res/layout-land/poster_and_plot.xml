@@ -20,7 +20,7 @@
             android:scaleType="centerCrop"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/ic_local_movies" />
+            tools:srcCompat="@drawable/ic_local_movies" />
 
         <TextView
             android:id="@+id/poster_error_tv"
@@ -33,7 +33,7 @@
             android:textAllCaps="true"
             android:textColor="@color/colorTransparentWhite"
             android:textSize="@dimen/details_font_size"
-            android:visibility="visible"
+            android:visibility="invisible"
             app:layout_constraintBottom_toBottomOf="@id/details_poster_iv"
             app:layout_constraintEnd_toEndOf="@id/details_poster_iv"
             app:layout_constraintStart_toStartOf="@id/details_poster_iv" />

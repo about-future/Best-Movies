@@ -49,9 +49,9 @@
                 android:layout_marginBottom="@dimen/details_vertical_spacing"
                 android:layout_marginStart="@dimen/details_horizontal_spacing"
                 android:fontFamily="sans-serif-condensed"
-                android:text="@string/original_title_label"
                 android:textColor="@color/colorAccent"
-                android:textSize="15sp" />
+                android:textSize="15sp"
+                tools:text="@string/original_title_label" />
 
             <android.support.v7.widget.Toolbar
                 android:id="@+id/toolbar"

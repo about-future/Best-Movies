@@ -47,17 +47,25 @@ public class CreditsAdapter extends RecyclerView.Adapter<CreditsAdapter.CreditsV
                         mContext,
                         mCredits.get(position).getPosterPath(),
                         ImageUtils.POSTER))
-                .error(R.drawable.ic_landscape)
+                .error(R.drawable.no_poster)
                 .into(holder.creditPosterImageView);
+
         holder.creditTitleTextView.setText(mCredits.get(position).getTitle());
+
+        String releaseYear;
         if (mCredits.get(position).getReleaseDate().length() > 4 && !TextUtils.equals(
                 mCredits.get(position).getReleaseDate(),
                 mContext.getText(R.string.credit_date_unknown))) {
-            holder.creditReleaseDateTextView.setText(mCredits.get(position).getReleaseDate().substring(0, 4));
+            releaseYear = mCredits.get(position).getReleaseDate().substring(0, 4);
         } else {
-            holder.creditReleaseDateTextView.setText(mContext.getText(R.string.credit_date_unknown));
+            releaseYear = mContext.getText(R.string.credit_date_unknown).toString();
         }
-        holder.creditCharacterTextView.setText(mCredits.get(position).getCharacter());
+        holder.creditReleaseDateTextView.setText(TextUtils.concat("(", releaseYear, ")"));
+
+        if (!mCredits.get(position).getCharacter().isEmpty())
+            holder.creditCharacterTextView.setText(TextUtils.concat(
+                    mContext.getText(R.string.credit_as_character).toString(),
+                    mCredits.get(position).getCharacter()));
     }
 
     @Override

@@ -39,10 +39,6 @@ public class NetworkUtils {
     private static final String API_KEY = "api_key";
     private static final String API_ID = "xxx";
 
-    //https://api.themoviedb.org/3/movie/157336?api_key=
-    //https://api.themoviedb.org/3/person/10297/movie_credits?api_key=
-    //https://api.themoviedb.org/3/person/10297?api_key=
-
     private static final String YOUTUBE_VIDEO_BASE_URL = "https://www.youtube.com/watch";
     private static final String YOUTUBE_PARAMETER = "v";
 

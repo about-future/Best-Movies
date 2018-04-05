@@ -320,11 +320,16 @@ public class ProfileActivity extends AppCompatActivity implements CreditsAdapter
         birthdayTextView.setText(actorDetails.getBirthday());
 
         // Age
-        if (actorDetails.getBirthday().length() > 4 &&
-                !actorDetails.getBirthday().equals(getString(R.string.credit_date_unknown))) {
-            int birthYear = Integer.valueOf(actorDetails.getBirthday().substring(0, 4));
-            int currentYear = Calendar.getInstance().get(Calendar.YEAR);
-            ageTextView.setText(getString(R.string.credit_age).concat(Integer.toString(currentYear - birthYear)));
+        int birthYear;
+        int endYear;
+        if (actorDetails.getBirthday().length() > 4 && !actorDetails.getBirthday().equals(getString(R.string.credit_date_unknown))) {
+            birthYear = Integer.valueOf(actorDetails.getBirthday().substring(0, 4));
+            if (actorDetails.getDeathday().length() > 4 && !actorDetails.getDeathday().equals(getString(R.string.credit_date_unknown))) {
+                endYear = Integer.valueOf(actorDetails.getDeathday().substring(0, 4));
+            } else {
+                endYear = Calendar.getInstance().get(Calendar.YEAR);
+            }
+            ageTextView.setText(getString(R.string.credit_age).concat(Integer.toString(endYear - birthYear)));
         } else {
             ageTextView.setText(getString(R.string.credit_age).concat("unknown"));
         }

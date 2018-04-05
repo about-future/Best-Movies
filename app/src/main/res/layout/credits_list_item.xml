@@ -14,7 +14,7 @@
         android:layout_height="150dp"
         android:contentDescription="@string/movie_poster"
         android:scaleType="centerCrop"
-        tools:srcCompat="@drawable/poster" />
+        tools:srcCompat="@drawable/no_poster" />
 
     <TextView
         android:id="@+id/credit_title_tv"

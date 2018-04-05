@@ -2,17 +2,14 @@ package com.future.bestmovies;
 
 import android.app.LoaderManager;
 import android.content.ContentValues;
-import android.content.Context;
 import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.Parcelable;
 import android.support.constraint.ConstraintLayout;
 import android.support.v4.content.ContextCompat;
 import android.content.CursorLoader;
 import android.support.v4.graphics.drawable.DrawableCompat;
-import android.support.v4.util.TimeUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -33,7 +30,6 @@ import android.widget.Toast;
 import com.future.bestmovies.data.Cast;
 import com.future.bestmovies.data.CastAdapter;
 import com.future.bestmovies.data.CastLoader;
-import com.future.bestmovies.data.Movie;
 import com.future.bestmovies.data.MovieDetails;
 import com.future.bestmovies.data.MovieDetailsLoader;
 import com.future.bestmovies.data.Review;
@@ -43,7 +39,6 @@ import com.future.bestmovies.data.VideoAdapter;
 import com.future.bestmovies.data.VideoLoader;
 import com.future.bestmovies.utils.ImageUtils;
 import com.future.bestmovies.utils.NetworkUtils;
-import com.future.bestmovies.utils.StringUtils;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
@@ -330,10 +325,14 @@ public class DetailsActivity extends AppCompatActivity implements
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
 
-//        if (id == android.R.id.home) {
-//            onBackPressed();
-//            return true;
-//        }
+        // This case is deactivate on purpose. The reason is when the user chooses a movie, then an
+        // actor profile, and an other movie in which the chosen actor appeared in and an other actor
+        // from the same movie, and an other movie and so on, (the user) will no be forced to click
+        // back 20 times, just to get to the main movie list. Thank you for your understanding!
+        /*if (id == android.R.id.home) {
+            onBackPressed();
+            return true;
+        }*/
 
         if (id == R.id.action_favourite_movie) {
             if (mIsFavourite) deleteFavourite(mSelectedMovie, item);

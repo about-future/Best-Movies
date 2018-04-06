@@ -5,6 +5,7 @@ import android.content.ContentValues;
 import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.support.constraint.ConstraintLayout;
 import android.support.v4.content.ContextCompat;
@@ -30,6 +31,7 @@ import android.widget.Toast;
 import com.future.bestmovies.data.Cast;
 import com.future.bestmovies.data.CastAdapter;
 import com.future.bestmovies.data.CastLoader;
+import com.future.bestmovies.data.FavouritesDbHelper;
 import com.future.bestmovies.data.MovieDetails;
 import com.future.bestmovies.data.MovieDetailsLoader;
 import com.future.bestmovies.data.Review;
@@ -55,6 +57,9 @@ public class DetailsActivity extends AppCompatActivity implements
     private static final int REVIEWS_LOADER_ID = 435;
     private static final int VIDEOS_LOADER_ID = 594;
     private static final int FAVOURITE_LOADER_ID = 516;
+    private static final int FAVOURITE_CAST_LOADER_ID = 516423;
+    private static final int FAVOURITE_REVIEW_LOADER_ID = 516435;
+    private static final int FAVOURITE_VIDEO_LOADER_ID = 516594;
     private static final int CHECK_IF_FAVOURITE_MOVIE_LOADER_ID = 473;
 
     // Query projection used to check if the movie is a favourite or not
@@ -72,6 +77,31 @@ public class DetailsActivity extends AppCompatActivity implements
             MovieDetailsEntry.COLUMN_RELEASE_DATE,
             MovieDetailsEntry.COLUMN_RUNTIME,
             MovieDetailsEntry.COLUMN_TITLE
+    };
+
+    public static final String[] CAST_DETAILED_PROJECTION = {
+            CastEntry.COLUMN_ACTOR_ID,
+            CastEntry.COLUMN_ACTOR_NAME,
+            CastEntry.COLUMN_CHARACTER_NAME,
+            CastEntry.COLUMN_IMAGE_PROFILE_PATH,
+            CastEntry.COLUMN_MOVIE_ID
+    };
+
+    public static final String[] TEST_PROJECTION = {
+            MovieDetailsEntry.COLUMN_MOVIE_ID,
+            MovieDetailsEntry.COLUMN_BACKDROP_PATH,
+            MovieDetailsEntry.COLUMN_GENRES,
+            MovieDetailsEntry.COLUMN_LANGUAGE,
+            MovieDetailsEntry.COLUMN_PLOT,
+            MovieDetailsEntry.COLUMN_POSTER_PATH,
+            MovieDetailsEntry.COLUMN_RATINGS,
+            MovieDetailsEntry.COLUMN_RELEASE_DATE,
+            MovieDetailsEntry.COLUMN_RUNTIME,
+            MovieDetailsEntry.COLUMN_TITLE,
+            CastEntry.COLUMN_ACTOR_ID,
+            CastEntry.COLUMN_ACTOR_NAME,
+            CastEntry.COLUMN_CHARACTER_NAME,
+            CastEntry.COLUMN_IMAGE_PROFILE_PATH
     };
 
     // Instance Keys
@@ -176,7 +206,7 @@ public class DetailsActivity extends AppCompatActivity implements
                     // Set the title of our activity as the movie title, passed from the other activity
                     setTitle(intent.getStringExtra(MOVIE_TITLE_KEY));
                     // Check if this movie is a favourite or not
-                    getLoaderManager().restartLoader(CHECK_IF_FAVOURITE_MOVIE_LOADER_ID,null, favouriteMovieResultLoaderListener);
+                    getLoaderManager().restartLoader(CHECK_IF_FAVOURITE_MOVIE_LOADER_ID, null, favouriteMovieResultLoaderListener);
                 } else {
                     closeOnError();
                 }
@@ -256,6 +286,59 @@ public class DetailsActivity extends AppCompatActivity implements
             // Otherwise, no previous data was saved before, so loader has to be initialised
             fetchReviews();
         }
+
+        // TODO: start
+
+        FavouritesDbHelper helper = new FavouritesDbHelper(getApplicationContext());
+        SQLiteDatabase db = helper.getReadableDatabase();
+
+        Cursor cursor = db.rawQuery("SELECT * FROM movie_details t1 INNER JOIN movie_cast t2 ON t1.movie_id = t2.movie_id AND t1.movie_id = " + mMovieId + ";", null);
+
+        if (cursor != null) {
+//            Log.v("MY CURSOR", "COUNT: " + String.valueOf(cursor.getCount()));
+//            Log.v("COLUMNS", String.valueOf(cursor.getColumnCount()));
+//            cursor.getColumnNames();
+//            for (int j=0; j < cursor.getColumnCount(); j++) {
+//                Log.v("COL " + j, cursor.getColumnName(j));
+//            }
+
+            /*
+            04-06 21:42:35.921 13079-13079/com.future.bestmovies V/COL 0: _id
+            04-06 21:42:35.921 13079-13079/com.future.bestmovies V/COL 1: movie_id
+            04-06 21:42:35.921 13079-13079/com.future.bestmovies V/COL 2: backdrop_path
+            04-06 21:42:35.921 13079-13079/com.future.bestmovies V/COL 3: genres
+            04-06 21:42:35.921 13079-13079/com.future.bestmovies V/COL 4: language
+            04-06 21:42:35.921 13079-13079/com.future.bestmovies V/COL 5: overview
+            04-06 21:42:35.921 13079-13079/com.future.bestmovies V/COL 6: poster_path
+            04-06 21:42:35.921 13079-13079/com.future.bestmovies V/COL 7: ratings
+            04-06 21:42:35.921 13079-13079/com.future.bestmovies V/COL 8: release_date
+            04-06 21:42:35.921 13079-13079/com.future.bestmovies V/COL 9: runtime
+            04-06 21:42:35.921 13079-13079/com.future.bestmovies V/COL 10: title
+            04-06 21:42:35.921 13079-13079/com.future.bestmovies V/COL 11: _id
+            04-06 21:42:35.921 13079-13079/com.future.bestmovies V/COL 12: movie_id
+            04-06 21:42:35.921 13079-13079/com.future.bestmovies V/COL 13: actor_name
+            04-06 21:42:35.921 13079-13079/com.future.bestmovies V/COL 14: character_name
+            04-06 21:42:35.921 13079-13079/com.future.bestmovies V/COL 15: profile_path
+            04-06 21:42:35.921 13079-13079/com.future.bestmovies V/COL 16: actor_id */
+
+            for (int i = 0; i < cursor.getCount(); i++) {
+                cursor.moveToPosition(i);
+                // Set the extracted value from the Cursor for the given column index and use each
+                // value to create a Cast object
+                Log.v("Cast " + i,
+                        "TITLE: " + cursor.getString(10) +
+                                ", ID: " + cursor.getInt(12) +
+                                ", Name: " + cursor.getString(13) +
+                                ", Character: " + cursor.getString(14) +
+                                ", Img Path: " + cursor.getString(15) +
+                                ", ActorID: " + cursor.getInt(16)
+                );
+            }
+
+            cursor.close();
+        }
+
+        // TODO: end
 
         // VIDEOS
         mVideosMessagesTextView = findViewById(R.id.videos_messages_tv);
@@ -686,6 +769,7 @@ public class DetailsActivity extends AppCompatActivity implements
                                         cursor.getInt(runtimeColumnIndex),
                                         cursor.getString(titleColumnIndex)
                                 );
+
                                 cursor.close();
                                 // Populate movie details section
                                 populateMovieDetails(mSelectedMovie);
@@ -701,10 +785,14 @@ public class DetailsActivity extends AppCompatActivity implements
                                 cursor.close();
                                 // If it's a favourite movie, load data using a cursor
                                 getLoaderManager().restartLoader(FAVOURITE_LOADER_ID, null, favouriteMovieResultLoaderListener);
+                                //getLoaderManager().initLoader(FAVOURITE_CAST_LOADER_ID, null, favouriteCastResultLoaderListener);
+                                //getLoaderManager().initLoader(FAVOURITE_REVIEW_LOADER_ID, null, favouriteReviewsResultLoaderListener);
+                                //getLoaderManager().initLoader(FAVOURITE_VIDEO_LOADER_ID, null, favouriteVideosResultLoaderListener);
                             } else {
                                 mIsFavourite = false;
                                 // Otherwise, use a movie details loader and download the movie details
                                 getLoaderManager().initLoader(MOVIE_DETAILS_LOADER_ID, null, movieDetailsResultLoaderListener);
+                                // TODO: init the other loader here too
                             }
                             break;
                     }
@@ -715,6 +803,63 @@ public class DetailsActivity extends AppCompatActivity implements
 
                 }
             };
+
+    private LoaderManager.LoaderCallbacks<Cursor> favouriteCastResultLoaderListener =
+            new LoaderManager.LoaderCallbacks<Cursor>() {
+                @Override
+                public Loader<Cursor> onCreateLoader(int loaderId, Bundle bundle) {
+                    switch (loaderId) {
+                        case FAVOURITE_CAST_LOADER_ID:
+                            // TODO: fix returned cursor loader
+                            return new CursorLoader(getApplicationContext(),
+                                    MovieDetailsEntry.buildMovieUriWithId(mMovieId),
+                                    MOVIE_DETAILED_PROJECTION,
+                                    null,
+                                    null,
+                                    null);
+                        default:
+                            throw new RuntimeException("Loader Not Implemented: " + loaderId);
+                    }
+                }
+
+                @Override
+                public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+                    if (cursor != null && cursor.moveToFirst()) {
+                        // Find the columns of movie cast attributes that we're interested in
+                        int movieIdColumnIndex = cursor.getColumnIndex(CastEntry.COLUMN_MOVIE_ID);
+                        int castNameColumnIndex = cursor.getColumnIndex(CastEntry.COLUMN_ACTOR_NAME);
+                        int castCharacterColumnIndex = cursor.getColumnIndex(CastEntry.COLUMN_CHARACTER_NAME);
+                        int castIdColumnIndex = cursor.getColumnIndex(CastEntry.COLUMN_ACTOR_ID);
+                        int castImagePathColumnIndex = cursor.getColumnIndex(CastEntry.COLUMN_IMAGE_PROFILE_PATH);
+
+                        // TODO: Maybe clear mCast before repopulating it?!
+                        // Use CastAdapter
+                        mCast.clear();
+                        for (int i=0; i < cursor.getCount(); i++) {
+                            cursor.move(i);
+                            // Set the extracted value from the Cursor for the given column index and use each
+                            // value to create a Cast object
+                            mCast.add(new Cast(
+                                    cursor.getInt(movieIdColumnIndex),
+                                    cursor.getString(castCharacterColumnIndex),
+                                    cursor.getInt(castIdColumnIndex),
+                                    cursor.getString(castNameColumnIndex),
+                                    cursor.getString(castImagePathColumnIndex)));
+                        }
+
+                        cursor.close();
+                        // Populate movie cast section
+                        populateCast(mCast);
+                    }
+                }
+
+                @Override
+                public void onLoaderReset(Loader<Cursor> loader) {
+
+                }
+            };
+
+    // TODO: review and video cursor listeners
 
     private void populateMovieDetails(MovieDetails movieDetails) {
         // BACKDROP
@@ -884,7 +1029,7 @@ public class DetailsActivity extends AppCompatActivity implements
         // Cast insertion
         ContentValues[] allCastValues = new ContentValues[mCast.size()];
         // For each cast member, get the data and put it in castValue
-        for (int i=0; i < mCast.size(); i++) {
+        for (int i = 0; i < mCast.size(); i++) {
             ContentValues castValues = new ContentValues();
             castValues.put(CastEntry.COLUMN_MOVIE_ID, selectedMovie.getMovieId());
             castValues.put(CastEntry.COLUMN_ACTOR_ID, mCast.get(i).getActorId());
@@ -906,7 +1051,7 @@ public class DetailsActivity extends AppCompatActivity implements
         // Reviews insertion
         ContentValues[] allReviewsValues = new ContentValues[mReviews.size()];
         // For each review, get it's data and put it in reviewValues
-        for (int i=0; i < mReviews.size(); i++) {
+        for (int i = 0; i < mReviews.size(); i++) {
             ContentValues reviewValues = new ContentValues();
             reviewValues.put(ReviewsEntry.COLUMN_MOVIE_ID, selectedMovie.getMovieId());
             reviewValues.put(ReviewsEntry.COLUMN_AUTHOR, mReviews.get(i).getReviewAuthor());
@@ -926,7 +1071,7 @@ public class DetailsActivity extends AppCompatActivity implements
         // Videos insertion
         ContentValues[] allVideoValues = new ContentValues[mVideos.size()];
         // For each video, get it's data and put it in videoValues
-        for (int i=0; i < mVideos.size(); i++) {
+        for (int i = 0; i < mVideos.size(); i++) {
             ContentValues videoValue = new ContentValues();
             videoValue.put(VideosEntry.COLUMN_MOVIE_ID, selectedMovie.getMovieId());
             videoValue.put(VideosEntry.COLUMN_VIDEO_KEY, mVideos.get(i).getVideoKey());

@@ -75,6 +75,12 @@ public class FavouritesContract {
         public final static String COLUMN_CHARACTER_NAME =      "character_name";   // Type: TEXT
         public final static String COLUMN_ACTOR_ID =            "actor_id";         // Type: INTEGER
         public final static String COLUMN_IMAGE_PROFILE_PATH =  "profile_path";     // Type: TEXT
+
+        public static Uri buildCastUriWithId(int movieId) {
+            return CONTENT_URI.buildUpon()
+                    .appendPath(Integer.toString(movieId))
+                    .build();
+        }
     }
 
 
@@ -96,6 +102,12 @@ public class FavouritesContract {
         public final static String COLUMN_MOVIE_ID =            "movie_id";         // Type: INTEGER
         public final static String COLUMN_AUTHOR =              "author";           // Type: TEXT
         public final static String COLUMN_CONTENT =             "content";          // Type: TEXT
+
+        public static Uri buildReviewsUriWithId(int movieId) {
+            return CONTENT_URI.buildUpon()
+                    .appendPath(Integer.toString(movieId))
+                    .build();
+        }
     }
 
 
@@ -118,5 +130,17 @@ public class FavouritesContract {
         public final static String COLUMN_VIDEO_KEY =           "video_key";        // Type: TEXT
         public final static String COLUMN_VIDEO_NAME =          "video_name";       // Type: TEXT
         public final static String COLUMN_VIDEO_TYPE =          "video_type";       // Type: TEXT
+
+        public static Uri buildVideosUriWithId(int movieId) {
+            return CONTENT_URI.buildUpon()
+                    .appendPath(Integer.toString(movieId))
+                    .build();
+        }
+    }
+
+    public static Uri buildUriWithId(Uri contentUri, int movieId) {
+        return contentUri.buildUpon()
+                .appendPath(Integer.toString(movieId))
+                .build();
     }
 }

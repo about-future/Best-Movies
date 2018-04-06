@@ -5,7 +5,6 @@ import android.content.ContentValues;
 import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.support.constraint.ConstraintLayout;
 import android.support.v4.content.ContextCompat;
@@ -31,7 +30,6 @@ import android.widget.Toast;
 import com.future.bestmovies.data.Cast;
 import com.future.bestmovies.data.CastAdapter;
 import com.future.bestmovies.data.CastLoader;
-import com.future.bestmovies.data.FavouritesDbHelper;
 import com.future.bestmovies.data.MovieDetails;
 import com.future.bestmovies.data.MovieDetailsLoader;
 import com.future.bestmovies.data.Review;
@@ -59,7 +57,7 @@ public class DetailsActivity extends AppCompatActivity implements
     private static final int FAVOURITE_LOADER_ID = 516;
     private static final int FAVOURITE_CAST_LOADER_ID = 516423;
     private static final int FAVOURITE_REVIEW_LOADER_ID = 516435;
-    private static final int FAVOURITE_VIDEO_LOADER_ID = 516594;
+    private static final int FAVOURITE_VIDEOS_LOADER_ID = 516594;
     private static final int CHECK_IF_FAVOURITE_MOVIE_LOADER_ID = 473;
 
     // Query projection used to check if the movie is a favourite or not
@@ -79,6 +77,7 @@ public class DetailsActivity extends AppCompatActivity implements
             MovieDetailsEntry.COLUMN_TITLE
     };
 
+    // Query projection used to retrieve movie cast
     public static final String[] CAST_DETAILED_PROJECTION = {
             CastEntry.COLUMN_ACTOR_ID,
             CastEntry.COLUMN_ACTOR_NAME,
@@ -87,21 +86,19 @@ public class DetailsActivity extends AppCompatActivity implements
             CastEntry.COLUMN_MOVIE_ID
     };
 
-    public static final String[] TEST_PROJECTION = {
-            MovieDetailsEntry.COLUMN_MOVIE_ID,
-            MovieDetailsEntry.COLUMN_BACKDROP_PATH,
-            MovieDetailsEntry.COLUMN_GENRES,
-            MovieDetailsEntry.COLUMN_LANGUAGE,
-            MovieDetailsEntry.COLUMN_PLOT,
-            MovieDetailsEntry.COLUMN_POSTER_PATH,
-            MovieDetailsEntry.COLUMN_RATINGS,
-            MovieDetailsEntry.COLUMN_RELEASE_DATE,
-            MovieDetailsEntry.COLUMN_RUNTIME,
-            MovieDetailsEntry.COLUMN_TITLE,
-            CastEntry.COLUMN_ACTOR_ID,
-            CastEntry.COLUMN_ACTOR_NAME,
-            CastEntry.COLUMN_CHARACTER_NAME,
-            CastEntry.COLUMN_IMAGE_PROFILE_PATH
+    // Query projection used to retrieve movie reviews
+    public static final String[] REVIEW_DETAILED_PROJECTION = {
+            ReviewsEntry.COLUMN_AUTHOR,
+            ReviewsEntry.COLUMN_CONTENT,
+            ReviewsEntry.COLUMN_MOVIE_ID
+    };
+
+    // Query projection used to retrieve movie videos
+    public static final String[] VIDEOS_DETAILED_PROJECTION = {
+            VideosEntry.COLUMN_MOVIE_ID,
+            VideosEntry.COLUMN_VIDEO_KEY,
+            VideosEntry.COLUMN_VIDEO_NAME,
+            VideosEntry.COLUMN_VIDEO_TYPE
     };
 
     // Instance Keys
@@ -125,6 +122,9 @@ public class DetailsActivity extends AppCompatActivity implements
     private MovieDetails mSelectedMovie;
 
     // Movie details variables
+    private ConstraintLayout mMovieDetailsLayout;
+    private ImageView mNoConnectionImageView;
+    private TextView mNoConnectionTextView;
     private ImageView mMovieBackdropImageView;
     private ImageView mMoviePosterImageView;
     private TextView posterErrorTextView;
@@ -135,36 +135,37 @@ public class DetailsActivity extends AppCompatActivity implements
     private TextView mMovieRuntimeTextView;
 
     // Cast variables
-    private TextView mCastMessagesTextView;
-    private int mCastPosition = RecyclerView.NO_POSITION;
-    private CastAdapter mCastAdapter;
-    private LinearLayoutManager mCastLayoutManager;
-    private RecyclerView mCastRecyclerView;
-    private ProgressBar mCastProgressBar;
     private ArrayList<Cast> mCast;
+    private RecyclerView mCastRecyclerView;
+    private int mCastPosition = RecyclerView.NO_POSITION;
+    private LinearLayoutManager mCastLayoutManager;
+    private CastAdapter mCastAdapter;
+    private ProgressBar mCastProgressBar;
     private ImageView mNoCastImageView;
     private ImageView mNoCastConnectionImageView;
+    private TextView mCastMessagesTextView;
 
     // Reviews variables
+    private ArrayList<Review> mReviews;
     private ConstraintLayout mFirstReviewLayout;
     private TextView mFirstReviewAuthorTextView;
     private TextView mFirstReviewContentTextView;
     private ProgressBar mFirstReviewProgressBar;
-    private TextView mFirstReviewMessagesTextView;
-    private TextView mSeeAllReviewsTextView;
-    private ArrayList<Review> mReviews;
     private ImageView mNoReviewsImageView;
     private ImageView mNoReviewsConnectionImageView;
+    private TextView mFirstReviewMessagesTextView;
+    private TextView mSeeAllReviewsTextView;
 
     // Videos variables
     private ArrayList<Video> mVideos;
     private RecyclerView mVideosRecyclerView;
-    private LinearLayoutManager mVideosLayoutManager;
-    private ProgressBar mVideosProgressBar;
-    private VideoAdapter mVideosAdapter;
-    private TextView mVideosMessagesTextView;
     private int mVideosPosition = RecyclerView.NO_POSITION;
+    private LinearLayoutManager mVideosLayoutManager;
+    private VideoAdapter mVideosAdapter;
+    private ProgressBar mVideosProgressBar;
     private ImageView mNoVideosImageView;
+    private ImageView mNoVideosConnectionImageView;
+    private TextView mVideosMessagesTextView;
 
     private boolean mIsFavourite;
     private MenuItem mFavouriteMovieMenuItem;
@@ -184,6 +185,9 @@ public class DetailsActivity extends AppCompatActivity implements
         }
 
         // MOVIE DETAILS
+        mMovieDetailsLayout = findViewById(R.id.movie_details_layout);
+        mNoConnectionImageView = findViewById(R.id.details_no_connection_iv);
+        mNoConnectionTextView = findViewById(R.id.details_messages_tv);
         mMovieBackdropImageView = findViewById(R.id.details_backdrop_iv);
         mMovieGenreTextView = findViewById(R.id.details_genre_tv);
         mMoviePosterImageView = findViewById(R.id.details_poster_iv);
@@ -192,6 +196,52 @@ public class DetailsActivity extends AppCompatActivity implements
         mMovieReleaseDateTextView = findViewById(R.id.details_release_date_tv);
         mMoviePlotTextView = findViewById(R.id.details_plot_tv);
         mMovieRuntimeTextView = findViewById(R.id.details_runtime_tv);
+        // TODO: hide details if no connection and activity is recreated
+
+        // CAST
+        mCastMessagesTextView = findViewById(R.id.cast_messages_tv);
+        mCastMessagesTextView.setText(R.string.loading);
+        mCastRecyclerView = findViewById(R.id.cast_rv);
+        mCastProgressBar = findViewById(R.id.loading_cast_pb);
+        // The layout manager for our Cast RecyclerView will be a LinerLayout, so we can display
+        // our cast on a single line, horizontally
+        mCastLayoutManager =
+                new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
+        mCastRecyclerView.setLayoutManager(mCastLayoutManager);
+        mCastRecyclerView.setHasFixedSize(false);
+        mCastAdapter = new CastAdapter(this, this);
+        mCastRecyclerView.setAdapter(mCastAdapter);
+        mNoCastImageView = findViewById(R.id.no_cast_iv);
+        mNoCastConnectionImageView = findViewById(R.id.no_cast_connection_iv);
+
+        // REVIEWS
+        mFirstReviewLayout = findViewById(R.id.first_review_layout);
+        mFirstReviewAuthorTextView = findViewById(R.id.first_review_author_tv);
+        mFirstReviewContentTextView = findViewById(R.id.first_review_content_tv);
+        mFirstReviewProgressBar = findViewById(R.id.loading_first_review_pb);
+        mFirstReviewMessagesTextView = findViewById(R.id.first_review_messages_tv);
+        mFirstReviewMessagesTextView.setText(R.string.loading);
+        mSeeAllReviewsTextView = findViewById(R.id.see_all_reviews_tv);
+        mNoReviewsImageView = findViewById(R.id.no_reviews_iv);
+        mNoReviewsConnectionImageView = findViewById(R.id.no_review_connection_iv);
+
+        // VIDEOS
+        mVideosMessagesTextView = findViewById(R.id.videos_messages_tv);
+        mVideosMessagesTextView.setText(R.string.loading);
+        mVideosRecyclerView = findViewById(R.id.videos_rv);
+        mVideosProgressBar = findViewById(R.id.loading_videos_pb);
+        // The layout manager for our Videos RecyclerView will be a LinerLayout, so we can display
+        // our videos on a single line, horizontally
+        mVideosLayoutManager =
+                new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
+        mVideosRecyclerView.setLayoutManager(mVideosLayoutManager);
+        mVideosRecyclerView.setHasFixedSize(true);
+        mVideosAdapter = new VideoAdapter(this, this);
+        mVideosRecyclerView.setAdapter(mVideosAdapter);
+        SnapHelper snapHelper = new PagerSnapHelper();
+        snapHelper.attachToRecyclerView(mVideosRecyclerView);
+        mNoVideosImageView = findViewById(R.id.no_videos_iv);
+        mNoVideosConnectionImageView = findViewById(R.id.no_videos_connection_iv);
 
         if (savedInstanceState == null) {
             // Check intent and see if there is a movieId passed from MainActivity or
@@ -213,174 +263,6 @@ public class DetailsActivity extends AppCompatActivity implements
             } else {
                 closeOnError();
             }
-        }
-
-        // CAST
-        mCastMessagesTextView = findViewById(R.id.cast_messages_tv);
-        mCastMessagesTextView.setText(R.string.loading);
-        mCastRecyclerView = findViewById(R.id.cast_rv);
-        mCastProgressBar = findViewById(R.id.loading_cast_pb);
-        // The layout manager for our Cast RecyclerView will be a LinerLayout, so we can display
-        // our cast on a single line, horizontally
-        mCastLayoutManager =
-                new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
-        mCastRecyclerView.setLayoutManager(mCastLayoutManager);
-        mCastRecyclerView.setHasFixedSize(false);
-        mCastAdapter = new CastAdapter(this, this);
-        mCastRecyclerView.setAdapter(mCastAdapter);
-        mNoCastImageView = findViewById(R.id.no_cast_iv);
-        mNoCastConnectionImageView = findViewById(R.id.no_cast_connection_iv);
-
-        // Show the Cast progress bar and hide the Cast RecyclerView
-        hideCast();
-        // Check for saved data or fetch movie cast
-        if (savedInstanceState != null && savedInstanceState.containsKey(MOVIE_CAST_KEY)) {
-            mCast = savedInstanceState.getParcelableArrayList(MOVIE_CAST_KEY);
-            // If cast is not null, data from server was previously fetched successfully
-            if (mCast != null) {
-                // If cast is not empty, use the saved cast and repopulate the cast section
-                if (!mCast.isEmpty()) {
-                    mCastAdapter = new CastAdapter(this, this);
-                    mCastRecyclerView.setAdapter(mCastAdapter);
-                    if (savedInstanceState.containsKey(CAST_POSITION_KEY)) {
-                        mCastPosition = savedInstanceState.getInt(CAST_POSITION_KEY);
-                    }
-                }
-                populateCast(mCast);
-            } else {
-                // Otherwise, there might be an error while accessing the server
-                // Check the connection and if connected try fetching cast again
-                fetchCast();
-            }
-        } else {
-            // Otherwise, no previous data was saved before, so loader has to be initialised
-            fetchCast();
-        }
-
-        // REVIEWS
-        mFirstReviewLayout = findViewById(R.id.first_review_layout);
-        mFirstReviewAuthorTextView = findViewById(R.id.first_review_author_tv);
-        mFirstReviewContentTextView = findViewById(R.id.first_review_content_tv);
-        mFirstReviewProgressBar = findViewById(R.id.loading_first_review_pb);
-        mFirstReviewMessagesTextView = findViewById(R.id.first_review_messages_tv);
-        mFirstReviewMessagesTextView.setText(R.string.loading);
-        mSeeAllReviewsTextView = findViewById(R.id.see_all_reviews_tv);
-        mNoReviewsImageView = findViewById(R.id.no_reviews_iv);
-        mNoReviewsConnectionImageView = findViewById(R.id.no_review_connection_iv);
-
-        // Show the Review progress bar and hide the firstReview layout
-        hideReviews();
-        // Check for saved data or fetch movie reviews
-        if (savedInstanceState != null && savedInstanceState.containsKey(MOVIE_REVIEWS_KEY)) {
-            mReviews = savedInstanceState.getParcelableArrayList(MOVIE_REVIEWS_KEY);
-            // If mReview is not null, data from server was previously fetched successfully
-            if (mReviews != null) {
-                // If review is not empty, use the saved reviews and repopulate the reviews section
-                populateReviews(mReviews);
-            } else {
-                // Otherwise, there might be an error while accessing the server
-                // Check the connection and if connected try fetching reviews again
-                fetchReviews();
-            }
-        } else {
-            // Otherwise, no previous data was saved before, so loader has to be initialised
-            fetchReviews();
-        }
-
-        // TODO: start
-
-        FavouritesDbHelper helper = new FavouritesDbHelper(getApplicationContext());
-        SQLiteDatabase db = helper.getReadableDatabase();
-
-        Cursor cursor = db.rawQuery("SELECT * FROM movie_details t1 INNER JOIN movie_cast t2 ON t1.movie_id = t2.movie_id AND t1.movie_id = " + mMovieId + ";", null);
-
-        if (cursor != null) {
-//            Log.v("MY CURSOR", "COUNT: " + String.valueOf(cursor.getCount()));
-//            Log.v("COLUMNS", String.valueOf(cursor.getColumnCount()));
-//            cursor.getColumnNames();
-//            for (int j=0; j < cursor.getColumnCount(); j++) {
-//                Log.v("COL " + j, cursor.getColumnName(j));
-//            }
-
-            /*
-            04-06 21:42:35.921 13079-13079/com.future.bestmovies V/COL 0: _id
-            04-06 21:42:35.921 13079-13079/com.future.bestmovies V/COL 1: movie_id
-            04-06 21:42:35.921 13079-13079/com.future.bestmovies V/COL 2: backdrop_path
-            04-06 21:42:35.921 13079-13079/com.future.bestmovies V/COL 3: genres
-            04-06 21:42:35.921 13079-13079/com.future.bestmovies V/COL 4: language
-            04-06 21:42:35.921 13079-13079/com.future.bestmovies V/COL 5: overview
-            04-06 21:42:35.921 13079-13079/com.future.bestmovies V/COL 6: poster_path
-            04-06 21:42:35.921 13079-13079/com.future.bestmovies V/COL 7: ratings
-            04-06 21:42:35.921 13079-13079/com.future.bestmovies V/COL 8: release_date
-            04-06 21:42:35.921 13079-13079/com.future.bestmovies V/COL 9: runtime
-            04-06 21:42:35.921 13079-13079/com.future.bestmovies V/COL 10: title
-            04-06 21:42:35.921 13079-13079/com.future.bestmovies V/COL 11: _id
-            04-06 21:42:35.921 13079-13079/com.future.bestmovies V/COL 12: movie_id
-            04-06 21:42:35.921 13079-13079/com.future.bestmovies V/COL 13: actor_name
-            04-06 21:42:35.921 13079-13079/com.future.bestmovies V/COL 14: character_name
-            04-06 21:42:35.921 13079-13079/com.future.bestmovies V/COL 15: profile_path
-            04-06 21:42:35.921 13079-13079/com.future.bestmovies V/COL 16: actor_id */
-
-            for (int i = 0; i < cursor.getCount(); i++) {
-                cursor.moveToPosition(i);
-                // Set the extracted value from the Cursor for the given column index and use each
-                // value to create a Cast object
-                Log.v("Cast " + i,
-                        "TITLE: " + cursor.getString(10) +
-                                ", ID: " + cursor.getInt(12) +
-                                ", Name: " + cursor.getString(13) +
-                                ", Character: " + cursor.getString(14) +
-                                ", Img Path: " + cursor.getString(15) +
-                                ", ActorID: " + cursor.getInt(16)
-                );
-            }
-
-            cursor.close();
-        }
-
-        // TODO: end
-
-        // VIDEOS
-        mVideosMessagesTextView = findViewById(R.id.videos_messages_tv);
-        mVideosMessagesTextView.setText(R.string.loading);
-        mVideosRecyclerView = findViewById(R.id.videos_rv);
-        mVideosProgressBar = findViewById(R.id.loading_videos_pb);
-        // The layout manager for our Videos RecyclerView will be a LinerLayout, so we can display
-        // our videos on a single line, horizontally
-        mVideosLayoutManager =
-                new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
-        mVideosRecyclerView.setLayoutManager(mVideosLayoutManager);
-        mVideosRecyclerView.setHasFixedSize(true);
-        mVideosAdapter = new VideoAdapter(this, this);
-        mVideosRecyclerView.setAdapter(mVideosAdapter);
-        SnapHelper snapHelper = new PagerSnapHelper();
-        snapHelper.attachToRecyclerView(mVideosRecyclerView);
-        mNoVideosImageView = findViewById(R.id.no_videos_iv);
-
-        // Show the Videos progress bar and hide the Videos RecyclerView
-        hideVideos();
-        // Check for saved data or fetch movie videos
-        if (savedInstanceState != null && savedInstanceState.containsKey(MOVIE_VIDEOS_KEY)) {
-            mVideos = savedInstanceState.getParcelableArrayList(MOVIE_VIDEOS_KEY);
-            // If mVideos is not null, data from server was previously fetched successfully
-            if (mVideos != null) {
-                // If mVideos is not empty, use the saved videos and repopulate the video section
-                if (!mVideos.isEmpty()) {
-                    mVideosAdapter = new VideoAdapter(this, this);
-                    mVideosRecyclerView.setAdapter(mVideosAdapter);
-                    //if (savedInstanceState.containsKey(VIDEOS_POSITION)) {
-                    mVideosPosition = savedInstanceState.getInt(VIDEOS_POSITION_KEY);
-                    //}
-                }
-                populateVideos(mVideos);
-            } else {
-                // Otherwise, there might be an error while accessing the server
-                // Check the connection and if connected try fetching videos again
-                fetchVideos();
-            }
-        } else {
-            // Otherwise, no previous data was saved before, so loader has to be initialised
-            fetchVideos();
         }
     }
 
@@ -418,8 +300,12 @@ public class DetailsActivity extends AppCompatActivity implements
         }*/
 
         if (id == R.id.action_favourite_movie) {
-            if (mIsFavourite) deleteFavourite(mSelectedMovie, item);
-            else insertMovie(mSelectedMovie, item);
+            if (mIsFavourite)
+                deleteFavourite(mSelectedMovie, item);
+            else {
+                if (NetworkUtils.isConnected(getApplicationContext()))
+                    insertMovie(mSelectedMovie, item);
+            }
 
             return true;
         }
@@ -458,16 +344,48 @@ public class DetailsActivity extends AppCompatActivity implements
                 mSelectedMovie = savedInstanceState.getParcelable(MOVIE_OBJECT_KEY);
                 if (mSelectedMovie != null) populateMovieDetails(mSelectedMovie);
             }
-            if (savedInstanceState.containsKey(MOVIE_CAST_KEY))
+
+            if (savedInstanceState.containsKey(MOVIE_CAST_KEY)) {
                 mCast = savedInstanceState.getParcelableArrayList(MOVIE_CAST_KEY);
-            if (savedInstanceState.containsKey(MOVIE_REVIEWS_KEY))
+                // If cast is not null, data from server was previously fetched successfully
+                if (mCast != null) {
+                    // If cast is not empty, use the saved cast and repopulate the cast section
+                    if (!mCast.isEmpty()) {
+                        mCastAdapter = new CastAdapter(this, this);
+                        mCastRecyclerView.setAdapter(mCastAdapter);
+                        if (savedInstanceState.containsKey(CAST_POSITION_KEY)) {
+                            mCastPosition = savedInstanceState.getInt(CAST_POSITION_KEY);
+                        }
+                    }
+                    populateCast(mCast);
+                }
+            }
+
+            if (savedInstanceState.containsKey(MOVIE_REVIEWS_KEY)) {
                 mReviews = savedInstanceState.getParcelableArrayList(MOVIE_REVIEWS_KEY);
-            if (savedInstanceState.containsKey(MOVIE_VIDEOS_KEY))
+                // If mReview is not null, data from server was previously fetched successfully
+                if (mReviews != null) {
+                    // If review is not empty, use the saved reviews and repopulate the reviews section
+                    populateReviews(mReviews);
+                }
+            }
+
+            if (savedInstanceState.containsKey(MOVIE_VIDEOS_KEY)) {
                 mVideos = savedInstanceState.getParcelableArrayList(MOVIE_VIDEOS_KEY);
-            if (savedInstanceState.containsKey(CAST_POSITION_KEY))
-                mCastPosition = savedInstanceState.getInt(CAST_POSITION_KEY);
-            if (savedInstanceState.containsKey(VIDEOS_POSITION_KEY))
-                mVideosPosition = savedInstanceState.getInt(VIDEOS_POSITION_KEY);
+                // If mVideos is not null, data from server was previously fetched successfully
+                if (mVideos != null) {
+                    // If mVideos is not empty, use the saved videos and repopulate the video section
+                    if (!mVideos.isEmpty()) {
+                        mVideosAdapter = new VideoAdapter(this, this);
+                        mVideosRecyclerView.setAdapter(mVideosAdapter);
+                        if (savedInstanceState.containsKey(VIDEOS_POSITION_KEY)) {
+                            mVideosPosition = savedInstanceState.getInt(VIDEOS_POSITION_KEY);
+                        }
+                    }
+                    populateVideos(mVideos);
+                }
+            }
+
             if (savedInstanceState.containsKey(IS_FAVOURITE_KEY))
                 mIsFavourite = savedInstanceState.getBoolean(IS_FAVOURITE_KEY);
         }
@@ -511,6 +429,18 @@ public class DetailsActivity extends AppCompatActivity implements
         }
     }
 
+    private void showMovieDetails() {
+        mMovieDetailsLayout.setVisibility(View.VISIBLE);
+        mNoConnectionImageView.setVisibility(View.INVISIBLE);
+        mNoConnectionTextView.setVisibility(View.INVISIBLE);
+    }
+
+    private void hideMovieDetails() {
+        mMovieDetailsLayout.setVisibility(View.INVISIBLE);
+        mNoConnectionImageView.setVisibility(View.VISIBLE);
+        mNoConnectionTextView.setVisibility(View.VISIBLE);
+    }
+
     // Hide the progress bar and show cast
     private void showCast() {
         mCastRecyclerView.setVisibility(View.VISIBLE);
@@ -522,7 +452,7 @@ public class DetailsActivity extends AppCompatActivity implements
 
     // Show progress bar and hide cast
     private void hideCast() {
-        mCastRecyclerView.setVisibility(View.GONE);
+        //mCastRecyclerView.setVisibility(View.GONE);
         mCastProgressBar.setVisibility(View.VISIBLE);
         mCastMessagesTextView.setVisibility(View.VISIBLE);
         mNoCastImageView.setVisibility(View.INVISIBLE);
@@ -554,6 +484,7 @@ public class DetailsActivity extends AppCompatActivity implements
         mVideosProgressBar.setVisibility(View.INVISIBLE);
         mVideosMessagesTextView.setVisibility(View.INVISIBLE);
         mNoVideosImageView.setVisibility(View.INVISIBLE);
+        mNoVideosConnectionImageView.setVisibility(View.INVISIBLE);
     }
 
     // Show progress bar and hide videos
@@ -562,13 +493,26 @@ public class DetailsActivity extends AppCompatActivity implements
         mVideosProgressBar.setVisibility(View.VISIBLE);
         mVideosMessagesTextView.setVisibility(View.VISIBLE);
         mNoVideosImageView.setVisibility(View.INVISIBLE);
+        mNoVideosConnectionImageView.setVisibility(View.INVISIBLE);
+    }
+
+    private void fetchMovieDetails() {
+        if (NetworkUtils.isConnected(getApplicationContext())) {
+            getLoaderManager().initLoader(MOVIE_DETAILS_LOADER_ID, null, movieDetailsResultLoaderListener);
+        } else {
+            // Otherwise, hide progress bar and show "No connection available" message
+
+        }
     }
 
     private void fetchCast() {
         if (NetworkUtils.isConnected(getApplicationContext())) {
-            getLoaderManager().restartLoader(CAST_LOADER_ID, null, castResultLoaderListener);
+            // Show the Cast progress bar and hide the Cast RecyclerView
+            hideCast();
+            getLoaderManager().initLoader(CAST_LOADER_ID, null, castResultLoaderListener);
         } else {
             // Otherwise, hide progress bar and show "No connection available" message
+            mCastRecyclerView.setVisibility(View.GONE);
             mCastMessagesTextView.setVisibility(View.VISIBLE);
             mCastMessagesTextView.setText(R.string.no_connection);
             mCastProgressBar.setVisibility(View.INVISIBLE);
@@ -579,7 +523,9 @@ public class DetailsActivity extends AppCompatActivity implements
 
     private void fetchReviews() {
         if (NetworkUtils.isConnected(getApplicationContext())) {
-            getLoaderManager().restartLoader(REVIEWS_LOADER_ID, null, reviewsResultLoaderListener);
+            // Show the Review progress bar and hide the firstReview layout
+            hideReviews();
+            getLoaderManager().initLoader(REVIEWS_LOADER_ID, null, reviewsResultLoaderListener);
         } else {
             // Otherwise, hide progress bar and show "No connection available" message
             mFirstReviewLayout.setVisibility(View.INVISIBLE);
@@ -594,12 +540,17 @@ public class DetailsActivity extends AppCompatActivity implements
 
     private void fetchVideos() {
         if (NetworkUtils.isConnected(getApplicationContext())) {
-            getLoaderManager().restartLoader(VIDEOS_LOADER_ID, null, videoResultLoaderListener);
+            // Show the Videos progress bar and hide the Videos RecyclerView
+            hideVideos();
+            getLoaderManager().initLoader(VIDEOS_LOADER_ID, null, videoResultLoaderListener);
         } else {
             // Otherwise, hide progress bar and show "No connection available" message
+            mVideosRecyclerView.setVisibility(View.GONE);
             mVideosMessagesTextView.setVisibility(View.VISIBLE);
             mVideosMessagesTextView.setText(R.string.no_connection);
             mVideosProgressBar.setVisibility(View.INVISIBLE);
+            mNoVideosImageView.setVisibility(View.INVISIBLE);
+            mNoVideosConnectionImageView.setVisibility(View.VISIBLE);
         }
     }
 
@@ -779,20 +730,28 @@ public class DetailsActivity extends AppCompatActivity implements
                         case CHECK_IF_FAVOURITE_MOVIE_LOADER_ID:
                             if (cursor != null && cursor.moveToFirst()) {
                                 mIsFavourite = true;
+                                showMovieDetails();
                                 // As soon as we know the movie is a favourite, color the heart, so the user will know it too
                                 if (mFavouriteMovieMenuItem != null)
                                     DrawableCompat.setTint(mFavouriteMovieMenuItem.getIcon(), ContextCompat.getColor(getApplicationContext(), R.color.colorHeart));
                                 cursor.close();
-                                // If it's a favourite movie, load data using a cursor
-                                getLoaderManager().restartLoader(FAVOURITE_LOADER_ID, null, favouriteMovieResultLoaderListener);
-                                //getLoaderManager().initLoader(FAVOURITE_CAST_LOADER_ID, null, favouriteCastResultLoaderListener);
-                                //getLoaderManager().initLoader(FAVOURITE_REVIEW_LOADER_ID, null, favouriteReviewsResultLoaderListener);
-                                //getLoaderManager().initLoader(FAVOURITE_VIDEO_LOADER_ID, null, favouriteVideosResultLoaderListener);
+                                // If it's a favourite movie, load data using a cursor for each section
+                                getLoaderManager().initLoader(FAVOURITE_LOADER_ID, null, favouriteMovieResultLoaderListener);
+                                getLoaderManager().initLoader(FAVOURITE_CAST_LOADER_ID, null, favouriteCastResultLoaderListener);
+                                getLoaderManager().initLoader(FAVOURITE_REVIEW_LOADER_ID, null, favouriteReviewsResultLoaderListener);
+                                getLoaderManager().initLoader(FAVOURITE_VIDEOS_LOADER_ID, null, favouriteVideosResultLoaderListener);
                             } else {
                                 mIsFavourite = false;
-                                // Otherwise, use a movie details loader and download the movie details
-                                getLoaderManager().initLoader(MOVIE_DETAILS_LOADER_ID, null, movieDetailsResultLoaderListener);
-                                // TODO: init the other loader here too
+                                if (NetworkUtils.isConnected(getApplicationContext())) {
+                                    showMovieDetails();
+                                    // Otherwise, use a movie details loader and download the movie details
+                                    fetchMovieDetails();
+                                    fetchCast();
+                                    fetchReviews();
+                                    fetchVideos();
+                                } else {
+                                    hideMovieDetails();
+                                }
                             }
                             break;
                     }
@@ -810,10 +769,9 @@ public class DetailsActivity extends AppCompatActivity implements
                 public Loader<Cursor> onCreateLoader(int loaderId, Bundle bundle) {
                     switch (loaderId) {
                         case FAVOURITE_CAST_LOADER_ID:
-                            // TODO: fix returned cursor loader
                             return new CursorLoader(getApplicationContext(),
-                                    MovieDetailsEntry.buildMovieUriWithId(mMovieId),
-                                    MOVIE_DETAILED_PROJECTION,
+                                    CastEntry.buildCastUriWithId(mMovieId),
+                                    CAST_DETAILED_PROJECTION,
                                     null,
                                     null,
                                     null);
@@ -832,11 +790,9 @@ public class DetailsActivity extends AppCompatActivity implements
                         int castIdColumnIndex = cursor.getColumnIndex(CastEntry.COLUMN_ACTOR_ID);
                         int castImagePathColumnIndex = cursor.getColumnIndex(CastEntry.COLUMN_IMAGE_PROFILE_PATH);
 
-                        // TODO: Maybe clear mCast before repopulating it?!
-                        // Use CastAdapter
-                        mCast.clear();
-                        for (int i=0; i < cursor.getCount(); i++) {
-                            cursor.move(i);
+                        mCast = new ArrayList<Cast>();
+                        for (int i = 0; i < cursor.getCount(); i++) {
+                            cursor.moveToPosition(i);
                             // Set the extracted value from the Cursor for the given column index and use each
                             // value to create a Cast object
                             mCast.add(new Cast(
@@ -859,7 +815,103 @@ public class DetailsActivity extends AppCompatActivity implements
                 }
             };
 
-    // TODO: review and video cursor listeners
+    private LoaderManager.LoaderCallbacks<Cursor> favouriteReviewsResultLoaderListener =
+            new LoaderManager.LoaderCallbacks<Cursor>() {
+                @Override
+                public Loader<Cursor> onCreateLoader(int loaderId, Bundle bundle) {
+                    switch (loaderId) {
+                        case FAVOURITE_REVIEW_LOADER_ID:
+                            return new CursorLoader(getApplicationContext(),
+                                    ReviewsEntry.buildReviewsUriWithId(mMovieId),
+                                    REVIEW_DETAILED_PROJECTION,
+                                    null,
+                                    null,
+                                    null);
+                        default:
+                            throw new RuntimeException("Loader Not Implemented: " + loaderId);
+                    }
+                }
+
+                @Override
+                public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+                    if (cursor != null && cursor.moveToFirst()) {
+                        // Find the columns of movie review attributes that we're interested in
+                        int movieIdColumnIndex = cursor.getColumnIndex(ReviewsEntry.COLUMN_MOVIE_ID);
+                        int authorColumnIndex = cursor.getColumnIndex(ReviewsEntry.COLUMN_AUTHOR);
+                        int contentColumnIndex = cursor.getColumnIndex(ReviewsEntry.COLUMN_CONTENT);
+
+                        mReviews = new ArrayList<Review>();
+                        for (int i = 0; i < cursor.getCount(); i++) {
+                            cursor.moveToPosition(i);
+                            // Set the extracted value from the Cursor for the given column index and use each
+                            // value to create a Review object
+                            mReviews.add(new Review(
+                                    cursor.getInt(movieIdColumnIndex),
+                                    cursor.getString(authorColumnIndex),
+                                    cursor.getString(contentColumnIndex)));
+                        }
+
+                        cursor.close();
+                        // Populate movie reviews section
+                        populateReviews(mReviews);
+                    }
+                }
+
+                @Override
+                public void onLoaderReset(Loader<Cursor> loader) {
+
+                }
+            };
+
+    private LoaderManager.LoaderCallbacks<Cursor> favouriteVideosResultLoaderListener =
+            new LoaderManager.LoaderCallbacks<Cursor>() {
+                @Override
+                public Loader<Cursor> onCreateLoader(int loaderId, Bundle bundle) {
+                    switch (loaderId) {
+                        case FAVOURITE_VIDEOS_LOADER_ID:
+                            return new CursorLoader(getApplicationContext(),
+                                    VideosEntry.buildVideosUriWithId(mMovieId),
+                                    VIDEOS_DETAILED_PROJECTION,
+                                    null,
+                                    null,
+                                    null);
+                        default:
+                            throw new RuntimeException("Loader Not Implemented: " + loaderId);
+                    }
+                }
+
+                @Override
+                public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+                    if (cursor != null && cursor.moveToFirst()) {
+                        // Find the columns of movie videos attributes that we're interested in
+                        int movieIdColumnIndex = cursor.getColumnIndex(VideosEntry.COLUMN_MOVIE_ID);
+                        int videoKeyColumnIndex = cursor.getColumnIndex(VideosEntry.COLUMN_VIDEO_KEY);
+                        int videoNameColumnIndex = cursor.getColumnIndex(VideosEntry.COLUMN_VIDEO_NAME);
+                        int videoTypeColumnIndex = cursor.getColumnIndex(VideosEntry.COLUMN_VIDEO_TYPE);
+
+                        mVideos = new ArrayList<Video>();
+                        for (int i = 0; i < cursor.getCount(); i++) {
+                            cursor.moveToPosition(i);
+                            // Set the extracted value from the Cursor for the given column index and use each
+                            // value to create a Video object
+                            mVideos.add(new Video(
+                                    cursor.getInt(movieIdColumnIndex),
+                                    cursor.getString(videoKeyColumnIndex),
+                                    cursor.getString(videoNameColumnIndex),
+                                    cursor.getString(videoTypeColumnIndex)));
+                        }
+
+                        cursor.close();
+                        // Populate movie videos section
+                        populateVideos(mVideos);
+                    }
+                }
+
+                @Override
+                public void onLoaderReset(Loader<Cursor> loader) {
+
+                }
+            };
 
     private void populateMovieDetails(MovieDetails movieDetails) {
         // BACKDROP
@@ -941,6 +993,7 @@ public class DetailsActivity extends AppCompatActivity implements
                 showCast();
             } else {
                 // Otherwise, hide progress bar and show "No cast available" message
+                //mCastRecyclerView.setVisibility(View.GONE);
                 mCastMessagesTextView.setVisibility(View.VISIBLE);
                 mCastMessagesTextView.setText(R.string.no_cast);
                 mCastProgressBar.setVisibility(View.INVISIBLE);

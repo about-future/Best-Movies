@@ -8,6 +8,10 @@
     tools:context="com.future.bestmovies.DetailsActivity"
     tools:showIn="@layout/activity_details">
 
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
         <android.support.constraint.ConstraintLayout
             android:id="@+id/movie_details_layout"
             android:layout_width="match_parent"
@@ -168,5 +172,28 @@
                 app:layout_constraintTop_toBottomOf="@id/separation_line3" />
 
         </android.support.constraint.ConstraintLayout>
+
+        <ImageView
+            android:id="@+id/details_no_connection_iv"
+            android:layout_width="@dimen/icon"
+            android:layout_height="@dimen/icon"
+            android:layout_gravity="center_horizontal"
+            android:contentDescription="@string/no_connection_icon"
+            android:visibility="invisible"
+            app:srcCompat="@drawable/ic_cloud_off" />
+
+        <TextView
+            android:id="@+id/details_messages_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="@dimen/message_top_margin"
+            android:fontFamily="sans-serif-condensed"
+            android:gravity="center"
+            android:text="@string/no_connection"
+            android:textSize="@dimen/details_font_size"
+            android:visibility="invisible" />
+
+    </FrameLayout>
 
 </android.support.v4.widget.NestedScrollView>

@@ -130,6 +130,7 @@ public class ProfileActivity extends AppCompatActivity implements CreditsAdapter
                         .error(R.drawable.ic_landscape)
                         .into(profileBackdropImageView);
 
+                // TODO: fetch if network
                 getSupportLoaderManager().restartLoader(ACTOR_LOADER_ID, null, actorResultLoaderListener);
                 hideCredits();
                 getSupportLoaderManager().restartLoader(CREDITS_LOADER_ID, null, actorCreditsResultLoaderListener);

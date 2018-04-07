@@ -191,6 +191,8 @@ public class MainActivity extends AppCompatActivity implements
     private void fetchMovies(Context context) {
         // If there is a network connection, fetch data
         if (NetworkUtils.isConnected(context)) {
+            showMovies();
+
             // Before we fetch data, we need the last page number that was loaded in our RecyclerView,
             // increment it by 1 and save it in a preference for next data fetching
             int nextPage = MoviePreferences.getLastPageNumber(context) + 1;
@@ -248,40 +250,40 @@ public class MainActivity extends AppCompatActivity implements
         switch (item.getItemId()) {
             case R.id.action_popular:
                 MoviePreferences.setPreferredQueryType(this, getString(R.string.category_popular));
-                MoviePreferences.setLastPageNumber(this, 1);
+                MoviePreferences.setLastPageNumber(this, 0);
                 getSupportLoaderManager().destroyLoader(FAVOURITES_LOADER_ID);
                 mCurrentLoaderId = MOVIES_LOADER_ID;
-                getSupportLoaderManager().restartLoader(mCurrentLoaderId, null, this);
+                fetchMovies(getApplicationContext());
                 setTitle(item.getTitle());
                 invalidateOptionsMenu();
                 break;
 
             case R.id.action_top_rated:
                 MoviePreferences.setPreferredQueryType(this, getString(R.string.category_top_rated));
-                MoviePreferences.setLastPageNumber(this, 1);
+                MoviePreferences.setLastPageNumber(this, 0);
                 getSupportLoaderManager().destroyLoader(FAVOURITES_LOADER_ID);
                 mCurrentLoaderId = MOVIES_LOADER_ID;
-                getSupportLoaderManager().restartLoader(mCurrentLoaderId, null, this);
+                fetchMovies(getApplicationContext());
                 setTitle(item.getTitle());
                 invalidateOptionsMenu();
                 break;
 
             case R.id.action_upcoming:
                 MoviePreferences.setPreferredQueryType(this, getString(R.string.category_upcoming));
-                MoviePreferences.setLastPageNumber(this, 1);
+                MoviePreferences.setLastPageNumber(this, 0);
                 getSupportLoaderManager().destroyLoader(FAVOURITES_LOADER_ID);
                 mCurrentLoaderId = MOVIES_LOADER_ID;
-                getSupportLoaderManager().restartLoader(mCurrentLoaderId, null, this);
+                fetchMovies(getApplicationContext());
                 setTitle(item.getTitle());
                 invalidateOptionsMenu();
                 break;
 
             case R.id.action_now_playing:
                 MoviePreferences.setPreferredQueryType(this, getString(R.string.category_now_playing));
-                MoviePreferences.setLastPageNumber(this, 1);
+                MoviePreferences.setLastPageNumber(this, 0);
                 getSupportLoaderManager().destroyLoader(FAVOURITES_LOADER_ID);
                 mCurrentLoaderId = MOVIES_LOADER_ID;
-                getSupportLoaderManager().restartLoader(mCurrentLoaderId, null, this);
+                fetchMovies(getApplicationContext());
                 setTitle(item.getTitle());
                 invalidateOptionsMenu();
                 break;
@@ -321,6 +323,15 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     // TODO: share info, save video and reviews
+
+    // Show movie data and hide no connection icon and message
+    private void showMovies() {
+        mMoviesRecyclerView.setVisibility(View.VISIBLE);
+        mImageView.setVisibility(View.INVISIBLE);
+        mImageView.setImageResource(R.drawable.ic_cloud_off);
+        mMessagesTextView.setVisibility(View.INVISIBLE);
+        mLoading.setVisibility(View.VISIBLE);
+    }
 
     // Hide the movie data and loading indicator and show error message
     private void showError() {
@@ -374,7 +385,8 @@ public class MainActivity extends AppCompatActivity implements
                     mAdapter.swapMovies((ArrayList<Movie>) data);
                 } else {
                     // Otherwise, we add the new data to the old data, creating an infinite scrolling effect
-                    mAdapter.addMovies((ArrayList<Movie>) data);
+                    if (currentPage > 1)
+                        mAdapter.addMovies((ArrayList<Movie>) data);
                 }
 
                 // If the RecyclerView has no position, we assume the first position in the list

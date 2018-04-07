@@ -63,8 +63,9 @@ public class MovieCategoryAdapter extends RecyclerView.Adapter<MovieCategoryAdap
     public int getItemCount() {
         if (mMovies != null && mMoviesCursor == null)
             return mMovies.size();
-        else
+        else if (mMoviesCursor != null)
             return mMoviesCursor.getCount();
+        else return 0;
     }
 
     // This method swaps the old movie result with the newly loaded ones and notify the change

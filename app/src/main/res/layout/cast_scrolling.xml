@@ -29,15 +29,6 @@
         android:visibility="invisible"
         app:srcCompat="@drawable/ic_no_people" />
 
-    <ImageView
-        android:id="@+id/no_cast_connection_iv"
-        android:layout_width="@dimen/icon"
-        android:layout_height="@dimen/icon"
-        android:layout_gravity="center_horizontal"
-        android:contentDescription="@string/no_connection_icon"
-        android:visibility="invisible"
-        app:srcCompat="@drawable/ic_cloud_off" />
-
     <TextView
         android:id="@+id/cast_messages_tv"
         android:layout_width="wrap_content"

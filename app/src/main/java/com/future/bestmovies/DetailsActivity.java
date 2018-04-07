@@ -30,6 +30,7 @@ import android.widget.Toast;
 import com.future.bestmovies.data.Cast;
 import com.future.bestmovies.data.CastAdapter;
 import com.future.bestmovies.data.CastLoader;
+import com.future.bestmovies.data.FavouritesContract;
 import com.future.bestmovies.data.MovieDetails;
 import com.future.bestmovies.data.MovieDetailsLoader;
 import com.future.bestmovies.data.Review;
@@ -122,9 +123,6 @@ public class DetailsActivity extends AppCompatActivity implements
     private MovieDetails mSelectedMovie;
 
     // Movie details variables
-    private ConstraintLayout mMovieDetailsLayout;
-    private ImageView mNoConnectionImageView;
-    private TextView mNoConnectionTextView;
     private ImageView mMovieBackdropImageView;
     private ImageView mMoviePosterImageView;
     private TextView posterErrorTextView;
@@ -142,7 +140,6 @@ public class DetailsActivity extends AppCompatActivity implements
     private CastAdapter mCastAdapter;
     private ProgressBar mCastProgressBar;
     private ImageView mNoCastImageView;
-    private ImageView mNoCastConnectionImageView;
     private TextView mCastMessagesTextView;
 
     // Reviews variables
@@ -152,7 +149,6 @@ public class DetailsActivity extends AppCompatActivity implements
     private TextView mFirstReviewContentTextView;
     private ProgressBar mFirstReviewProgressBar;
     private ImageView mNoReviewsImageView;
-    private ImageView mNoReviewsConnectionImageView;
     private TextView mFirstReviewMessagesTextView;
     private TextView mSeeAllReviewsTextView;
 
@@ -164,13 +160,11 @@ public class DetailsActivity extends AppCompatActivity implements
     private VideoAdapter mVideosAdapter;
     private ProgressBar mVideosProgressBar;
     private ImageView mNoVideosImageView;
-    private ImageView mNoVideosConnectionImageView;
     private TextView mVideosMessagesTextView;
 
     private boolean mIsFavourite;
     private MenuItem mFavouriteMovieMenuItem;
     private Toast mToast;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -185,9 +179,6 @@ public class DetailsActivity extends AppCompatActivity implements
         }
 
         // MOVIE DETAILS
-        mMovieDetailsLayout = findViewById(R.id.movie_details_layout);
-        mNoConnectionImageView = findViewById(R.id.details_no_connection_iv);
-        mNoConnectionTextView = findViewById(R.id.details_messages_tv);
         mMovieBackdropImageView = findViewById(R.id.details_backdrop_iv);
         mMovieGenreTextView = findViewById(R.id.details_genre_tv);
         mMoviePosterImageView = findViewById(R.id.details_poster_iv);
@@ -196,7 +187,6 @@ public class DetailsActivity extends AppCompatActivity implements
         mMovieReleaseDateTextView = findViewById(R.id.details_release_date_tv);
         mMoviePlotTextView = findViewById(R.id.details_plot_tv);
         mMovieRuntimeTextView = findViewById(R.id.details_runtime_tv);
-        // TODO: hide details if no connection and activity is recreated
 
         // CAST
         mCastMessagesTextView = findViewById(R.id.cast_messages_tv);
@@ -212,7 +202,6 @@ public class DetailsActivity extends AppCompatActivity implements
         mCastAdapter = new CastAdapter(this, this);
         mCastRecyclerView.setAdapter(mCastAdapter);
         mNoCastImageView = findViewById(R.id.no_cast_iv);
-        mNoCastConnectionImageView = findViewById(R.id.no_cast_connection_iv);
 
         // REVIEWS
         mFirstReviewLayout = findViewById(R.id.first_review_layout);
@@ -223,7 +212,6 @@ public class DetailsActivity extends AppCompatActivity implements
         mFirstReviewMessagesTextView.setText(R.string.loading);
         mSeeAllReviewsTextView = findViewById(R.id.see_all_reviews_tv);
         mNoReviewsImageView = findViewById(R.id.no_reviews_iv);
-        mNoReviewsConnectionImageView = findViewById(R.id.no_review_connection_iv);
 
         // VIDEOS
         mVideosMessagesTextView = findViewById(R.id.videos_messages_tv);
@@ -238,10 +226,10 @@ public class DetailsActivity extends AppCompatActivity implements
         mVideosRecyclerView.setHasFixedSize(true);
         mVideosAdapter = new VideoAdapter(this, this);
         mVideosRecyclerView.setAdapter(mVideosAdapter);
+        // Scrolling one item at the time is done with a SnapHelper
         SnapHelper snapHelper = new PagerSnapHelper();
         snapHelper.attachToRecyclerView(mVideosRecyclerView);
         mNoVideosImageView = findViewById(R.id.no_videos_iv);
-        mNoVideosConnectionImageView = findViewById(R.id.no_videos_connection_iv);
 
         if (savedInstanceState == null) {
             // Check intent and see if there is a movieId passed from MainActivity or
@@ -258,10 +246,10 @@ public class DetailsActivity extends AppCompatActivity implements
                     // Check if this movie is a favourite or not
                     getLoaderManager().restartLoader(CHECK_IF_FAVOURITE_MOVIE_LOADER_ID, null, favouriteMovieResultLoaderListener);
                 } else {
-                    closeOnError();
+                    closeOnError(getString(R.string.details_error_message));
                 }
             } else {
-                closeOnError();
+                closeOnError(getString(R.string.details_error_message));
             }
         }
     }
@@ -281,10 +269,10 @@ public class DetailsActivity extends AppCompatActivity implements
         return true;
     }
 
-    @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
-        return super.onPrepareOptionsMenu(menu);
-    }
+//    @Override
+//    public boolean onPrepareOptionsMenu(Menu menu) {
+//        return super.onPrepareOptionsMenu(menu);
+//    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -313,23 +301,27 @@ public class DetailsActivity extends AppCompatActivity implements
         return super.onOptionsItemSelected(item);
     }
 
-    private void closeOnError() {
+    private void closeOnError(String message) {
         finish();
-        toastThis(getString(R.string.details_error_message));
+        toastThis(message);
     }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         // Movie Details
         outState.putParcelable(MOVIE_OBJECT_KEY, mSelectedMovie);
+
         // Cast
         outState.putParcelableArrayList(MOVIE_CAST_KEY, mCast);
         outState.putInt(CAST_POSITION_KEY, mCastLayoutManager.findFirstCompletelyVisibleItemPosition());
+
         // Reviews
         outState.putParcelableArrayList(MOVIE_REVIEWS_KEY, mReviews);
+
         // Videos
         outState.putParcelableArrayList(MOVIE_VIDEOS_KEY, mVideos);
         outState.putInt(VIDEOS_POSITION_KEY, mVideosLayoutManager.findFirstCompletelyVisibleItemPosition());
+
         // Favourite Movie
         outState.putBoolean(IS_FAVOURITE_KEY, mIsFavourite);
 
@@ -340,11 +332,13 @@ public class DetailsActivity extends AppCompatActivity implements
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
         if (savedInstanceState != null) {
+            // Movie Details
             if (savedInstanceState.containsKey(MOVIE_OBJECT_KEY)) {
                 mSelectedMovie = savedInstanceState.getParcelable(MOVIE_OBJECT_KEY);
                 if (mSelectedMovie != null) populateMovieDetails(mSelectedMovie);
             }
 
+            // Cast
             if (savedInstanceState.containsKey(MOVIE_CAST_KEY)) {
                 mCast = savedInstanceState.getParcelableArrayList(MOVIE_CAST_KEY);
                 // If cast is not null, data from server was previously fetched successfully
@@ -358,18 +352,24 @@ public class DetailsActivity extends AppCompatActivity implements
                         }
                     }
                     populateCast(mCast);
+                } else {
+                    noCast();
                 }
             }
 
+            // Reviews
             if (savedInstanceState.containsKey(MOVIE_REVIEWS_KEY)) {
                 mReviews = savedInstanceState.getParcelableArrayList(MOVIE_REVIEWS_KEY);
                 // If mReview is not null, data from server was previously fetched successfully
                 if (mReviews != null) {
                     // If review is not empty, use the saved reviews and repopulate the reviews section
                     populateReviews(mReviews);
+                } else {
+                    noReviews();
                 }
             }
 
+            // Videos
             if (savedInstanceState.containsKey(MOVIE_VIDEOS_KEY)) {
                 mVideos = savedInstanceState.getParcelableArrayList(MOVIE_VIDEOS_KEY);
                 // If mVideos is not null, data from server was previously fetched successfully
@@ -383,11 +383,15 @@ public class DetailsActivity extends AppCompatActivity implements
                         }
                     }
                     populateVideos(mVideos);
+                } else {
+                    noVideos();
                 }
             }
 
-            if (savedInstanceState.containsKey(IS_FAVOURITE_KEY))
+            // Favourite Movie
+            if (savedInstanceState.containsKey(IS_FAVOURITE_KEY)) {
                 mIsFavourite = savedInstanceState.getBoolean(IS_FAVOURITE_KEY);
+            }
         }
     }
 
@@ -429,25 +433,12 @@ public class DetailsActivity extends AppCompatActivity implements
         }
     }
 
-    private void showMovieDetails() {
-        mMovieDetailsLayout.setVisibility(View.VISIBLE);
-        mNoConnectionImageView.setVisibility(View.INVISIBLE);
-        mNoConnectionTextView.setVisibility(View.INVISIBLE);
-    }
-
-    private void hideMovieDetails() {
-        mMovieDetailsLayout.setVisibility(View.INVISIBLE);
-        mNoConnectionImageView.setVisibility(View.VISIBLE);
-        mNoConnectionTextView.setVisibility(View.VISIBLE);
-    }
-
     // Hide the progress bar and show cast
     private void showCast() {
         mCastRecyclerView.setVisibility(View.VISIBLE);
         mCastProgressBar.setVisibility(View.INVISIBLE);
         mCastMessagesTextView.setVisibility(View.INVISIBLE);
         mNoCastImageView.setVisibility(View.INVISIBLE);
-        mNoCastConnectionImageView.setVisibility(View.INVISIBLE);
     }
 
     // Show progress bar and hide cast
@@ -456,7 +447,15 @@ public class DetailsActivity extends AppCompatActivity implements
         mCastProgressBar.setVisibility(View.VISIBLE);
         mCastMessagesTextView.setVisibility(View.VISIBLE);
         mNoCastImageView.setVisibility(View.INVISIBLE);
-        mNoCastConnectionImageView.setVisibility(View.INVISIBLE);
+    }
+
+    // Hide progress bar and show no reviews and message
+    private void noCast() {
+        //mCastRecyclerView.setVisibility(View.GONE);
+        mCastMessagesTextView.setVisibility(View.VISIBLE);
+        mCastMessagesTextView.setText(R.string.no_cast);
+        mCastProgressBar.setVisibility(View.INVISIBLE);
+        mNoCastImageView.setVisibility(View.VISIBLE);
     }
 
     // Hide the progress bar and show reviews
@@ -465,7 +464,6 @@ public class DetailsActivity extends AppCompatActivity implements
         mFirstReviewProgressBar.setVisibility(View.INVISIBLE);
         mFirstReviewMessagesTextView.setVisibility(View.INVISIBLE);
         mNoReviewsImageView.setVisibility(View.INVISIBLE);
-        mNoReviewsConnectionImageView.setVisibility(View.INVISIBLE);
     }
 
     // Show progress bar and hide reviews
@@ -475,7 +473,16 @@ public class DetailsActivity extends AppCompatActivity implements
         mFirstReviewMessagesTextView.setVisibility(View.VISIBLE);
         mSeeAllReviewsTextView.setVisibility(View.INVISIBLE);
         mNoReviewsImageView.setVisibility(View.INVISIBLE);
-        mNoReviewsConnectionImageView.setVisibility(View.INVISIBLE);
+    }
+
+    // Hide progress bar and show no reviews icon and message
+    private void noReviews() {
+        mFirstReviewLayout.setVisibility(View.INVISIBLE);
+        mSeeAllReviewsTextView.setVisibility(View.INVISIBLE);
+        mFirstReviewMessagesTextView.setVisibility(View.VISIBLE);
+        mFirstReviewMessagesTextView.setText(R.string.no_reviews);
+        mFirstReviewProgressBar.setVisibility(View.INVISIBLE);
+        mNoReviewsImageView.setVisibility(View.VISIBLE);
     }
 
     // Hide the progress bar and show videos
@@ -484,7 +491,6 @@ public class DetailsActivity extends AppCompatActivity implements
         mVideosProgressBar.setVisibility(View.INVISIBLE);
         mVideosMessagesTextView.setVisibility(View.INVISIBLE);
         mNoVideosImageView.setVisibility(View.INVISIBLE);
-        mNoVideosConnectionImageView.setVisibility(View.INVISIBLE);
     }
 
     // Show progress bar and hide videos
@@ -493,15 +499,22 @@ public class DetailsActivity extends AppCompatActivity implements
         mVideosProgressBar.setVisibility(View.VISIBLE);
         mVideosMessagesTextView.setVisibility(View.VISIBLE);
         mNoVideosImageView.setVisibility(View.INVISIBLE);
-        mNoVideosConnectionImageView.setVisibility(View.INVISIBLE);
+    }
+
+    // Hide progress bar and show no videos icon and message
+    private void noVideos() {
+        mVideosRecyclerView.setVisibility(View.GONE);
+        mVideosMessagesTextView.setVisibility(View.VISIBLE);
+        mVideosMessagesTextView.setText(R.string.no_videos);
+        mVideosProgressBar.setVisibility(View.INVISIBLE);
+        mNoVideosImageView.setVisibility(View.VISIBLE);
     }
 
     private void fetchMovieDetails() {
         if (NetworkUtils.isConnected(getApplicationContext())) {
             getLoaderManager().initLoader(MOVIE_DETAILS_LOADER_ID, null, movieDetailsResultLoaderListener);
         } else {
-            // Otherwise, hide progress bar and show "No connection available" message
-
+            toastThis(getString(R.string.no_connection));
         }
     }
 
@@ -510,14 +523,6 @@ public class DetailsActivity extends AppCompatActivity implements
             // Show the Cast progress bar and hide the Cast RecyclerView
             hideCast();
             getLoaderManager().initLoader(CAST_LOADER_ID, null, castResultLoaderListener);
-        } else {
-            // Otherwise, hide progress bar and show "No connection available" message
-            mCastRecyclerView.setVisibility(View.GONE);
-            mCastMessagesTextView.setVisibility(View.VISIBLE);
-            mCastMessagesTextView.setText(R.string.no_connection);
-            mCastProgressBar.setVisibility(View.INVISIBLE);
-            mNoCastImageView.setVisibility(View.INVISIBLE);
-            mNoCastConnectionImageView.setVisibility(View.VISIBLE);
         }
     }
 
@@ -526,15 +531,6 @@ public class DetailsActivity extends AppCompatActivity implements
             // Show the Review progress bar and hide the firstReview layout
             hideReviews();
             getLoaderManager().initLoader(REVIEWS_LOADER_ID, null, reviewsResultLoaderListener);
-        } else {
-            // Otherwise, hide progress bar and show "No connection available" message
-            mFirstReviewLayout.setVisibility(View.INVISIBLE);
-            mSeeAllReviewsTextView.setVisibility(View.INVISIBLE);
-            mFirstReviewMessagesTextView.setVisibility(View.VISIBLE);
-            mFirstReviewMessagesTextView.setText(R.string.no_connection);
-            mFirstReviewProgressBar.setVisibility(View.INVISIBLE);
-            mNoReviewsImageView.setVisibility(View.INVISIBLE);
-            mNoReviewsConnectionImageView.setVisibility(View.VISIBLE);
         }
     }
 
@@ -543,14 +539,6 @@ public class DetailsActivity extends AppCompatActivity implements
             // Show the Videos progress bar and hide the Videos RecyclerView
             hideVideos();
             getLoaderManager().initLoader(VIDEOS_LOADER_ID, null, videoResultLoaderListener);
-        } else {
-            // Otherwise, hide progress bar and show "No connection available" message
-            mVideosRecyclerView.setVisibility(View.GONE);
-            mVideosMessagesTextView.setVisibility(View.VISIBLE);
-            mVideosMessagesTextView.setText(R.string.no_connection);
-            mVideosProgressBar.setVisibility(View.INVISIBLE);
-            mNoVideosImageView.setVisibility(View.INVISIBLE);
-            mNoVideosConnectionImageView.setVisibility(View.VISIBLE);
         }
     }
 
@@ -605,8 +593,7 @@ public class DetailsActivity extends AppCompatActivity implements
 
                 @Override
                 public void onLoaderReset(Loader<ArrayList<Cast>> loader) {
-                    mCastAdapter.swapCast(new ArrayList<Cast>() {
-                    });
+                    //mCastAdapter.swapCast(new ArrayList<Cast>() {});
                 }
             };
 
@@ -633,8 +620,8 @@ public class DetailsActivity extends AppCompatActivity implements
                 @Override
                 public void onLoaderReset(Loader<ArrayList<Review>> loader) {
                     // Clear TextViews
-                    mFirstReviewAuthorTextView.setText(null);
-                    mFirstReviewContentTextView.setText(null);
+                    //mFirstReviewAuthorTextView.setText("");
+                    //mFirstReviewContentTextView.setText("");
                 }
             };
 
@@ -660,8 +647,7 @@ public class DetailsActivity extends AppCompatActivity implements
 
                 @Override
                 public void onLoaderReset(Loader<ArrayList<Video>> loader) {
-                    mVideosAdapter.swapVideos(new ArrayList<Video>() {
-                    });
+                    //mVideosAdapter.swapVideos(new ArrayList<Video>() {});
                 }
             };
 
@@ -672,14 +658,14 @@ public class DetailsActivity extends AppCompatActivity implements
                     switch (loaderId) {
                         case FAVOURITE_LOADER_ID:
                             return new CursorLoader(getApplicationContext(),
-                                    MovieDetailsEntry.buildMovieUriWithId(mMovieId),
+                                    FavouritesContract.buildUriWithId(MovieDetailsEntry.CONTENT_URI, mMovieId),
                                     MOVIE_DETAILED_PROJECTION,
                                     null,
                                     null,
                                     null);
                         case CHECK_IF_FAVOURITE_MOVIE_LOADER_ID:
                             return new CursorLoader(getApplicationContext(),
-                                    MovieDetailsEntry.buildMovieUriWithId(mMovieId),
+                                    FavouritesContract.buildUriWithId(MovieDetailsEntry.CONTENT_URI, mMovieId),
                                     MOVIE_CHECK_PROJECTION,
                                     null,
                                     null,
@@ -730,7 +716,7 @@ public class DetailsActivity extends AppCompatActivity implements
                         case CHECK_IF_FAVOURITE_MOVIE_LOADER_ID:
                             if (cursor != null && cursor.moveToFirst()) {
                                 mIsFavourite = true;
-                                showMovieDetails();
+
                                 // As soon as we know the movie is a favourite, color the heart, so the user will know it too
                                 if (mFavouriteMovieMenuItem != null)
                                     DrawableCompat.setTint(mFavouriteMovieMenuItem.getIcon(), ContextCompat.getColor(getApplicationContext(), R.color.colorHeart));
@@ -743,14 +729,20 @@ public class DetailsActivity extends AppCompatActivity implements
                             } else {
                                 mIsFavourite = false;
                                 if (NetworkUtils.isConnected(getApplicationContext())) {
-                                    showMovieDetails();
                                     // Otherwise, use a movie details loader and download the movie details
-                                    fetchMovieDetails();
-                                    fetchCast();
-                                    fetchReviews();
-                                    fetchVideos();
+                                    getLoaderManager().initLoader(MOVIE_DETAILS_LOADER_ID, null, movieDetailsResultLoaderListener);
+                                    //hideCast();
+                                    getLoaderManager().initLoader(CAST_LOADER_ID, null, castResultLoaderListener);
+                                    //hideReviews();
+                                    getLoaderManager().initLoader(REVIEWS_LOADER_ID, null, reviewsResultLoaderListener);
+                                    //hideVideos();
+                                    getLoaderManager().initLoader(VIDEOS_LOADER_ID, null, videoResultLoaderListener);
+                                    //fetchMovieDetails();
+                                    //fetchCast();
+                                    //fetchReviews();
+                                    //fetchVideos();
                                 } else {
-                                    hideMovieDetails();
+                                    closeOnError(getString(R.string.no_connection));
                                 }
                             }
                             break;
@@ -770,7 +762,7 @@ public class DetailsActivity extends AppCompatActivity implements
                     switch (loaderId) {
                         case FAVOURITE_CAST_LOADER_ID:
                             return new CursorLoader(getApplicationContext(),
-                                    CastEntry.buildCastUriWithId(mMovieId),
+                                    FavouritesContract.buildUriWithId(CastEntry.CONTENT_URI, mMovieId),
                                     CAST_DETAILED_PROJECTION,
                                     null,
                                     null,
@@ -790,7 +782,7 @@ public class DetailsActivity extends AppCompatActivity implements
                         int castIdColumnIndex = cursor.getColumnIndex(CastEntry.COLUMN_ACTOR_ID);
                         int castImagePathColumnIndex = cursor.getColumnIndex(CastEntry.COLUMN_IMAGE_PROFILE_PATH);
 
-                        mCast = new ArrayList<Cast>();
+                        mCast = new ArrayList<>();
                         for (int i = 0; i < cursor.getCount(); i++) {
                             cursor.moveToPosition(i);
                             // Set the extracted value from the Cursor for the given column index and use each
@@ -806,6 +798,8 @@ public class DetailsActivity extends AppCompatActivity implements
                         cursor.close();
                         // Populate movie cast section
                         populateCast(mCast);
+                    } else {
+                        noCast();
                     }
                 }
 
@@ -822,7 +816,7 @@ public class DetailsActivity extends AppCompatActivity implements
                     switch (loaderId) {
                         case FAVOURITE_REVIEW_LOADER_ID:
                             return new CursorLoader(getApplicationContext(),
-                                    ReviewsEntry.buildReviewsUriWithId(mMovieId),
+                                    FavouritesContract.buildUriWithId(ReviewsEntry.CONTENT_URI, mMovieId),
                                     REVIEW_DETAILED_PROJECTION,
                                     null,
                                     null,
@@ -840,7 +834,7 @@ public class DetailsActivity extends AppCompatActivity implements
                         int authorColumnIndex = cursor.getColumnIndex(ReviewsEntry.COLUMN_AUTHOR);
                         int contentColumnIndex = cursor.getColumnIndex(ReviewsEntry.COLUMN_CONTENT);
 
-                        mReviews = new ArrayList<Review>();
+                        mReviews = new ArrayList<>();
                         for (int i = 0; i < cursor.getCount(); i++) {
                             cursor.moveToPosition(i);
                             // Set the extracted value from the Cursor for the given column index and use each
@@ -854,6 +848,8 @@ public class DetailsActivity extends AppCompatActivity implements
                         cursor.close();
                         // Populate movie reviews section
                         populateReviews(mReviews);
+                    } else {
+                        noReviews();
                     }
                 }
 
@@ -870,7 +866,7 @@ public class DetailsActivity extends AppCompatActivity implements
                     switch (loaderId) {
                         case FAVOURITE_VIDEOS_LOADER_ID:
                             return new CursorLoader(getApplicationContext(),
-                                    VideosEntry.buildVideosUriWithId(mMovieId),
+                                    FavouritesContract.buildUriWithId(VideosEntry.CONTENT_URI, mMovieId),
                                     VIDEOS_DETAILED_PROJECTION,
                                     null,
                                     null,
@@ -889,7 +885,7 @@ public class DetailsActivity extends AppCompatActivity implements
                         int videoNameColumnIndex = cursor.getColumnIndex(VideosEntry.COLUMN_VIDEO_NAME);
                         int videoTypeColumnIndex = cursor.getColumnIndex(VideosEntry.COLUMN_VIDEO_TYPE);
 
-                        mVideos = new ArrayList<Video>();
+                        mVideos = new ArrayList<>();
                         for (int i = 0; i < cursor.getCount(); i++) {
                             cursor.moveToPosition(i);
                             // Set the extracted value from the Cursor for the given column index and use each
@@ -904,6 +900,8 @@ public class DetailsActivity extends AppCompatActivity implements
                         cursor.close();
                         // Populate movie videos section
                         populateVideos(mVideos);
+                    } else {
+                        noVideos();
                     }
                 }
 
@@ -979,86 +977,65 @@ public class DetailsActivity extends AppCompatActivity implements
     }
 
     private void populateCast(ArrayList<Cast> movieCast) {
-        if (movieCast != null) {
-            mCastAdapter.swapCast(movieCast);
+        mCastAdapter.swapCast(movieCast);
 
-            // If the RecyclerView has no position, we assume the first position in the list
-            if (mCastPosition == RecyclerView.NO_POSITION) mCastPosition = 0;
-            // Scroll the RecyclerView to mCastPosition
-            mCastRecyclerView.smoothScrollToPosition(mCastPosition);
+        // If the RecyclerView has no position, we assume the first position in the list
+        if (mCastPosition == RecyclerView.NO_POSITION) mCastPosition = 0;
+        // Scroll the RecyclerView to mCastPosition
+        mCastRecyclerView.smoothScrollToPosition(mCastPosition);
 
-            // If the movieCast has data
-            if (movieCast.size() != 0) {
-                // Show movie cast
-                showCast();
-            } else {
-                // Otherwise, hide progress bar and show "No cast available" message
-                //mCastRecyclerView.setVisibility(View.GONE);
-                mCastMessagesTextView.setVisibility(View.VISIBLE);
-                mCastMessagesTextView.setText(R.string.no_cast);
-                mCastProgressBar.setVisibility(View.INVISIBLE);
-                mNoCastImageView.setVisibility(View.VISIBLE);
-                mNoCastConnectionImageView.setVisibility(View.INVISIBLE);
-            }
+        // If the movieCast has data
+        if (movieCast.size() != 0) {
+            // Show movie cast
+            showCast();
+        } else {
+            // Otherwise, hide progress bar and show "No cast available" message
+            noCast();
         }
     }
 
     private void populateReviews(final ArrayList<Review> movieReviews) {
-        if (movieReviews != null) {
-            if (movieReviews.size() != 0) {
-                if (movieReviews.size() > 1) {
-                    mSeeAllReviewsTextView.setVisibility(View.VISIBLE);
-                    mSeeAllReviewsTextView.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            Intent reviewsIntent = new Intent(getApplicationContext(), ReviewsActivity.class);
-                            reviewsIntent.putParcelableArrayListExtra(MOVIE_REVIEWS_KEY, movieReviews);
-                            reviewsIntent.putExtra(MOVIE_TITLE_KEY, mSelectedMovie.getMovieTitle());
-                            reviewsIntent.putExtra(MOVIE_BACKDROP_KEY, mSelectedMovie.getBackdropPath());
-                            startActivity(reviewsIntent);
-                        }
-                    });
-                } else {
-                    mSeeAllReviewsTextView.setVisibility(View.GONE);
-                }
-                // Show movie reviews
-                showReviews();
-                mFirstReviewAuthorTextView.setText(movieReviews.get(0).getReviewAuthor());
-                mFirstReviewContentTextView.setText(movieReviews.get(0).getReviewContent());
+        if (movieReviews.size() != 0) {
+            if (movieReviews.size() > 1) {
+                mSeeAllReviewsTextView.setVisibility(View.VISIBLE);
+                mSeeAllReviewsTextView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Intent reviewsIntent = new Intent(getApplicationContext(), ReviewsActivity.class);
+                        reviewsIntent.putParcelableArrayListExtra(MOVIE_REVIEWS_KEY, movieReviews);
+                        reviewsIntent.putExtra(MOVIE_TITLE_KEY, mSelectedMovie.getMovieTitle());
+                        reviewsIntent.putExtra(MOVIE_BACKDROP_KEY, mSelectedMovie.getBackdropPath());
+                        startActivity(reviewsIntent);
+                    }
+                });
             } else {
-                // Otherwise, hide progress bar and show "No reviews available" message
-                hideReviews();
-                mFirstReviewMessagesTextView.setVisibility(View.VISIBLE);
-                mFirstReviewMessagesTextView.setText(R.string.no_reviews);
-                mFirstReviewProgressBar.setVisibility(View.INVISIBLE);
-                mNoReviewsImageView.setVisibility(View.VISIBLE);
-                mNoReviewsConnectionImageView.setVisibility(View.INVISIBLE);
+                mSeeAllReviewsTextView.setVisibility(View.GONE);
             }
+            // Show movie reviews
+            showReviews();
+            mFirstReviewAuthorTextView.setText(movieReviews.get(0).getReviewAuthor());
+            mFirstReviewContentTextView.setText(movieReviews.get(0).getReviewContent());
+        } else {
+            // Otherwise, hide progress bar and show "No reviews available" message
+            noReviews();
         }
     }
 
     private void populateVideos(ArrayList<Video> movieVideos) {
-        if (movieVideos != null) {
-            mVideosAdapter.swapVideos(movieVideos);
+        mVideosAdapter.swapVideos(movieVideos);
 
-            // If the RecyclerView has no position, we assume the first position in the list
-            if (mVideosPosition == RecyclerView.NO_POSITION) mVideosPosition = 0;
-            // Scroll the RecyclerView to mVideoPosition
-            mVideosRecyclerView.smoothScrollToPosition(mVideosPosition);
+        // If the RecyclerView has no position, we assume the first position in the list
+        if (mVideosPosition == RecyclerView.NO_POSITION) mVideosPosition = 0;
+        // Scroll the RecyclerView to mVideoPosition
+        mVideosRecyclerView.smoothScrollToPosition(mVideosPosition);
 
-
-            // If the movieVideo has data
-            if (movieVideos.size() != 0) {
-                // Show movie videos
-                showVideos();
-            } else {
-                // Otherwise, hide progress bar and show "No videos available" message
-                mVideosRecyclerView.setVisibility(View.GONE);
-                mVideosMessagesTextView.setVisibility(View.VISIBLE);
-                mVideosMessagesTextView.setText(R.string.no_videos);
-                mVideosProgressBar.setVisibility(View.INVISIBLE);
-                mNoVideosImageView.setVisibility(View.VISIBLE);
-            }
+        // If the movieVideo has data
+        if (movieVideos.size() != 0) {
+            // Show movie videos
+            showVideos();
+        } else {
+            // Otherwise, hide progress bar and show "No videos available" message
+            noVideos();
         }
     }
 

@@ -29,15 +29,6 @@
         android:visibility="invisible"
         app:srcCompat="@drawable/ic_no_movies" />
 
-    <ImageView
-        android:id="@+id/no_videos_connection_iv"
-        android:layout_width="@dimen/icon"
-        android:layout_height="@dimen/icon"
-        android:layout_gravity="center_horizontal"
-        android:contentDescription="@string/no_connection_icon"
-        android:visibility="invisible"
-        app:srcCompat="@drawable/ic_cloud_off" />
-
     <TextView
         android:id="@+id/videos_messages_tv"
         android:layout_width="wrap_content"

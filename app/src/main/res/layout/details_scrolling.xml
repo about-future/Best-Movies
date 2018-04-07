@@ -8,192 +8,165 @@
     tools:context="com.future.bestmovies.DetailsActivity"
     tools:showIn="@layout/activity_details">
 
-    <FrameLayout
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/movie_details_layout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="wrap_content"
+        android:descendantFocusability="blocksDescendants"
+        android:orientation="vertical"
+        android:visibility="visible">
 
-        <android.support.constraint.ConstraintLayout
-            android:id="@+id/movie_details_layout"
+        <include
+            android:id="@+id/poster_and_plot"
+            layout="@layout/poster_and_plot"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:descendantFocusability="blocksDescendants"
-            android:orientation="vertical"
-            android:visibility="visible">
+            android:layout_margin="@dimen/details_horizontal_spacing"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-            <include
-                android:id="@+id/poster_and_plot"
-                layout="@layout/poster_and_plot"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="@dimen/details_horizontal_spacing"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <View
-                android:id="@+id/separation_line1"
-                android:layout_width="0dp"
-                android:layout_height="1dp"
-                android:layout_marginEnd="@dimen/details_horizontal_spacing"
-                android:layout_marginStart="@dimen/details_horizontal_spacing"
-                android:layout_marginTop="@dimen/details_vertical_spacing"
-                android:background="@color/colorPrimary"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/poster_and_plot" />
-
-            <TextView
-                android:id="@+id/videos_label"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/details_vertical_spacing"
-                android:fontFamily="sans-serif-condensed"
-                android:text="@string/videos_label"
-                android:textColor="@color/colorWhite"
-                android:textSize="20sp"
-                app:layout_constraintStart_toStartOf="@id/separation_line1"
-                app:layout_constraintTop_toBottomOf="@id/separation_line1" />
-
-            <include
-                android:id="@+id/videos"
-                layout="@layout/videos_scrolling"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="@dimen/details_horizontal_spacing"
-                app:layout_constraintTop_toBottomOf="@id/videos_label"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent" />
-
-            <View
-                android:id="@+id/separation_line4"
-                android:layout_width="0dp"
-                android:layout_height="1dp"
-                android:layout_marginEnd="@dimen/details_horizontal_spacing"
-                android:layout_marginStart="@dimen/details_horizontal_spacing"
-                android:layout_marginTop="@dimen/details_vertical_spacing"
-                android:background="@color/colorPrimary"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/videos"/>
-
-            <TextView
-                android:id="@+id/cast_label"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/details_vertical_spacing"
-                android:fontFamily="sans-serif-condensed"
-                android:text="@string/cast_label"
-                android:textColor="@color/colorWhite"
-                android:textSize="20sp"
-                app:layout_constraintStart_toStartOf="@id/separation_line4"
-                app:layout_constraintTop_toBottomOf="@id/separation_line4" />
-
-            <include
-                android:id="@+id/cast_body"
-                layout="@layout/cast_scrolling"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="@dimen/details_vertical_spacing"
-                android:layout_marginEnd="@dimen/details_horizontal_spacing"
-                android:layout_marginStart="@dimen/details_horizontal_spacing"
-                android:layout_marginTop="@dimen/details_vertical_spacing"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/cast_label" />
-
-            <View
-                android:id="@+id/separation_line2"
-                android:layout_width="0dp"
-                android:layout_height="1dp"
-                android:layout_marginEnd="@dimen/details_horizontal_spacing"
-                android:layout_marginStart="@dimen/details_horizontal_spacing"
-                android:layout_marginTop="@dimen/details_vertical_spacing"
-                android:background="@color/colorPrimary"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/cast_body" />
-
-            <TextView
-                android:id="@+id/reviews_label"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/details_vertical_spacing"
-                android:fontFamily="sans-serif-condensed"
-                android:text="@string/reviews_label"
-                android:textColor="@color/colorWhite"
-                android:textSize="20sp"
-                app:layout_constraintStart_toStartOf="@id/separation_line2"
-                app:layout_constraintTop_toBottomOf="@id/separation_line2" />
-
-            <TextView
-                android:id="@+id/see_all_reviews_tv"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:background="@drawable/touch_selector"
-                android:fontFamily="sans-serif-condensed"
-                android:padding="@dimen/details_horizontal_spacing"
-                android:text="@string/see_all"
-                android:textAllCaps="true"
-                android:textStyle="bold"
-                android:textColor="@color/colorAccent"
-                android:textSize="@dimen/details_font_size"
-                android:visibility="invisible"
-                app:layout_constraintEnd_toEndOf="@id/separation_line2"
-                app:layout_constraintTop_toBottomOf="@id/separation_line2" />
-
-            <include
-                android:id="@+id/first_review_body"
-                layout="@layout/first_review"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="@dimen/details_vertical_spacing"
-                android:layout_marginEnd="@dimen/details_horizontal_spacing"
-                android:layout_marginStart="@dimen/details_horizontal_spacing"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/reviews_label" />
-
-            <View
-                android:id="@+id/separation_line3"
-                android:layout_width="0dp"
-                android:layout_height="1dp"
-                android:layout_marginEnd="@dimen/details_horizontal_spacing"
-                android:layout_marginStart="@dimen/details_horizontal_spacing"
-                android:layout_marginTop="@dimen/details_vertical_spacing"
-                android:background="@color/colorPrimary"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/first_review_body" />
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/details_vertical_spacing"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/separation_line3" />
-
-        </android.support.constraint.ConstraintLayout>
-
-        <ImageView
-            android:id="@+id/details_no_connection_iv"
-            android:layout_width="@dimen/icon"
-            android:layout_height="@dimen/icon"
-            android:layout_gravity="center_horizontal"
-            android:contentDescription="@string/no_connection_icon"
-            android:visibility="invisible"
-            app:srcCompat="@drawable/ic_cloud_off" />
+        <View
+            android:id="@+id/separation_line1"
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_marginEnd="@dimen/details_horizontal_spacing"
+            android:layout_marginStart="@dimen/details_horizontal_spacing"
+            android:layout_marginTop="@dimen/details_vertical_spacing"
+            android:background="@color/colorPrimary"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/poster_and_plot" />
 
         <TextView
-            android:id="@+id/details_messages_tv"
+            android:id="@+id/videos_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="@dimen/message_top_margin"
+            android:layout_marginTop="@dimen/details_vertical_spacing"
             android:fontFamily="sans-serif-condensed"
-            android:gravity="center"
-            android:text="@string/no_connection"
-            android:textSize="@dimen/details_font_size"
-            android:visibility="invisible" />
+            android:text="@string/videos_label"
+            android:textColor="@color/colorWhite"
+            android:textSize="20sp"
+            app:layout_constraintStart_toStartOf="@id/separation_line1"
+            app:layout_constraintTop_toBottomOf="@id/separation_line1" />
 
-    </FrameLayout>
+        <include
+            android:id="@+id/videos"
+            layout="@layout/videos_scrolling"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/details_horizontal_spacing"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/videos_label" />
+
+        <View
+            android:id="@+id/separation_line4"
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_marginEnd="@dimen/details_horizontal_spacing"
+            android:layout_marginStart="@dimen/details_horizontal_spacing"
+            android:layout_marginTop="@dimen/details_vertical_spacing"
+            android:background="@color/colorPrimary"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/videos" />
+
+        <TextView
+            android:id="@+id/cast_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/details_vertical_spacing"
+            android:fontFamily="sans-serif-condensed"
+            android:text="@string/cast_label"
+            android:textColor="@color/colorWhite"
+            android:textSize="20sp"
+            app:layout_constraintStart_toStartOf="@id/separation_line4"
+            app:layout_constraintTop_toBottomOf="@id/separation_line4" />
+
+        <include
+            android:id="@+id/cast_body"
+            layout="@layout/cast_scrolling"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/details_vertical_spacing"
+            android:layout_marginEnd="@dimen/details_horizontal_spacing"
+            android:layout_marginStart="@dimen/details_horizontal_spacing"
+            android:layout_marginTop="@dimen/details_vertical_spacing"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/cast_label" />
+
+        <View
+            android:id="@+id/separation_line2"
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_marginEnd="@dimen/details_horizontal_spacing"
+            android:layout_marginStart="@dimen/details_horizontal_spacing"
+            android:layout_marginTop="@dimen/details_vertical_spacing"
+            android:background="@color/colorPrimary"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/cast_body" />
+
+        <TextView
+            android:id="@+id/reviews_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/details_vertical_spacing"
+            android:fontFamily="sans-serif-condensed"
+            android:text="@string/reviews_label"
+            android:textColor="@color/colorWhite"
+            android:textSize="20sp"
+            app:layout_constraintStart_toStartOf="@id/separation_line2"
+            app:layout_constraintTop_toBottomOf="@id/separation_line2" />
+
+        <TextView
+            android:id="@+id/see_all_reviews_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/touch_selector"
+            android:fontFamily="sans-serif-condensed"
+            android:padding="@dimen/details_horizontal_spacing"
+            android:text="@string/see_all"
+            android:textAllCaps="true"
+            android:textColor="@color/colorAccent"
+            android:textSize="@dimen/details_font_size"
+            android:textStyle="bold"
+            android:visibility="invisible"
+            app:layout_constraintEnd_toEndOf="@id/separation_line2"
+            app:layout_constraintTop_toBottomOf="@id/separation_line2" />
+
+        <include
+            android:id="@+id/first_review_body"
+            layout="@layout/first_review"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/details_vertical_spacing"
+            android:layout_marginEnd="@dimen/details_horizontal_spacing"
+            android:layout_marginStart="@dimen/details_horizontal_spacing"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/reviews_label" />
+
+        <View
+            android:id="@+id/separation_line3"
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_marginEnd="@dimen/details_horizontal_spacing"
+            android:layout_marginStart="@dimen/details_horizontal_spacing"
+            android:layout_marginTop="@dimen/details_vertical_spacing"
+            android:background="@color/colorPrimary"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/first_review_body" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/details_vertical_spacing"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/separation_line3" />
+
+    </android.support.constraint.ConstraintLayout>
 
 </android.support.v4.widget.NestedScrollView>

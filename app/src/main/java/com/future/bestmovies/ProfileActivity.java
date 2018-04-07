@@ -34,6 +34,7 @@ import com.future.bestmovies.data.CreditsAdapter;
 import com.future.bestmovies.data.CreditsLoader;
 import com.future.bestmovies.data.MovieCategoryAdapter;
 import com.future.bestmovies.utils.ImageUtils;
+import com.future.bestmovies.utils.NetworkUtils;
 import com.future.bestmovies.utils.ScreenUtils;
 import com.squareup.picasso.Picasso;
 
@@ -130,12 +131,15 @@ public class ProfileActivity extends AppCompatActivity implements CreditsAdapter
                         .error(R.drawable.ic_landscape)
                         .into(profileBackdropImageView);
 
-                // TODO: fetch if network
-                getSupportLoaderManager().restartLoader(ACTOR_LOADER_ID, null, actorResultLoaderListener);
-                hideCredits();
-                getSupportLoaderManager().restartLoader(CREDITS_LOADER_ID, null, actorCreditsResultLoaderListener);
+                if (NetworkUtils.isConnected(this)) {
+                    getSupportLoaderManager().restartLoader(ACTOR_LOADER_ID, null, actorResultLoaderListener);
+                    hideCredits();
+                    getSupportLoaderManager().restartLoader(CREDITS_LOADER_ID, null, actorCreditsResultLoaderListener);
+                } else {
+                    closeOnError(getString(R.string.no_connection));
+                }
             } else {
-                closeOnError();
+                closeOnError(getString(R.string.details_error_message));
             }
         }
     }
@@ -222,9 +226,9 @@ public class ProfileActivity extends AppCompatActivity implements CreditsAdapter
         return super.onOptionsItemSelected(item);
     }
 
-    private void closeOnError() {
+    private void closeOnError(String message) {
         finish();
-        toastThis(getString(R.string.details_error_message));
+        toastThis(message);
     }
 
     // Hide the progress bar and show credits

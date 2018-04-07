@@ -86,12 +86,9 @@
         <include
             android:id="@+id/cast_body"
             layout="@layout/cast_scrolling"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/details_vertical_spacing"
-            android:layout_marginEnd="@dimen/details_horizontal_spacing"
-            android:layout_marginStart="@dimen/details_horizontal_spacing"
-            android:layout_marginTop="@dimen/details_vertical_spacing"
+            android:layout_margin="@dimen/details_horizontal_spacing"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/cast_label" />

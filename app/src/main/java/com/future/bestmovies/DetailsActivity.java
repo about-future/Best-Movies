@@ -269,11 +269,6 @@ public class DetailsActivity extends AppCompatActivity implements
         return true;
     }
 
-//    @Override
-//    public boolean onPrepareOptionsMenu(Menu menu) {
-//        return super.onPrepareOptionsMenu(menu);
-//    }
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
@@ -443,7 +438,7 @@ public class DetailsActivity extends AppCompatActivity implements
 
     // Show progress bar and hide cast
     private void hideCast() {
-        //mCastRecyclerView.setVisibility(View.GONE);
+        mCastRecyclerView.setVisibility(View.GONE);
         mCastProgressBar.setVisibility(View.VISIBLE);
         mCastMessagesTextView.setVisibility(View.VISIBLE);
         mNoCastImageView.setVisibility(View.INVISIBLE);
@@ -451,7 +446,7 @@ public class DetailsActivity extends AppCompatActivity implements
 
     // Hide progress bar and show no reviews and message
     private void noCast() {
-        //mCastRecyclerView.setVisibility(View.GONE);
+        mCastRecyclerView.setVisibility(View.GONE);
         mCastMessagesTextView.setVisibility(View.VISIBLE);
         mCastMessagesTextView.setText(R.string.no_cast);
         mCastProgressBar.setVisibility(View.INVISIBLE);
@@ -588,12 +583,12 @@ public class DetailsActivity extends AppCompatActivity implements
                 public void onLoadFinished(Loader<ArrayList<Cast>> loader, ArrayList<Cast> movieCast) {
                     mCast = movieCast;
                     // Populate cast section
-                    populateCast(movieCast);
+                    populateCast(mCast);
                 }
 
                 @Override
                 public void onLoaderReset(Loader<ArrayList<Cast>> loader) {
-                    //mCastAdapter.swapCast(new ArrayList<Cast>() {});
+                    mCastAdapter.swapCast(new ArrayList<Cast>() {});
                 }
             };
 
@@ -620,8 +615,8 @@ public class DetailsActivity extends AppCompatActivity implements
                 @Override
                 public void onLoaderReset(Loader<ArrayList<Review>> loader) {
                     // Clear TextViews
-                    //mFirstReviewAuthorTextView.setText("");
-                    //mFirstReviewContentTextView.setText("");
+                    mFirstReviewAuthorTextView.setText("");
+                    mFirstReviewContentTextView.setText("");
                 }
             };
 
@@ -647,7 +642,7 @@ public class DetailsActivity extends AppCompatActivity implements
 
                 @Override
                 public void onLoaderReset(Loader<ArrayList<Video>> loader) {
-                    //mVideosAdapter.swapVideos(new ArrayList<Video>() {});
+                    mVideosAdapter.swapVideos(new ArrayList<Video>() {});
                 }
             };
 
@@ -794,8 +789,8 @@ public class DetailsActivity extends AppCompatActivity implements
                                     cursor.getString(castNameColumnIndex),
                                     cursor.getString(castImagePathColumnIndex)));
                         }
-
                         cursor.close();
+
                         // Populate movie cast section
                         populateCast(mCast);
                     } else {

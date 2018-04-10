@@ -64,7 +64,6 @@ public class MainActivity extends AppCompatActivity implements
             MovieDetailsEntry.COLUMN_POSTER_PATH
     };
 
-
     @BindView(R.id.movies_rv) RecyclerView mMoviesRecyclerView;
     @BindView(R.id.messages_tv) TextView mMessagesTextView;
     @BindView(R.id.no_connection_cloud_iv) ImageView mNoConnectionImageView;

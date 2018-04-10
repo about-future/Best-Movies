@@ -23,7 +23,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-
 public class NetworkUtils {
     private static final String TAG = NetworkUtils.class.getSimpleName();
     private static final String API_MOVIE_BASE_URL = "https://api.themoviedb.org/3";

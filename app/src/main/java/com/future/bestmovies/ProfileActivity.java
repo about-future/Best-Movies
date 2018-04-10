@@ -35,6 +35,7 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 
+import butterknife.BindString;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -77,6 +78,10 @@ public class ProfileActivity extends AppCompatActivity implements CreditsAdapter
     @BindView(R.id.no_credits_connection_iv) ImageView mNoCreditsConnectionImageView;
 
     private MenuItem mFavouriteActorMenuItem;
+
+    // Resources
+    @BindString(R.string.credit_date_unknown) String dateUnknown;
+    @BindString(R.string.credit_age) String age;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -317,16 +322,16 @@ public class ProfileActivity extends AppCompatActivity implements CreditsAdapter
         // Age
         int birthYear;
         int endYear;
-        if (actorDetails.getBirthday().length() > 4 && !actorDetails.getBirthday().equals(getString(R.string.credit_date_unknown))) {
+        if (actorDetails.getBirthday().length() > 4 && !actorDetails.getBirthday().equals(dateUnknown)) {
             birthYear = Integer.valueOf(actorDetails.getBirthday().substring(0, 4));
-            if (actorDetails.getDeathday().length() > 4 && !actorDetails.getDeathday().equals(getString(R.string.credit_date_unknown))) {
+            if (actorDetails.getDeathday().length() > 4 && !actorDetails.getDeathday().equals(dateUnknown)) {
                 endYear = Integer.valueOf(actorDetails.getDeathday().substring(0, 4));
             } else {
                 endYear = Calendar.getInstance().get(Calendar.YEAR);
             }
-            ageTextView.setText(getString(R.string.credit_age).concat(Integer.toString(endYear - birthYear)));
+            ageTextView.setText(age.concat(Integer.toString(endYear - birthYear)));
         } else {
-            ageTextView.setText(getString(R.string.credit_age).concat("unknown"));
+            ageTextView.setText(age.concat("unknown"));
         }
 
         // Birthplace

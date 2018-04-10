@@ -46,6 +46,8 @@ import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
+import butterknife.BindColor;
+import butterknife.BindString;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -171,6 +173,16 @@ public class DetailsActivity extends AppCompatActivity implements
     private MenuItem mFavouriteMovieMenuItem;
     private Toast mToast;
 
+    // Resources
+    @BindString(R.string.no_connection) String noConnection;
+    @BindString(R.string.no_poster) String noPoster;
+    @BindString(R.string.loading) String loadingMsg;
+    @BindString(R.string.details_error_message) String errorMsg;
+    @BindString(R.string.favourite_movie_insert_successful) String insertSuccessfulMsg;
+    @BindString(R.string.favourite_movie_insert_failed) String insertFailedMsg;
+    @BindString(R.string.favourite_movie_delete_successful) String deleteSuccessfulMsg;
+    @BindString(R.string.favourite_movie_delete_failed) String deleteFailedMsg;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -184,7 +196,7 @@ public class DetailsActivity extends AppCompatActivity implements
         }
 
         // CAST
-        mCastMessagesTextView.setText(R.string.loading);
+        mCastMessagesTextView.setText(loadingMsg);
         // The layout manager for our Cast RecyclerView will be a LinerLayout, so we can display
         // our cast on a single line, horizontally
         mCastLayoutManager =
@@ -195,10 +207,10 @@ public class DetailsActivity extends AppCompatActivity implements
         mCastRecyclerView.setAdapter(mCastAdapter);
 
         // REVIEWS
-        mFirstReviewMessagesTextView.setText(R.string.loading);
+        mFirstReviewMessagesTextView.setText(loadingMsg);
 
         // VIDEOS
-        mVideosMessagesTextView.setText(R.string.loading);
+        mVideosMessagesTextView.setText(loadingMsg);
         // The layout manager for our Videos RecyclerView will be a LinerLayout, so we can display
         // our videos on a single line, horizontally
         mVideosLayoutManager =
@@ -226,10 +238,10 @@ public class DetailsActivity extends AppCompatActivity implements
                     // Check if this movie is a favourite or not
                     getLoaderManager().restartLoader(CHECK_IF_FAVOURITE_MOVIE_LOADER_ID, null, favouriteMovieResultLoaderListener);
                 } else {
-                    closeOnError(getString(R.string.details_error_message));
+                    closeOnError(errorMsg);
                 }
             } else {
-                closeOnError(getString(R.string.details_error_message));
+                closeOnError(errorMsg);
             }
         }
     }
@@ -680,12 +692,8 @@ public class DetailsActivity extends AppCompatActivity implements
                                     getLoaderManager().initLoader(REVIEWS_LOADER_ID, null, reviewsResultLoaderListener);
                                     //hideVideos();
                                     getLoaderManager().initLoader(VIDEOS_LOADER_ID, null, videoResultLoaderListener);
-                                    //fetchMovieDetails();
-                                    //fetchCast();
-                                    //fetchReviews();
-                                    //fetchVideos();
                                 } else {
-                                    closeOnError(getString(R.string.no_connection));
+                                    closeOnError(noConnection);
                                 }
                             }
                             break;
@@ -890,13 +898,13 @@ public class DetailsActivity extends AppCompatActivity implements
                         posterErrorTextView.setVisibility(View.VISIBLE);
                         // If there isn't a network connection, we show a "no connection" message
                         if (!NetworkUtils.isConnected(getApplicationContext())) {
-                            posterErrorTextView.setText(getString(R.string.no_connection));
+                            posterErrorTextView.setText(noConnection);
                         } else {
                             // Otherwise, we show "no_poster" message
-                            posterErrorTextView.setText(getString(R.string.no_poster));
+                            posterErrorTextView.setText(noPoster);
                         }
                         // Set poster content description for error case
-                        mMoviePosterImageView.setContentDescription(getString(R.string.no_poster));
+                        mMoviePosterImageView.setContentDescription(noPoster);
                     }
                 });
         // RATINGS
@@ -1069,12 +1077,12 @@ public class DetailsActivity extends AppCompatActivity implements
                 (videosResponse == INITIAL_VALUE || videosResponse > 0)) {
             // The insertion was successful and we can display a toast.
             DrawableCompat.setTint(item.getIcon(), ContextCompat.getColor(getApplicationContext(), R.color.colorHeart));
-            toastThis(getString(R.string.favourite_movie_insert_successful));
+            toastThis(insertSuccessfulMsg);
             mIsFavourite = true;
         } else {
             // Otherwise, if the new content URI is null, then there was an error with insertion.
             DrawableCompat.setTint(item.getIcon(), ContextCompat.getColor(getApplicationContext(), R.color.colorWhite));
-            toastThis(getString(R.string.favourite_movie_insert_failed));
+            toastThis(insertFailedMsg);
         }
     }
 
@@ -1099,12 +1107,12 @@ public class DetailsActivity extends AppCompatActivity implements
         if (rowsDeleted != 0) {
             // Otherwise, the delete was successful and we can display a toast.
             DrawableCompat.setTint(item.getIcon(), ContextCompat.getColor(getApplicationContext(), R.color.colorWhite));
-            toastThis(getString(R.string.favourite_movie_delete_successful));
+            toastThis(deleteSuccessfulMsg);
             mIsFavourite = false;
         } else {
             // Otherwise, if no rows were affected, then there was an error with the delete.
             DrawableCompat.setTint(item.getIcon(), ContextCompat.getColor(getApplicationContext(), R.color.colorHeart));
-            toastThis(getString(R.string.favourite_movie_delete_failed));
+            toastThis(deleteFailedMsg);
         }
     }
 

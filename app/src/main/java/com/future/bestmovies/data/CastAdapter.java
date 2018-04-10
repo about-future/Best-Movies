@@ -16,6 +16,9 @@ import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 
 public class CastAdapter extends RecyclerView.Adapter<CastAdapter.CastViewHolder> {
     private final Context mContext;
@@ -61,15 +64,13 @@ public class CastAdapter extends RecyclerView.Adapter<CastAdapter.CastViewHolder
     }
 
     class CastViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        final ImageView actorProfileImageView;
-        final TextView actorNameTextView;
-        final TextView characterTextView;
+        @BindView(R.id.actor_profile_iv) ImageView actorProfileImageView;
+        @BindView(R.id.actor_name_tv) TextView actorNameTextView;
+        @BindView(R.id.character_tv) TextView characterTextView;
 
         CastViewHolder(View itemView) {
             super(itemView);
-            actorProfileImageView = itemView.findViewById(R.id.actor_profile_iv);
-            actorNameTextView = itemView.findViewById(R.id.actor_name_tv);
-            characterTextView = itemView.findViewById(R.id.character_tv);
+            ButterKnife.bind(this, itemView);
             itemView.setOnClickListener(this);
         }
 

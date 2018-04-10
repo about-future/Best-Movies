@@ -33,6 +33,9 @@ import com.future.bestmovies.utils.ScreenUtils;
 
 import java.util.ArrayList;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 import static com.future.bestmovies.data.FavouritesContract.*;
 
 
@@ -40,7 +43,7 @@ public class MainActivity extends AppCompatActivity implements
         MovieCategoryAdapter.GridItemClickListener, LoaderManager.LoaderCallbacks {
 
     private static final String TAG = MainActivity.class.getSimpleName();
-    private static final String TITLE = "title";
+    private static final String TITLE_KEY = "title";
 
     // Movie categories
     private static final String CATEGORY_POPULAR = "popular";
@@ -61,12 +64,13 @@ public class MainActivity extends AppCompatActivity implements
             MovieDetailsEntry.COLUMN_POSTER_PATH
     };
 
+
+    @BindView(R.id.movies_rv) RecyclerView mMoviesRecyclerView;
+    @BindView(R.id.messages_tv) TextView mMessagesTextView;
+    @BindView(R.id.no_connection_cloud_iv) ImageView mNoConnectionImageView;
+    @BindView(R.id.loading_pb) ProgressBar mLoading;
     private MovieCategoryAdapter mAdapter;
-    private RecyclerView mMoviesRecyclerView;
     private GridLayoutManager mGridLayoutManager;
-    private TextView mMessagesTextView;
-    private ImageView mImageView;
-    private ProgressBar mLoading;
     private int mPosition = RecyclerView.NO_POSITION;
 
     // Infinite scrolling variables
@@ -80,12 +84,9 @@ public class MainActivity extends AppCompatActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        ButterKnife.bind(this);
 
-        mLoading = findViewById(R.id.loading_pb);
         mLoading.setVisibility(View.VISIBLE);
-        mImageView = findViewById(R.id.no_connection_cloud_iv);
-        mMessagesTextView = findViewById(R.id.messages_tv);
-        mMoviesRecyclerView = findViewById(R.id.movies_rv);
         // The layout manager for our RecyclerView will be a GridLayout, so we can display our movies
         // on columns. The number of columns is dictated by the orientation and size of the device
         mGridLayoutManager = new GridLayoutManager(
@@ -160,7 +161,7 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void onSaveInstanceState(Bundle outState) {
         outState.putInt(CURRENT_LOADED_ID, mCurrentLoaderId);
-        outState.putString(TITLE, getTitle().toString());
+        outState.putString(TITLE_KEY, getTitle().toString());
         super.onSaveInstanceState(outState);
     }
 
@@ -171,7 +172,7 @@ public class MainActivity extends AppCompatActivity implements
                 mCurrentLoaderId = savedInstanceState.getInt(CURRENT_LOADED_ID);
                 fetchMovies(this);
             }
-            if (savedInstanceState.containsKey(TITLE)) setTitle(savedInstanceState.getString(TITLE));
+            if (savedInstanceState.containsKey(TITLE_KEY)) setTitle(savedInstanceState.getString(TITLE_KEY));
         }
         super.onRestoreInstanceState(savedInstanceState);
     }
@@ -327,8 +328,8 @@ public class MainActivity extends AppCompatActivity implements
     // Show movie data and hide no connection icon and message
     private void showMovies() {
         mMoviesRecyclerView.setVisibility(View.VISIBLE);
-        mImageView.setVisibility(View.INVISIBLE);
-        mImageView.setImageResource(R.drawable.ic_cloud_off);
+        mNoConnectionImageView.setVisibility(View.INVISIBLE);
+        mNoConnectionImageView.setImageResource(R.drawable.ic_cloud_off);
         mMessagesTextView.setVisibility(View.INVISIBLE);
         mLoading.setVisibility(View.VISIBLE);
     }
@@ -336,8 +337,8 @@ public class MainActivity extends AppCompatActivity implements
     // Hide the movie data and loading indicator and show error message
     private void showError() {
         mMoviesRecyclerView.setVisibility(View.INVISIBLE);
-        mImageView.setVisibility(View.VISIBLE);
-        mImageView.setImageResource(R.drawable.ic_cloud_off);
+        mNoConnectionImageView.setVisibility(View.VISIBLE);
+        mNoConnectionImageView.setImageResource(R.drawable.ic_cloud_off);
         mMessagesTextView.setVisibility(View.VISIBLE);
         mLoading.setVisibility(View.INVISIBLE);
     }
@@ -374,7 +375,7 @@ public class MainActivity extends AppCompatActivity implements
 
         switch (loader.getId()) {
             case MOVIES_LOADER_ID:
-                mImageView.setVisibility(View.INVISIBLE);
+                mNoConnectionImageView.setVisibility(View.INVISIBLE);
                 mMessagesTextView.setVisibility(View.INVISIBLE);
 
                 // Every time we get new results we have 2 possibilities
@@ -402,12 +403,12 @@ public class MainActivity extends AppCompatActivity implements
                 mAdapter.swapCursor((Cursor) data);
 
                 if (data != null && ((Cursor) data).getCount() == 0) {
-                    mImageView.setVisibility(View.VISIBLE);
-                    mImageView.setImageResource(R.drawable.ic_favorite);
+                    mNoConnectionImageView.setVisibility(View.VISIBLE);
+                    mNoConnectionImageView.setImageResource(R.drawable.ic_favorite);
                     mMessagesTextView.setVisibility(View.VISIBLE);
                     mMessagesTextView.setText(R.string.no_favourites);
                 } else {
-                    mImageView.setVisibility(View.INVISIBLE);
+                    mNoConnectionImageView.setVisibility(View.INVISIBLE);
                     mMessagesTextView.setVisibility(View.INVISIBLE);
                     // If the RecyclerView has no position, we assume the first position in the list
                     if (mPosition == RecyclerView.NO_POSITION) {

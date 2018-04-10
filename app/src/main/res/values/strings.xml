@@ -87,11 +87,14 @@
     <string name="no_credits">No credits available</string>
 
     <!-- Toast messages -->
-    <string name="favourite_insert_successful">Movie added to favourites</string>
-    <string name="favourite_insert_failed">Failed to add movie to favourites</string>
-    <string name="favourite_delete_successful">Movie deleted from favourites</string>
-    <string name="favourite_delete_failed">Failed to delete from favourites</string>
-
+    <string name="favourite_movie_insert_successful">Movie added to favourites</string>
+    <string name="favourite_movie_insert_failed">Failed to add movie to favourites</string>
+    <string name="favourite_movie_delete_successful">Movie deleted from favourites</string>
+    <string name="favourite_movie_delete_failed">Failed to delete from favourites</string>
+    <string name="favourite_actor_insert_successful">Actor added to favourites</string>
+    <string name="favourite_actor_insert_failed">Failed to add actor to favourites</string>
+    <string name="favourite_actor_delete_successful">Actor deleted from favourites</string>
+    <string name="favourite_actor_delete_failed">Failed to delete from favourites</string>
 
     <!-- PREFERENCES -->
     <!-- Page number preference -->

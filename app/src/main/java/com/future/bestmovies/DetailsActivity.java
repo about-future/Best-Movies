@@ -46,6 +46,9 @@ import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 import static com.future.bestmovies.data.FavouritesContract.*;
 
 
@@ -122,45 +125,47 @@ public class DetailsActivity extends AppCompatActivity implements
     private int mMovieId;
     private MovieDetails mSelectedMovie;
 
+    @BindView(R.id.toolbar) Toolbar toolbar;
+
     // Movie details variables
-    private ImageView mMovieBackdropImageView;
-    private ImageView mMoviePosterImageView;
-    private TextView posterErrorTextView;
-    private TextView mMovieGenreTextView;
-    private TextView mMovieRatingTextView;
-    private TextView mMovieReleaseDateTextView;
-    private TextView mMoviePlotTextView;
-    private TextView mMovieRuntimeTextView;
+    @BindView(R.id.details_backdrop_iv) ImageView mMovieBackdropImageView;
+    @BindView(R.id.details_poster_iv) ImageView mMoviePosterImageView;
+    @BindView(R.id.poster_error_tv) TextView posterErrorTextView;
+    @BindView(R.id.details_genre_tv) TextView mMovieGenreTextView;
+    @BindView(R.id.details_rating_tv) TextView mMovieRatingTextView;
+    @BindView(R.id.details_release_date_tv) TextView mMovieReleaseDateTextView;
+    @BindView(R.id.details_plot_tv) TextView mMoviePlotTextView;
+    @BindView(R.id.details_runtime_tv) TextView mMovieRuntimeTextView;
 
     // Cast variables
+    @BindView(R.id.cast_rv) RecyclerView mCastRecyclerView;
+    @BindView(R.id.loading_cast_pb) ProgressBar mCastProgressBar;
+    @BindView(R.id.no_cast_iv) ImageView mNoCastImageView;
+    @BindView(R.id.cast_messages_tv) TextView mCastMessagesTextView;
     private ArrayList<Cast> mCast;
-    private RecyclerView mCastRecyclerView;
     private int mCastPosition = RecyclerView.NO_POSITION;
     private LinearLayoutManager mCastLayoutManager;
     private CastAdapter mCastAdapter;
-    private ProgressBar mCastProgressBar;
-    private ImageView mNoCastImageView;
-    private TextView mCastMessagesTextView;
 
     // Reviews variables
+    @BindView(R.id.first_review_layout) ConstraintLayout mFirstReviewLayout;
+    @BindView(R.id.first_review_author_tv) TextView mFirstReviewAuthorTextView;
+    @BindView(R.id.first_review_content_tv) TextView mFirstReviewContentTextView;
+    @BindView(R.id.loading_first_review_pb) ProgressBar mFirstReviewProgressBar;
+    @BindView(R.id.no_reviews_iv) ImageView mNoReviewsImageView;
+    @BindView(R.id.first_review_messages_tv) TextView mFirstReviewMessagesTextView;
+    @BindView(R.id.see_all_reviews_tv) TextView mSeeAllReviewsTextView;
     private ArrayList<Review> mReviews;
-    private ConstraintLayout mFirstReviewLayout;
-    private TextView mFirstReviewAuthorTextView;
-    private TextView mFirstReviewContentTextView;
-    private ProgressBar mFirstReviewProgressBar;
-    private ImageView mNoReviewsImageView;
-    private TextView mFirstReviewMessagesTextView;
-    private TextView mSeeAllReviewsTextView;
 
     // Videos variables
+    @BindView(R.id.videos_rv) RecyclerView mVideosRecyclerView;
+    @BindView(R.id.loading_videos_pb) ProgressBar mVideosProgressBar;
+    @BindView(R.id.no_videos_iv) ImageView mNoVideosImageView;
+    @BindView(R.id.videos_messages_tv) TextView mVideosMessagesTextView;
     private ArrayList<Video> mVideos;
-    private RecyclerView mVideosRecyclerView;
     private int mVideosPosition = RecyclerView.NO_POSITION;
     private LinearLayoutManager mVideosLayoutManager;
     private VideoAdapter mVideosAdapter;
-    private ProgressBar mVideosProgressBar;
-    private ImageView mNoVideosImageView;
-    private TextView mVideosMessagesTextView;
 
     private boolean mIsFavourite;
     private MenuItem mFavouriteMovieMenuItem;
@@ -170,29 +175,16 @@ public class DetailsActivity extends AppCompatActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_details);
+        ButterKnife.bind(this);
 
         // We initialize and set the toolbar
-        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
 
-        // MOVIE DETAILS
-        mMovieBackdropImageView = findViewById(R.id.details_backdrop_iv);
-        mMovieGenreTextView = findViewById(R.id.details_genre_tv);
-        mMoviePosterImageView = findViewById(R.id.details_poster_iv);
-        posterErrorTextView = findViewById(R.id.poster_error_tv);
-        mMovieRatingTextView = findViewById(R.id.details_rating_tv);
-        mMovieReleaseDateTextView = findViewById(R.id.details_release_date_tv);
-        mMoviePlotTextView = findViewById(R.id.details_plot_tv);
-        mMovieRuntimeTextView = findViewById(R.id.details_runtime_tv);
-
         // CAST
-        mCastMessagesTextView = findViewById(R.id.cast_messages_tv);
         mCastMessagesTextView.setText(R.string.loading);
-        mCastRecyclerView = findViewById(R.id.cast_rv);
-        mCastProgressBar = findViewById(R.id.loading_cast_pb);
         // The layout manager for our Cast RecyclerView will be a LinerLayout, so we can display
         // our cast on a single line, horizontally
         mCastLayoutManager =
@@ -201,23 +193,12 @@ public class DetailsActivity extends AppCompatActivity implements
         mCastRecyclerView.setHasFixedSize(false);
         mCastAdapter = new CastAdapter(this, this);
         mCastRecyclerView.setAdapter(mCastAdapter);
-        mNoCastImageView = findViewById(R.id.no_cast_iv);
 
         // REVIEWS
-        mFirstReviewLayout = findViewById(R.id.first_review_layout);
-        mFirstReviewAuthorTextView = findViewById(R.id.first_review_author_tv);
-        mFirstReviewContentTextView = findViewById(R.id.first_review_content_tv);
-        mFirstReviewProgressBar = findViewById(R.id.loading_first_review_pb);
-        mFirstReviewMessagesTextView = findViewById(R.id.first_review_messages_tv);
         mFirstReviewMessagesTextView.setText(R.string.loading);
-        mSeeAllReviewsTextView = findViewById(R.id.see_all_reviews_tv);
-        mNoReviewsImageView = findViewById(R.id.no_reviews_iv);
 
         // VIDEOS
-        mVideosMessagesTextView = findViewById(R.id.videos_messages_tv);
         mVideosMessagesTextView.setText(R.string.loading);
-        mVideosRecyclerView = findViewById(R.id.videos_rv);
-        mVideosProgressBar = findViewById(R.id.loading_videos_pb);
         // The layout manager for our Videos RecyclerView will be a LinerLayout, so we can display
         // our videos on a single line, horizontally
         mVideosLayoutManager =
@@ -229,7 +210,6 @@ public class DetailsActivity extends AppCompatActivity implements
         // Scrolling one item at the time is done with a SnapHelper
         SnapHelper snapHelper = new PagerSnapHelper();
         snapHelper.attachToRecyclerView(mVideosRecyclerView);
-        mNoVideosImageView = findViewById(R.id.no_videos_iv);
 
         if (savedInstanceState == null) {
             // Check intent and see if there is a movieId passed from MainActivity or
@@ -503,38 +483,6 @@ public class DetailsActivity extends AppCompatActivity implements
         mVideosMessagesTextView.setText(R.string.no_videos);
         mVideosProgressBar.setVisibility(View.INVISIBLE);
         mNoVideosImageView.setVisibility(View.VISIBLE);
-    }
-
-    private void fetchMovieDetails() {
-        if (NetworkUtils.isConnected(getApplicationContext())) {
-            getLoaderManager().initLoader(MOVIE_DETAILS_LOADER_ID, null, movieDetailsResultLoaderListener);
-        } else {
-            toastThis(getString(R.string.no_connection));
-        }
-    }
-
-    private void fetchCast() {
-        if (NetworkUtils.isConnected(getApplicationContext())) {
-            // Show the Cast progress bar and hide the Cast RecyclerView
-            hideCast();
-            getLoaderManager().initLoader(CAST_LOADER_ID, null, castResultLoaderListener);
-        }
-    }
-
-    private void fetchReviews() {
-        if (NetworkUtils.isConnected(getApplicationContext())) {
-            // Show the Review progress bar and hide the firstReview layout
-            hideReviews();
-            getLoaderManager().initLoader(REVIEWS_LOADER_ID, null, reviewsResultLoaderListener);
-        }
-    }
-
-    private void fetchVideos() {
-        if (NetworkUtils.isConnected(getApplicationContext())) {
-            // Show the Videos progress bar and hide the Videos RecyclerView
-            hideVideos();
-            getLoaderManager().initLoader(VIDEOS_LOADER_ID, null, videoResultLoaderListener);
-        }
     }
 
     private LoaderManager.LoaderCallbacks<MovieDetails> movieDetailsResultLoaderListener =
@@ -1121,12 +1069,12 @@ public class DetailsActivity extends AppCompatActivity implements
                 (videosResponse == INITIAL_VALUE || videosResponse > 0)) {
             // The insertion was successful and we can display a toast.
             DrawableCompat.setTint(item.getIcon(), ContextCompat.getColor(getApplicationContext(), R.color.colorHeart));
-            toastThis(getString(R.string.favourite_insert_successful));
+            toastThis(getString(R.string.favourite_movie_insert_successful));
             mIsFavourite = true;
         } else {
             // Otherwise, if the new content URI is null, then there was an error with insertion.
             DrawableCompat.setTint(item.getIcon(), ContextCompat.getColor(getApplicationContext(), R.color.colorWhite));
-            toastThis(getString(R.string.favourite_insert_failed));
+            toastThis(getString(R.string.favourite_movie_insert_failed));
         }
     }
 
@@ -1151,12 +1099,12 @@ public class DetailsActivity extends AppCompatActivity implements
         if (rowsDeleted != 0) {
             // Otherwise, the delete was successful and we can display a toast.
             DrawableCompat.setTint(item.getIcon(), ContextCompat.getColor(getApplicationContext(), R.color.colorWhite));
-            toastThis(getString(R.string.favourite_delete_successful));
+            toastThis(getString(R.string.favourite_movie_delete_successful));
             mIsFavourite = false;
         } else {
             // Otherwise, if no rows were affected, then there was an error with the delete.
             DrawableCompat.setTint(item.getIcon(), ContextCompat.getColor(getApplicationContext(), R.color.colorHeart));
-            toastThis(getString(R.string.favourite_delete_failed));
+            toastThis(getString(R.string.favourite_movie_delete_failed));
         }
     }
 

@@ -14,14 +14,16 @@ import com.future.bestmovies.R;
 
 import java.util.ArrayList;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 
 public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.ReviewViewHolder>{
     private final Context mContext;
-    private ArrayList<Review> mReviews;
+    private ArrayList<Review> mReviews = new ArrayList<Review>();
 
-    public ReviewAdapter(Context context, ArrayList<Review> reviews) {
+    public ReviewAdapter(Context context) {
         mContext = context;
-        mReviews = reviews;
     }
 
     @NonNull
@@ -49,13 +51,12 @@ public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.ReviewView
     }
 
     class ReviewViewHolder extends RecyclerView.ViewHolder {
-        final TextView reviewAuthorTextView;
-        final TextView reviewContentTextView;
+        @BindView(R.id.review_author_tv) TextView reviewAuthorTextView;
+        @BindView(R.id.review_content_tv) TextView reviewContentTextView;
 
         ReviewViewHolder(View itemView) {
             super(itemView);
-            reviewAuthorTextView = itemView.findViewById(R.id.review_author_tv);
-            reviewContentTextView = itemView.findViewById(R.id.review_content_tv);
+            ButterKnife.bind(this, itemView);
         }
     }
 }

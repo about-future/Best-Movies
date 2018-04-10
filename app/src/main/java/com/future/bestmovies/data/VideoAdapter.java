@@ -17,6 +17,9 @@ import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHolder> {
     private final Context mContext;
     private ArrayList<Video> mVideos = new ArrayList<Video>(){};
@@ -63,15 +66,13 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
     }
 
     class VideoViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        final ImageView videoThumbnailImageView;
-        final TextView videoNameTextView;
-        final TextView videoTypeTextView;
+        @BindView(R.id.video_thumbnail_iv) ImageView videoThumbnailImageView;
+        @BindView(R.id.video_name_tv) TextView videoNameTextView;
+        @BindView(R.id.video_type_tv) TextView videoTypeTextView;
 
         VideoViewHolder(View itemView) {
             super(itemView);
-            videoThumbnailImageView = itemView.findViewById(R.id.video_thumbnail_iv);
-            videoNameTextView = itemView.findViewById(R.id.video_name_tv);
-            videoTypeTextView = itemView.findViewById(R.id.video_type_tv);
+            ButterKnife.bind(this, itemView);
             itemView.setOnClickListener(this);
         }
 

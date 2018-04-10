@@ -289,6 +289,7 @@ public class JsonUtils {
         int movieId;
         String posterPath;
         String releaseDate;
+        int releaseYear;
         String title;
 
         // Instantiate a JSON object so we can get data.
@@ -311,8 +312,13 @@ public class JsonUtils {
             posterPath = creditJson.getString(CREDIT_POSTER_PATH);
             try {
                 releaseDate = creditJson.getString(CREDIT_RELEASE_DATE);
+                if (releaseDate != null && releaseDate.length() > 4) {
+                    releaseDate = releaseDate.substring(0, 4);
+                } else {
+                    releaseDate = "9999";
+                }
             } catch (JSONException e) {
-                releaseDate = "Unknown";
+                releaseDate = "9999";
             }
 
             title = creditJson.getString(CREDIT_TITLE);

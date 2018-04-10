@@ -16,6 +16,12 @@ import com.future.bestmovies.utils.ImageUtils;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
 public class CreditsAdapter extends RecyclerView.Adapter<CreditsAdapter.CreditsViewHolder> {
     private final Context mContext;
@@ -53,10 +59,8 @@ public class CreditsAdapter extends RecyclerView.Adapter<CreditsAdapter.CreditsV
         holder.creditTitleTextView.setText(mCredits.get(position).getTitle());
 
         String releaseYear;
-        if (mCredits.get(position).getReleaseDate().length() > 4 && !TextUtils.equals(
-                mCredits.get(position).getReleaseDate(),
-                mContext.getText(R.string.credit_date_unknown))) {
-            releaseYear = mCredits.get(position).getReleaseDate().substring(0, 4);
+        if (!mCredits.get(position).getReleaseDate().equals("9999")) {
+            releaseYear = mCredits.get(position).getReleaseDate();
         } else {
             releaseYear = mContext.getText(R.string.credit_date_unknown).toString();
         }
@@ -74,22 +78,26 @@ public class CreditsAdapter extends RecyclerView.Adapter<CreditsAdapter.CreditsV
     }
 
     public void swapCredits(ArrayList<Credits> newCredits) {
+        Collections.sort(newCredits, new Comparator<Credits>() {
+            @Override
+            public int compare(Credits o1, Credits o2) {
+                return o1.getReleaseDate().compareTo(o2.getReleaseDate());
+            }
+        });
+
         mCredits = newCredits;
         notifyDataSetChanged();
     }
 
     class CreditsViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        final ImageView creditPosterImageView;
-        final TextView creditTitleTextView;
-        final TextView creditReleaseDateTextView;
-        final TextView creditCharacterTextView;
+        @BindView(R.id.credit_poster_iv) ImageView creditPosterImageView;
+        @BindView(R.id.credit_title_tv) TextView creditTitleTextView;
+        @BindView(R.id.credit_release_date_tv) TextView creditReleaseDateTextView;
+        @BindView(R.id.credit_character_tv) TextView creditCharacterTextView;
 
         CreditsViewHolder(View itemView) {
             super(itemView);
-            creditPosterImageView = itemView.findViewById(R.id.credit_poster_iv);
-            creditTitleTextView = itemView.findViewById(R.id.credit_title_tv);
-            creditReleaseDateTextView = itemView.findViewById(R.id.credit_release_date_tv);
-            creditCharacterTextView = itemView.findViewById(R.id.credit_character_tv);
+            ButterKnife.bind(this, itemView);
             itemView.setOnClickListener(this);
         }
 

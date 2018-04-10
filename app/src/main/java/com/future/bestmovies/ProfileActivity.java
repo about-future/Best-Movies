@@ -1,22 +1,17 @@
 package com.future.bestmovies;
 
 import android.content.Intent;
-import android.os.PersistableBundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.Loader;
 import android.support.v4.graphics.drawable.DrawableCompat;
-import android.support.v4.util.TimeUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.text.TextUtils;
-import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -27,20 +22,21 @@ import android.widget.Toast;
 
 import com.future.bestmovies.data.Actor;
 import com.future.bestmovies.data.ActorLoader;
-import com.future.bestmovies.data.Cast;
-import com.future.bestmovies.data.CastLoader;
 import com.future.bestmovies.data.Credits;
 import com.future.bestmovies.data.CreditsAdapter;
 import com.future.bestmovies.data.CreditsLoader;
-import com.future.bestmovies.data.MovieCategoryAdapter;
 import com.future.bestmovies.utils.ImageUtils;
 import com.future.bestmovies.utils.NetworkUtils;
 import com.future.bestmovies.utils.ScreenUtils;
 import com.squareup.picasso.Picasso;
 
-import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
 import static com.future.bestmovies.DetailsActivity.*;
 
@@ -52,6 +48,18 @@ public class ProfileActivity extends AppCompatActivity implements CreditsAdapter
     public static final String ACTOR_DETAILS_KEY = "actor";
     private static final String MOVIE_CREDITS_KEY = "movie_credits";
 
+    @BindView(R.id.profile_toolbar) Toolbar toolbar;
+
+    // Profile detail variables
+    @BindView(R.id.profile_backdrop_iv) ImageView profileBackdropImageView;
+    @BindView(R.id.actor_age_tv) TextView ageTextView;
+    @BindView(R.id.credit_actor_iv) ImageView profilePictureImageView;
+    @BindView(R.id.credit_gender_tv) TextView genderTextView;
+    @BindView(R.id.credit_birthday_tv) TextView birthdayTextView;
+    @BindView(R.id.credit_place_of_birth_tv) TextView birthPlaceTextView;
+    @BindView(R.id.credit_biography_tv) TextView biographyTextView;
+
+    @BindView(R.id.credits_rv) RecyclerView mCreditsRecyclerView;
     private Actor mActor;
     private ArrayList<Credits> mCredits;
     private int mActorId;
@@ -59,21 +67,14 @@ public class ProfileActivity extends AppCompatActivity implements CreditsAdapter
     private String mBackdropPath;
     private boolean mIsFavouriteActor;
     private Toast mToast;
-    private ImageView profileBackdropImageView;
-    private TextView ageTextView;
-    private ImageView profilePictureImageView;
-    private TextView genderTextView;
-    private TextView birthdayTextView;
-    private TextView birthPlaceTextView;
-    private TextView biographyTextView;
     private CreditsAdapter mCreditsAdapter;
-    private RecyclerView mCreditsRecyclerView;
     private GridLayoutManager mCreditsLayoutManager;
 
-    private TextView mCreditsMessagesTextView;
-    private ProgressBar mCreditsProgressBar;
-    private ImageView mNoCreditsImageView;
-    private ImageView mNoCreditsConnectionImageView;
+    // Movie credits variables
+    @BindView(R.id.credits_messages_tv) TextView mCreditsMessagesTextView;
+    @BindView(R.id.loading_credits_pb) ProgressBar mCreditsProgressBar;
+    @BindView(R.id.no_credits_iv) ImageView mNoCreditsImageView;
+    @BindView(R.id.no_credits_connection_iv) ImageView mNoCreditsConnectionImageView;
 
     private MenuItem mFavouriteActorMenuItem;
 
@@ -81,22 +82,13 @@ public class ProfileActivity extends AppCompatActivity implements CreditsAdapter
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
+        ButterKnife.bind(this);
 
-        Toolbar toolbar = findViewById(R.id.profile_toolbar);
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
 
-        profileBackdropImageView = findViewById(R.id.profile_backdrop_iv);
-        ageTextView = findViewById(R.id.actor_age_tv);
-        profilePictureImageView = findViewById(R.id.credit_actor_iv);
-        genderTextView = findViewById(R.id.credit_gender_tv);
-        birthdayTextView = findViewById(R.id.credit_birthday_tv);
-        birthPlaceTextView = findViewById(R.id.credit_place_of_birth_tv);
-        biographyTextView = findViewById(R.id.credit_biography_tv);
-
-        mCreditsRecyclerView = findViewById(R.id.credits_rv);
         mCreditsLayoutManager = new GridLayoutManager(
                 this,
                 ScreenUtils.getNumberOfColumns(this, 120, 3));
@@ -106,11 +98,7 @@ public class ProfileActivity extends AppCompatActivity implements CreditsAdapter
         mCreditsRecyclerView.setAdapter(mCreditsAdapter);
         mCreditsRecyclerView.setNestedScrollingEnabled(false);
 
-        mCreditsMessagesTextView = findViewById(R.id.credits_messages_tv);
         mCreditsMessagesTextView.setText(R.string.loading);
-        mCreditsProgressBar = findViewById(R.id.loading_credits_pb);
-        mNoCreditsImageView = findViewById(R.id.no_credits_iv);
-        mNoCreditsConnectionImageView = findViewById(R.id.no_credits_connection_iv);
 
         if (savedInstanceState == null) {
             // Check our intent and see if there is an actor ID passed from DetailsActivity, so we
@@ -214,8 +202,10 @@ public class ProfileActivity extends AppCompatActivity implements CreditsAdapter
         if (id == R.id.action_favourite_actor) {
             if (!mIsFavouriteActor) {
                 DrawableCompat.setTint(item.getIcon(), ContextCompat.getColor(getApplicationContext(), R.color.colorAccent));
+                toastThis(getString(R.string.favourite_actor_insert_successful));
             } else {
                 DrawableCompat.setTint(item.getIcon(), ContextCompat.getColor(getApplicationContext(), R.color.colorWhite));
+                toastThis(getString(R.string.favourite_actor_delete_successful));
             }
 
             mIsFavouriteActor = !mIsFavouriteActor;

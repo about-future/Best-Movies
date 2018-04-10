@@ -81,7 +81,7 @@ public class CreditsAdapter extends RecyclerView.Adapter<CreditsAdapter.CreditsV
         Collections.sort(newCredits, new Comparator<Credits>() {
             @Override
             public int compare(Credits o1, Credits o2) {
-                return o1.getReleaseDate().compareTo(o2.getReleaseDate());
+                return o2.getReleaseDate().compareTo(o1.getReleaseDate());
             }
         });
 

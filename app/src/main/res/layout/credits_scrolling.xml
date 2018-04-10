@@ -102,6 +102,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
+                android:layout_marginBottom="@dimen/details_vertical_spacing"
                 android:layout_marginTop="@dimen/message_top_margin"
                 android:fontFamily="sans-serif-condensed"
                 android:gravity="center"

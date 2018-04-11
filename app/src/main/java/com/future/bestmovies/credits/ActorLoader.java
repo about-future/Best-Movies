@@ -1,4 +1,4 @@
-package com.future.bestmovies.data;
+package com.future.bestmovies.credits;
 
 
 import android.content.Context;
@@ -6,12 +6,11 @@ import android.support.v4.content.AsyncTaskLoader;
 
 import com.future.bestmovies.utils.NetworkUtils;
 
-import java.util.ArrayList;
 
-public class CreditsLoader  extends AsyncTaskLoader<ArrayList<Credits>> {
+public class ActorLoader extends AsyncTaskLoader<Actor> {
     private final int actorId;
 
-    public CreditsLoader(Context context, int actorId) {
+    public ActorLoader(Context context, int actorId) {
         super(context);
         this.actorId = actorId;
     }
@@ -22,7 +21,7 @@ public class CreditsLoader  extends AsyncTaskLoader<ArrayList<Credits>> {
     }
 
     @Override
-    public ArrayList<Credits> loadInBackground() {
-        return NetworkUtils.fetchActorCredits(actorId);
+    public Actor loadInBackground() {
+        return NetworkUtils.fetchActorDetails(actorId);
     }
 }

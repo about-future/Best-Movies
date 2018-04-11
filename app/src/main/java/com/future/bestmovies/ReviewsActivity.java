@@ -1,28 +1,17 @@
 package com.future.bestmovies;
 
-import android.app.LoaderManager;
 import android.content.Intent;
-import android.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.text.TextUtils;
-import android.util.Log;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import com.future.bestmovies.data.CastAdapter;
-import com.future.bestmovies.data.Movie;
-import com.future.bestmovies.data.Review;
-import com.future.bestmovies.data.ReviewAdapter;
-import com.future.bestmovies.data.ReviewLoader;
+import com.future.bestmovies.reviews.Review;
+import com.future.bestmovies.reviews.ReviewAdapter;
 import com.future.bestmovies.utils.ImageUtils;
 import com.squareup.picasso.Picasso;
 
@@ -89,7 +78,7 @@ public class ReviewsActivity extends AppCompatActivity {
                 if (intent.hasExtra(MOVIE_BACKDROP_KEY)) {
                     mMovieBackdrop = intent.getStringExtra(MOVIE_BACKDROP_KEY);
                     // Set the backdrop for the movie reviews
-                    Picasso.with(this)
+                    Picasso.get()
                             .load(ImageUtils.buildImageUrl(
                                     this,
                                     mMovieBackdrop,
@@ -153,11 +142,12 @@ public class ReviewsActivity extends AppCompatActivity {
         // Restore the backdrop for the movie reviews
         if (savedInstanceState.containsKey(MOVIE_BACKDROP_KEY)) {
             mMovieBackdrop = savedInstanceState.getString(MOVIE_BACKDROP_KEY);
-            Picasso.with(this)
+            Picasso.get()
                     .load(ImageUtils.buildImageUrl(
                             this,
                             mMovieBackdrop,
                             ImageUtils.BACKDROP))
+                    .error(R.drawable.ic_landscape)
                     .into(movieBackdropImageView);
         }
 

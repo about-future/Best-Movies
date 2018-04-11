@@ -27,17 +27,17 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.future.bestmovies.data.Cast;
-import com.future.bestmovies.data.CastAdapter;
-import com.future.bestmovies.data.CastLoader;
+import com.future.bestmovies.cast.Cast;
+import com.future.bestmovies.cast.CastAdapter;
+import com.future.bestmovies.cast.CastLoader;
 import com.future.bestmovies.data.FavouritesContract;
-import com.future.bestmovies.data.MovieDetails;
-import com.future.bestmovies.data.MovieDetailsLoader;
-import com.future.bestmovies.data.Review;
-import com.future.bestmovies.data.ReviewLoader;
-import com.future.bestmovies.data.Video;
-import com.future.bestmovies.data.VideoAdapter;
-import com.future.bestmovies.data.VideoLoader;
+import com.future.bestmovies.movie.MovieDetails;
+import com.future.bestmovies.movie.MovieDetailsLoader;
+import com.future.bestmovies.reviews.Review;
+import com.future.bestmovies.reviews.ReviewLoader;
+import com.future.bestmovies.videos.Video;
+import com.future.bestmovies.videos.VideoAdapter;
+import com.future.bestmovies.videos.VideoLoader;
 import com.future.bestmovies.utils.ImageUtils;
 import com.future.bestmovies.utils.NetworkUtils;
 import com.squareup.picasso.Callback;
@@ -46,7 +46,6 @@ import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
-import butterknife.BindColor;
 import butterknife.BindString;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -127,43 +126,67 @@ public class DetailsActivity extends AppCompatActivity implements
     private int mMovieId;
     private MovieDetails mSelectedMovie;
 
-    @BindView(R.id.toolbar) Toolbar toolbar;
+    @BindView(R.id.toolbar)
+    Toolbar toolbar;
 
     // Movie details variables
-    @BindView(R.id.details_backdrop_iv) ImageView mMovieBackdropImageView;
-    @BindView(R.id.details_poster_iv) ImageView mMoviePosterImageView;
-    @BindView(R.id.poster_error_tv) TextView posterErrorTextView;
-    @BindView(R.id.details_genre_tv) TextView mMovieGenreTextView;
-    @BindView(R.id.details_rating_tv) TextView mMovieRatingTextView;
-    @BindView(R.id.details_release_date_tv) TextView mMovieReleaseDateTextView;
-    @BindView(R.id.details_plot_tv) TextView mMoviePlotTextView;
-    @BindView(R.id.details_runtime_tv) TextView mMovieRuntimeTextView;
+    @BindView(R.id.details_backdrop_iv)
+    ImageView mMovieBackdropImageView;
+    @BindView(R.id.details_poster_iv)
+    ImageView mMoviePosterImageView;
+    @BindView(R.id.poster_error_tv)
+    TextView posterErrorTextView;
+    @BindView(R.id.details_genre_tv)
+    TextView mMovieGenreTextView;
+    @BindView(R.id.details_rating_tv)
+    TextView mMovieRatingTextView;
+    @BindView(R.id.details_release_date_tv)
+    TextView mMovieReleaseDateTextView;
+    @BindView(R.id.details_plot_tv)
+    TextView mMoviePlotTextView;
+    @BindView(R.id.details_runtime_tv)
+    TextView mMovieRuntimeTextView;
 
     // Cast variables
-    @BindView(R.id.cast_rv) RecyclerView mCastRecyclerView;
-    @BindView(R.id.loading_cast_pb) ProgressBar mCastProgressBar;
-    @BindView(R.id.no_cast_iv) ImageView mNoCastImageView;
-    @BindView(R.id.cast_messages_tv) TextView mCastMessagesTextView;
+    @BindView(R.id.cast_rv)
+    RecyclerView mCastRecyclerView;
+    @BindView(R.id.loading_cast_pb)
+    ProgressBar mCastProgressBar;
+    @BindView(R.id.no_cast_iv)
+    ImageView mNoCastImageView;
+    @BindView(R.id.cast_messages_tv)
+    TextView mCastMessagesTextView;
     private ArrayList<Cast> mCast;
     private int mCastPosition = RecyclerView.NO_POSITION;
     private LinearLayoutManager mCastLayoutManager;
     private CastAdapter mCastAdapter;
 
     // Reviews variables
-    @BindView(R.id.first_review_layout) ConstraintLayout mFirstReviewLayout;
-    @BindView(R.id.first_review_author_tv) TextView mFirstReviewAuthorTextView;
-    @BindView(R.id.first_review_content_tv) TextView mFirstReviewContentTextView;
-    @BindView(R.id.loading_first_review_pb) ProgressBar mFirstReviewProgressBar;
-    @BindView(R.id.no_reviews_iv) ImageView mNoReviewsImageView;
-    @BindView(R.id.first_review_messages_tv) TextView mFirstReviewMessagesTextView;
-    @BindView(R.id.see_all_reviews_tv) TextView mSeeAllReviewsTextView;
+    @BindView(R.id.first_review_layout)
+    ConstraintLayout mFirstReviewLayout;
+    @BindView(R.id.first_review_author_tv)
+    TextView mFirstReviewAuthorTextView;
+    @BindView(R.id.first_review_content_tv)
+    TextView mFirstReviewContentTextView;
+    @BindView(R.id.loading_first_review_pb)
+    ProgressBar mFirstReviewProgressBar;
+    @BindView(R.id.no_reviews_iv)
+    ImageView mNoReviewsImageView;
+    @BindView(R.id.first_review_messages_tv)
+    TextView mFirstReviewMessagesTextView;
+    @BindView(R.id.see_all_reviews_tv)
+    TextView mSeeAllReviewsTextView;
     private ArrayList<Review> mReviews;
 
     // Videos variables
-    @BindView(R.id.videos_rv) RecyclerView mVideosRecyclerView;
-    @BindView(R.id.loading_videos_pb) ProgressBar mVideosProgressBar;
-    @BindView(R.id.no_videos_iv) ImageView mNoVideosImageView;
-    @BindView(R.id.videos_messages_tv) TextView mVideosMessagesTextView;
+    @BindView(R.id.videos_rv)
+    RecyclerView mVideosRecyclerView;
+    @BindView(R.id.loading_videos_pb)
+    ProgressBar mVideosProgressBar;
+    @BindView(R.id.no_videos_iv)
+    ImageView mNoVideosImageView;
+    @BindView(R.id.videos_messages_tv)
+    TextView mVideosMessagesTextView;
     private ArrayList<Video> mVideos;
     private int mVideosPosition = RecyclerView.NO_POSITION;
     private LinearLayoutManager mVideosLayoutManager;
@@ -174,14 +197,22 @@ public class DetailsActivity extends AppCompatActivity implements
     private Toast mToast;
 
     // Resources
-    @BindString(R.string.no_connection) String noConnection;
-    @BindString(R.string.no_poster) String noPoster;
-    @BindString(R.string.loading) String loadingMsg;
-    @BindString(R.string.details_error_message) String errorMsg;
-    @BindString(R.string.favourite_movie_insert_successful) String insertSuccessfulMsg;
-    @BindString(R.string.favourite_movie_insert_failed) String insertFailedMsg;
-    @BindString(R.string.favourite_movie_delete_successful) String deleteSuccessfulMsg;
-    @BindString(R.string.favourite_movie_delete_failed) String deleteFailedMsg;
+    @BindString(R.string.no_connection)
+    String noConnection;
+    @BindString(R.string.no_poster)
+    String noPoster;
+    @BindString(R.string.loading)
+    String loadingMsg;
+    @BindString(R.string.details_error_message)
+    String errorMsg;
+    @BindString(R.string.favourite_movie_insert_successful)
+    String insertSuccessfulMsg;
+    @BindString(R.string.favourite_movie_insert_failed)
+    String insertFailedMsg;
+    @BindString(R.string.favourite_movie_delete_successful)
+    String deleteSuccessfulMsg;
+    @BindString(R.string.favourite_movie_delete_failed)
+    String deleteFailedMsg;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -548,7 +579,8 @@ public class DetailsActivity extends AppCompatActivity implements
 
                 @Override
                 public void onLoaderReset(Loader<ArrayList<Cast>> loader) {
-                    mCastAdapter.swapCast(new ArrayList<Cast>() {});
+                    mCastAdapter.swapCast(new ArrayList<Cast>() {
+                    });
                 }
             };
 
@@ -602,7 +634,8 @@ public class DetailsActivity extends AppCompatActivity implements
 
                 @Override
                 public void onLoaderReset(Loader<ArrayList<Video>> loader) {
-                    mVideosAdapter.swapVideos(new ArrayList<Video>() {});
+                    mVideosAdapter.swapVideos(new ArrayList<Video>() {
+                    });
                 }
             };
 
@@ -864,7 +897,7 @@ public class DetailsActivity extends AppCompatActivity implements
 
     private void populateMovieDetails(MovieDetails movieDetails) {
         // BACKDROP
-        Picasso.with(getApplicationContext())
+        Picasso.get()
                 .load(ImageUtils.buildImageUrl(
                         getApplicationContext(),
                         movieDetails.getBackdropPath(),
@@ -876,11 +909,17 @@ public class DetailsActivity extends AppCompatActivity implements
         setTitle(movieDetails.getMovieTitle());
 
         // GENRE (generate and set movie genres)
-        mMovieGenreTextView.setText(TextUtils.join(", ", movieDetails.getGenreIds()));
+        mMovieGenreTextView.setText(TextUtils.join(", ", movieDetails.getGenres()));
+
+//        for (int i = 0; i < movieDetails.getGenresList().size(); i++ )
+//            genres[i] = movieDetails.getGenresList().get(i).getName();
+//        mMovieGenreTextView.setText(TextUtils.join(", ", genres));
+
+
         // POSTER
         // Fetch the movie poster, if it's available. If no poster is available or if no internet
         // connection, poster error message will be used
-        Picasso.with(this)
+        Picasso.get()
                 .load(ImageUtils.buildImageUrl(
                         this,
                         movieDetails.getPosterPath(),
@@ -894,7 +933,7 @@ public class DetailsActivity extends AppCompatActivity implements
                     }
 
                     @Override
-                    public void onError() {
+                    public void onError(Exception e) {
                         posterErrorTextView.setVisibility(View.VISIBLE);
                         // If there isn't a network connection, we show a "no connection" message
                         if (!NetworkUtils.isConnected(getApplicationContext())) {
@@ -997,7 +1036,7 @@ public class DetailsActivity extends AppCompatActivity implements
         ContentValues movieValues = new ContentValues();
         movieValues.put(MovieDetailsEntry.COLUMN_MOVIE_ID, selectedMovie.getMovieId());
         movieValues.put(MovieDetailsEntry.COLUMN_BACKDROP_PATH, selectedMovie.getBackdropPath());
-        movieValues.put(MovieDetailsEntry.COLUMN_GENRES, TextUtils.join(", ", selectedMovie.getGenreIds()));
+        movieValues.put(MovieDetailsEntry.COLUMN_GENRES, TextUtils.join(", ", selectedMovie.getGenres()));
         movieValues.put(MovieDetailsEntry.COLUMN_LANGUAGE, selectedMovie.getLanguage());
         movieValues.put(MovieDetailsEntry.COLUMN_PLOT, selectedMovie.getOverview());
         movieValues.put(MovieDetailsEntry.COLUMN_POSTER_PATH, selectedMovie.getPosterPath());

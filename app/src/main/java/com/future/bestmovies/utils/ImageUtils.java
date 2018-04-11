@@ -1,7 +1,9 @@
 package com.future.bestmovies.utils;
 
 import android.content.Context;
-import com.future.bestmovies.data.MoviePreferences;
+import android.util.Log;
+
+import com.future.bestmovies.movie.MoviePreferences;
 
 
 public class ImageUtils {
@@ -40,7 +42,12 @@ public class ImageUtils {
         // Get the image width, so we can build our image URL (i.e. 500 or 342 or 185)
         int imageWidth = MoviePreferences.getImageWidthForRecyclerView(context);
         // Create the image URL and return it
-        return IMAGES_BASE_URL.concat(String.valueOf(imageWidth)).concat(imagePath);
+        try {
+            return IMAGES_BASE_URL.concat(String.valueOf(imageWidth)).concat(imagePath);
+        } catch (NullPointerException e) {
+            Log.v("BuildImageUrl", "Error: " + e.toString());
+            return "";
+        }
     }
 
     /* Return the image width for backdrop, poster or cast (i.e. 780, 342 or 185)

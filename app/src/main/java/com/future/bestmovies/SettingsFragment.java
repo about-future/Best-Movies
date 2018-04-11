@@ -8,8 +8,7 @@ import android.support.v7.preference.Preference;
 import android.support.v7.preference.PreferenceFragmentCompat;
 import android.support.v7.preference.PreferenceScreen;
 
-import com.future.bestmovies.data.FavouritesContract;
-import com.future.bestmovies.data.MoviePreferences;
+import com.future.bestmovies.movie.MoviePreferences;
 import com.future.bestmovies.utils.ImageUtils;
 
 

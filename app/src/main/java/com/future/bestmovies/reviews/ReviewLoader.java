@@ -1,15 +1,17 @@
-package com.future.bestmovies.data;
+package com.future.bestmovies.reviews;
 
 import android.content.AsyncTaskLoader;
 import android.content.Context;
+
 import com.future.bestmovies.utils.NetworkUtils;
+
 import java.util.ArrayList;
 
 
-public class CastLoader extends AsyncTaskLoader<ArrayList<Cast>> {
+public class ReviewLoader extends AsyncTaskLoader<ArrayList<Review>> {
     private final int movieId;
 
-    public CastLoader(Context context, int movieId) {
+    public ReviewLoader(Context context, int movieId) {
         super(context);
         this.movieId = movieId;
     }
@@ -20,7 +22,7 @@ public class CastLoader extends AsyncTaskLoader<ArrayList<Cast>> {
     }
 
     @Override
-    public ArrayList<Cast> loadInBackground() {
-        return NetworkUtils.fetchMovieCast(movieId);
+    public ArrayList<Review> loadInBackground() {
+        return NetworkUtils.fetchMovieReviews(movieId);
     }
 }

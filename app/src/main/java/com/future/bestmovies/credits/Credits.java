@@ -1,4 +1,4 @@
-package com.future.bestmovies.data;
+package com.future.bestmovies.credits;
 
 import android.os.Parcel;
 import android.os.Parcelable;

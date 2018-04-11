@@ -5,9 +5,6 @@ import android.content.res.Configuration;
 import android.util.DisplayMetrics;
 import android.view.WindowManager;
 
-import com.future.bestmovies.R;
-import com.future.bestmovies.data.MoviePreferences;
-
 
 public class ScreenUtils {
 

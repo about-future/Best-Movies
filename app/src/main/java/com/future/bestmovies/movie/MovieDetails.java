@@ -1,21 +1,37 @@
-package com.future.bestmovies.data;
+package com.future.bestmovies.movie;
 
 import android.os.Parcel;
 import android.os.Parcelable;
 
-public class MovieDetails implements Parcelable {
-    private int id;
-    private double voteAverage;
-    private String title;
-    private String posterPath;
-    private String backdropPath;
-    private String overview;
-    private String releaseDate;
-    private String[] genreIds;
-    private String language;
-    private int runtime;
+import com.google.gson.annotations.SerializedName;
 
-    public MovieDetails(String backdropPath, String[] genreIds, int id, String language,
+import java.util.ArrayList;
+import java.util.List;
+
+public class MovieDetails implements Parcelable {
+    @SerializedName("backdrop_path")
+    private String backdropPath;
+    @SerializedName("genres")
+    private List<MovieGenre> genres;
+    private String[] genreArray;
+    @SerializedName("id")
+    private int id;
+    @SerializedName("original_language")
+    private String language;
+    @SerializedName("overview")
+    private String overview;
+    @SerializedName("poster_path")
+    private String posterPath;
+    @SerializedName("vote_average")
+    private double voteAverage;
+    @SerializedName("release_date")
+    private String releaseDate;
+    @SerializedName("runtime")
+    private int runtime;
+    @SerializedName("original_title")
+    private String title;
+
+    public MovieDetails(String backdropPath, String[] genreArray, int id, String language,
                         String overview, String posterPath, double voteAverage,
                         String releaseDate, int runtime, String title) {
         this.id = id;
@@ -25,9 +41,13 @@ public class MovieDetails implements Parcelable {
         this.backdropPath = backdropPath;
         this.overview = overview;
         this.releaseDate = releaseDate;
-        this.genreIds = genreIds;
+        this.genreArray = genreArray;
         this.language = language;
         this.runtime = runtime;
+    }
+
+    public MovieDetails() {
+
     }
 
     private MovieDetails(Parcel in) {
@@ -38,7 +58,9 @@ public class MovieDetails implements Parcelable {
         backdropPath = in.readString();
         overview = in.readString();
         releaseDate = in.readString();
-        genreIds = in.createStringArray();
+        //genres = in.createStringArray();
+        genres = new ArrayList<>();
+        in.readList(genres, MovieGenre.class.getClassLoader());
         language = in.readString();
         runtime = in.readInt();
     }
@@ -52,7 +74,8 @@ public class MovieDetails implements Parcelable {
         parcel.writeString(backdropPath);
         parcel.writeString(overview);
         parcel.writeString(releaseDate);
-        parcel.writeStringArray(genreIds);
+        //parcel.writeStringArray(genres);
+        parcel.writeList(genres);
         parcel.writeString(language);
         parcel.writeInt(runtime);
     }
@@ -79,7 +102,17 @@ public class MovieDetails implements Parcelable {
     public String getBackdropPath() { return backdropPath; }
     public String getOverview() { return overview; }
     public String getReleaseDate() { return releaseDate; }
-    public String[] getGenreIds() { return genreIds; }
+    public String[] getGenres() {
+        if (genres == null) {
+            return genreArray;
+        } else {
+            genreArray = new String[genres.size()];
+            for (int i = 0; i < genres.size(); i++ )
+                genreArray[i] = genres.get(i).getName();
+
+            return genreArray;
+        }
+    }
     public String getLanguage() { return language; }
     public int getRuntime() { return runtime; }
 }

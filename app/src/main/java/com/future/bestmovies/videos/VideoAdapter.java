@@ -1,10 +1,9 @@
-package com.future.bestmovies.data;
+package com.future.bestmovies.videos;
 
 
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -44,7 +43,7 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
 
     @Override
     public void onBindViewHolder(@NonNull VideoAdapter.VideoViewHolder holder, int position) {
-        Picasso.with(mContext)
+        Picasso.get()
                 .load(ImageUtils.buildVideoThumbnailUrl(
                         mContext,
                         mVideos.get(position).getVideoKey()))

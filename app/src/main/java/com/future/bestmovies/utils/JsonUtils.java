@@ -4,16 +4,15 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.future.bestmovies.data.Actor;
-import com.future.bestmovies.data.Credits;
-import com.future.bestmovies.data.Movie;
-import com.future.bestmovies.data.Cast;
-import com.future.bestmovies.data.MovieDetails;
-import com.future.bestmovies.data.Review;
-import com.future.bestmovies.data.Video;
+import com.future.bestmovies.credits.Actor;
+import com.future.bestmovies.credits.Credits;
+import com.future.bestmovies.movie.Movie;
+import com.future.bestmovies.cast.Cast;
+import com.future.bestmovies.movie.MovieDetails;
+import com.future.bestmovies.reviews.Review;
+import com.future.bestmovies.videos.Video;
 
 import java.util.ArrayList;
-import java.util.List;
 
 
 public class JsonUtils {

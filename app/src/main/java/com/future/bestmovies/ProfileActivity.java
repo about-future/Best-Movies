@@ -20,11 +20,11 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.future.bestmovies.data.Actor;
-import com.future.bestmovies.data.ActorLoader;
-import com.future.bestmovies.data.Credits;
-import com.future.bestmovies.data.CreditsAdapter;
-import com.future.bestmovies.data.CreditsLoader;
+import com.future.bestmovies.credits.Actor;
+import com.future.bestmovies.credits.ActorLoader;
+import com.future.bestmovies.credits.Credits;
+import com.future.bestmovies.credits.CreditsAdapter;
+import com.future.bestmovies.credits.CreditsLoader;
 import com.future.bestmovies.utils.ImageUtils;
 import com.future.bestmovies.utils.NetworkUtils;
 import com.future.bestmovies.utils.ScreenUtils;
@@ -32,8 +32,6 @@ import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
-import java.util.Comparator;
 
 import butterknife.BindString;
 import butterknife.BindView;
@@ -116,7 +114,7 @@ public class ProfileActivity extends AppCompatActivity implements CreditsAdapter
                 setTitle(mActorName);
 
                 mBackdropPath = intent.getStringExtra(MOVIE_BACKDROP_KEY);
-                Picasso.with(this)
+                Picasso.get()
                         .load(ImageUtils.buildImageUrl(
                                 this,
                                 mBackdropPath,
@@ -154,7 +152,7 @@ public class ProfileActivity extends AppCompatActivity implements CreditsAdapter
         super.onRestoreInstanceState(savedInstanceState);
         if (savedInstanceState.containsKey(MOVIE_BACKDROP_KEY)) {
             mBackdropPath = savedInstanceState.getString(MOVIE_BACKDROP_KEY);
-            Picasso.with(this)
+            Picasso.get()
                     .load(ImageUtils.buildImageUrl(
                             this,
                             mBackdropPath,
@@ -304,7 +302,7 @@ public class ProfileActivity extends AppCompatActivity implements CreditsAdapter
 
     private void populateActorDetails(Actor actorDetails) {
         // Profile picture
-        Picasso.with(getApplicationContext())
+        Picasso.get()
                 .load(ImageUtils.buildImageUrl(
                         getApplicationContext(),
                         actorDetails.getProfilePath(),

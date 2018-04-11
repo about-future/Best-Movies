@@ -23,13 +23,15 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.future.bestmovies.data.Movie;
-import com.future.bestmovies.data.MovieCategoryAdapter;
-import com.future.bestmovies.data.MovieCategoryLoader;
-import com.future.bestmovies.data.MoviePreferences;
+import com.future.bestmovies.movie.Movie;
+import com.future.bestmovies.movie.MovieCategoryAdapter;
+import com.future.bestmovies.movie.MovieCategoryLoader;
+import com.future.bestmovies.movie.MoviePreferences;
 import com.future.bestmovies.utils.ImageUtils;
 import com.future.bestmovies.utils.NetworkUtils;
 import com.future.bestmovies.utils.ScreenUtils;
+import com.jakewharton.picasso.OkHttp3Downloader;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
@@ -84,6 +86,14 @@ public class MainActivity extends AppCompatActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
+
+//        Picasso.Builder builder = new Picasso.Builder(this);
+//        builder.downloader(new OkHttp3Downloader(this,Integer.MAX_VALUE));
+//        Picasso built = builder.build();
+//        built.setIndicatorsEnabled(true);
+//        built.setLoggingEnabled(true);
+//        //if (built == null)
+//            Picasso.setSingletonInstance(built);
 
         mLoading.setVisibility(View.VISIBLE);
         // The layout manager for our RecyclerView will be a GridLayout, so we can display our movies

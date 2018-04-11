@@ -1,4 +1,4 @@
-package com.future.bestmovies.data;
+package com.future.bestmovies.cast;
 
 
 import android.content.Context;
@@ -43,7 +43,7 @@ public class CastAdapter extends RecyclerView.Adapter<CastAdapter.CastViewHolder
 
     @Override
     public void onBindViewHolder(@NonNull final CastAdapter.CastViewHolder holder, int position) {
-        Picasso.with(mContext)
+        Picasso.get()
                 .load(ImageUtils.buildImageUrl(
                         mContext,
                         mCast.get(position).getProfilePath(),

@@ -1,12 +1,17 @@
-package com.future.bestmovies.data;
+package com.future.bestmovies.movie;
 
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.google.gson.annotations.SerializedName;
+
 
 public class Movie implements Parcelable {
+    @SerializedName("id")
     private int id;
+    @SerializedName("title")
     private String title;
+    @SerializedName("poster_path")
     private String posterPath;
 
     public Movie(int id, String posterPath, String title) {

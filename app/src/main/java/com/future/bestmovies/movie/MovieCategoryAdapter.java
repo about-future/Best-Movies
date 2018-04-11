@@ -1,4 +1,4 @@
-package com.future.bestmovies.data;
+package com.future.bestmovies.movie;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -8,11 +8,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 import com.future.bestmovies.R;
 import com.future.bestmovies.data.FavouritesContract.MovieDetailsEntry;
 import com.future.bestmovies.utils.ImageUtils;
+import com.squareup.picasso.Callback;
+import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -45,8 +46,8 @@ public class MovieCategoryAdapter extends RecyclerView.Adapter<MovieCategoryAdap
     }
 
     @Override
-    public void onBindViewHolder(@NonNull MovieViewHolder holder, int position) {
-        String posterPath;
+    public void onBindViewHolder(@NonNull final MovieViewHolder holder, int position) {
+        final String posterPath;
         if (mMovies != null && mMoviesCursor == null) {
             posterPath = mMovies.get(position).getPosterPath();
         } else {
@@ -54,12 +55,29 @@ public class MovieCategoryAdapter extends RecyclerView.Adapter<MovieCategoryAdap
             int posterColumnIndex = mMoviesCursor.getColumnIndex(MovieDetailsEntry.COLUMN_POSTER_PATH);
             posterPath = mMoviesCursor.getString(posterColumnIndex);
         }
-        Picasso.with(mContext)
+        // TODO: correct image loading when offline
+        Picasso.get()
                 .load(ImageUtils.buildImageUrlForRecyclerView(
                         mContext,
                         posterPath))
-                .error(R.drawable.no_poster)
-                .into(holder.moviePosterImageView);
+                .networkPolicy(NetworkPolicy.OFFLINE)
+                .into(holder.moviePosterImageView, new Callback() {
+                    @Override
+                    public void onSuccess() {
+                        // Celebrate: Yay!!!
+                    }
+
+                    @Override
+                    public void onError(Exception e) {
+                        // Try again online if cache failed
+                        Picasso.get()
+                                .load(ImageUtils.buildImageUrlForRecyclerView(
+                                        mContext,
+                                        posterPath))
+                                .error(R.drawable.no_poster)
+                                .into(holder.moviePosterImageView);
+                    }
+                });
     }
 
     @Override

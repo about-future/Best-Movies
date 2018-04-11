@@ -6,14 +6,14 @@ import android.net.NetworkInfo;
 import android.net.Uri;
 import android.util.Log;
 
-import com.future.bestmovies.data.Actor;
-import com.future.bestmovies.data.Credits;
-import com.future.bestmovies.data.Movie;
-import com.future.bestmovies.data.Cast;
-import com.future.bestmovies.data.MovieDetails;
-import com.future.bestmovies.data.MoviePreferences;
-import com.future.bestmovies.data.Review;
-import com.future.bestmovies.data.Video;
+import com.future.bestmovies.credits.Actor;
+import com.future.bestmovies.credits.Credits;
+import com.future.bestmovies.movie.Movie;
+import com.future.bestmovies.cast.Cast;
+import com.future.bestmovies.movie.MovieDetails;
+import com.future.bestmovies.movie.MoviePreferences;
+import com.future.bestmovies.reviews.Review;
+import com.future.bestmovies.videos.Video;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -34,7 +34,7 @@ public class NetworkUtils {
     private static final String PERSON = "person";
     private static final String MOVIE_CREDITS = "movie_credits";
     private static final String API_KEY = "api_key";
-    private static final String API_ID = "xxx";
+    public static final String API_ID = "xxx";
 
     private static final String YOUTUBE_VIDEO_BASE_URL = "https://www.youtube.com/watch";
     private static final String YOUTUBE_PARAMETER = "v";

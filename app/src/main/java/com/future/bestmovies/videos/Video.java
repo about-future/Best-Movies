@@ -1,4 +1,4 @@
-package com.future.bestmovies.data;
+package com.future.bestmovies.videos;
 
 
 import android.os.Parcel;

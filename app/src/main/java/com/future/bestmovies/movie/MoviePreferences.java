@@ -1,4 +1,4 @@
-package com.future.bestmovies.data;
+package com.future.bestmovies.movie;
 
 import android.content.Context;
 import android.content.SharedPreferences;

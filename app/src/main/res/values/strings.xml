@@ -37,6 +37,7 @@
     <string name="video_thumbnail">Video thumbnail</string>
     <string name="video_play">Play button</string>
     <string name="no_credits_icon">No cast icon</string>
+    <string name="share_video_icon">Share video trailer icon</string>
 
     <!-- Activity Labels -->
     <string name="original_title_label">Original Title</string>
@@ -59,6 +60,7 @@
     <string name="credit_age">Age:\ </string>
     <string name="credit_date_unknown">Unknown</string>
 
+    <!-- TODO 2: What is the correct format for this? Never got it right! -->
     <string name="format_runtime">
         <xliff:g id="hours">%1$1.0f</xliff:g>h
         <xliff:g id="minutes">%2$2.0f</xliff:g>m
@@ -141,5 +143,10 @@
 
     <!-- Database -->
     <string name="content_authority">com.future.bestmovies</string>
+
+    <!-- Gender Types -->
+    <string name="gender_female">Female</string>
+    <string name="gender_male">Male</string>
+    <string name="gender_unknown">Unknown</string>
 
 </resources>

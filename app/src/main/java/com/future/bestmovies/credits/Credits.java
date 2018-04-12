@@ -3,12 +3,18 @@ package com.future.bestmovies.credits;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.google.gson.annotations.SerializedName;
+
 public class Credits implements Parcelable{
-    //private final String backdropPath;
+    @SerializedName("character")
     private final String character;
+    @SerializedName("id")
     private final int movieId;
+    @SerializedName("poster_path")
     private final String posterPath;
+    @SerializedName("release_date")
     private final String releaseDate;
+    @SerializedName("title")
     private final String title;
 
     public Credits (String character, int movieId, String posterPath, String releaseDate, String title) {

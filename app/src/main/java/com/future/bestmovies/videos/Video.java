@@ -4,20 +4,22 @@ package com.future.bestmovies.videos;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.google.gson.annotations.SerializedName;
+
 public class Video implements Parcelable{
-    private final int movieId;
+    @SerializedName("key")
     private final String key;
+    @SerializedName("name")
     private final String name;
+    @SerializedName("type")
     private final String type;
 
-    public Video(int movieId, String key, String name, String type) {
-        this.movieId = movieId;
+    public Video(String key, String name, String type) {
         this.key = key;
         this.name = name;
         this.type = type;
     }
 
-    public int getMovieId() { return movieId; }
     public String getVideoKey() {
         return key;
     }
@@ -35,14 +37,12 @@ public class Video implements Parcelable{
 
     @Override
     public void writeToParcel(Parcel parcel, int i) {
-        parcel.writeInt(movieId);
         parcel.writeString(key);
         parcel.writeString(name);
         parcel.writeString(type);
     }
 
     public Video (Parcel in) {
-        movieId = in.readInt();
         key = in.readString();
         name = in.readString();
         type = in.readString();

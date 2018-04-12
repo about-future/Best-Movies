@@ -30,7 +30,7 @@ import com.future.bestmovies.movie.MoviePreferences;
 import com.future.bestmovies.utils.ImageUtils;
 import com.future.bestmovies.utils.NetworkUtils;
 import com.future.bestmovies.utils.ScreenUtils;
-import com.jakewharton.picasso.OkHttp3Downloader;
+import com.squareup.picasso.OkHttp3Downloader;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -66,10 +66,14 @@ public class MainActivity extends AppCompatActivity implements
             MovieDetailsEntry.COLUMN_POSTER_PATH
     };
 
-    @BindView(R.id.movies_rv) RecyclerView mMoviesRecyclerView;
-    @BindView(R.id.messages_tv) TextView mMessagesTextView;
-    @BindView(R.id.no_connection_cloud_iv) ImageView mNoConnectionImageView;
-    @BindView(R.id.loading_pb) ProgressBar mLoading;
+    @BindView(R.id.movies_rv)
+    RecyclerView mMoviesRecyclerView;
+    @BindView(R.id.messages_tv)
+    TextView mMessagesTextView;
+    @BindView(R.id.no_connection_cloud_iv)
+    ImageView mNoConnectionImageView;
+    @BindView(R.id.loading_pb)
+    ProgressBar mLoading;
     private MovieCategoryAdapter mAdapter;
     private GridLayoutManager mGridLayoutManager;
     private int mPosition = RecyclerView.NO_POSITION;
@@ -88,12 +92,10 @@ public class MainActivity extends AppCompatActivity implements
         ButterKnife.bind(this);
 
 //        Picasso.Builder builder = new Picasso.Builder(this);
-//        builder.downloader(new OkHttp3Downloader(this,Integer.MAX_VALUE));
-//        Picasso built = builder.build();
-//        built.setIndicatorsEnabled(true);
-//        built.setLoggingEnabled(true);
-//        //if (built == null)
-//            Picasso.setSingletonInstance(built);
+//        builder.downloader(new OkHttp3Downloader(this, Integer.MAX_VALUE));
+//        Picasso picasso = builder.build();
+//        picasso.setIndicatorsEnabled(true);
+//        Picasso.setSingletonInstance(picasso);
 
         mLoading.setVisibility(View.VISIBLE);
         // The layout manager for our RecyclerView will be a GridLayout, so we can display our movies
@@ -110,8 +112,8 @@ public class MainActivity extends AppCompatActivity implements
         if (!MoviePreferences.isImageWidthAvailable(this)) {
             // Create an image width preference for our RecyclerView
             // This preference is very useful to our RecyclerView, so we can load all the images
-            // for the RecyclerView heaving the same width, perfect for the device we are using.
-            // We measure once and use it as many times we want.
+            // into it heaving the same width. The image width will be perfect(or almost perfect)
+            // for the device we are using. We measure once and use it as many times we want.
             MoviePreferences.setImageWidthForRecyclerView(
                     this,
                     ImageUtils.getImageWidth(this, ImageUtils.POSTER));
@@ -120,11 +122,37 @@ public class MainActivity extends AppCompatActivity implements
         // Every time we create this activity we set the page number of our results to be 0
         MoviePreferences.setLastPageNumber(this, 0);
 
-        // Check chosen category
+
         if (savedInstanceState == null) {
-            MoviePreferences.setPreferredQueryType(this, getString(R.string.category_popular));
-            setTitle(R.string.menu_popular);
-            mCurrentLoaderId = MOVIES_LOADER_ID;
+//            if (MoviePreferences.getPreferredQueryType(this) == null) {
+//            }
+
+            // Set current loader id and title, depending on preferred "query type" (aka: "movie category" or "sort order")
+            switch (MoviePreferences.getPreferredQueryType(this)) {
+                case CATEGORY_TOP_RATED:
+                    mCurrentLoaderId = MOVIES_LOADER_ID;
+                    setTitle(R.string.menu_top_rated);
+                    break;
+                case CATEGORY_UPCOMING:
+                    mCurrentLoaderId = MOVIES_LOADER_ID;
+                    setTitle(R.string.menu_upcoming);
+                    break;
+                case CATEGORY_NOW_PLAYING:
+                    mCurrentLoaderId = MOVIES_LOADER_ID;
+                    setTitle(R.string.menu_now_playing);
+                    break;
+                case CATEGORY_FAVOURITES:
+                    mCurrentLoaderId = FAVOURITES_LOADER_ID;
+                    setTitle(R.string.menu_favourites);
+                    break;
+                default:
+                    // If we run the app for the first time, no movie category was set as query
+                    // preference and no loader was initialized
+                    mCurrentLoaderId = MOVIES_LOADER_ID;
+                    setTitle(R.string.menu_popular);
+            }
+
+            // Fetch movie data, using the selected loader id
             fetchMovies(this);
         }
 
@@ -181,7 +209,8 @@ public class MainActivity extends AppCompatActivity implements
                 mCurrentLoaderId = savedInstanceState.getInt(CURRENT_LOADED_ID);
                 fetchMovies(this);
             }
-            if (savedInstanceState.containsKey(TITLE_KEY)) setTitle(savedInstanceState.getString(TITLE_KEY));
+            if (savedInstanceState.containsKey(TITLE_KEY))
+                setTitle(savedInstanceState.getString(TITLE_KEY));
         }
         super.onRestoreInstanceState(savedInstanceState);
     }
@@ -197,10 +226,10 @@ public class MainActivity extends AppCompatActivity implements
         }, 1000);
     }
 
-    // Fetch data if connection is available
+    // Fetch data or show connection error
     private void fetchMovies(Context context) {
         // If there is a network connection, fetch data
-        if (NetworkUtils.isConnected(context)) {
+        if (NetworkUtils.isConnected(context) && mCurrentLoaderId != FAVOURITES_LOADER_ID) {
             showMovies();
 
             // Before we fetch data, we need the last page number that was loaded in our RecyclerView,
@@ -209,9 +238,20 @@ public class MainActivity extends AppCompatActivity implements
             MoviePreferences.setLastPageNumber(context, nextPage);
             //Init or restart loader
             getSupportLoaderManager().restartLoader(mCurrentLoaderId, null, this);
-        } else {
-            // Otherwise, hide loading indicator, hide data and display connection error message
+        }
+        // If selected loader id is FAVOURITES_LOADER_ID, we don't need internet connection, so we
+        // showMovies and start favourites loader
+        else if (mCurrentLoaderId == FAVOURITES_LOADER_ID) {
+            showMovies();
+
+            //Init or restart loader
+            getSupportLoaderManager().restartLoader(mCurrentLoaderId, null, this);
+        }
+        // If no connection and the loader id is not FAVOURITES_LOADER_ID
+        else {
+            // Hide loading indicator, hide data and display connection error message
             showError();
+
             // Update message TextView with no connection error message
             mMessagesTextView.setText(R.string.no_internet);
 
@@ -302,7 +342,8 @@ public class MainActivity extends AppCompatActivity implements
                 MoviePreferences.setPreferredQueryType(this, getString(R.string.category_favourites));
                 getSupportLoaderManager().destroyLoader(MOVIES_LOADER_ID);
                 mCurrentLoaderId = FAVOURITES_LOADER_ID;
-                getSupportLoaderManager().restartLoader(mCurrentLoaderId, null, this);
+                //getSupportLoaderManager().restartLoader(mCurrentLoaderId, null, this);
+                fetchMovies(getApplicationContext());
                 setTitle(item.getTitle());
                 invalidateOptionsMenu();
                 break;
@@ -331,8 +372,6 @@ public class MainActivity extends AppCompatActivity implements
             startActivity(movieDetailsIntent);
         }
     }
-
-    // TODO: share info, save video and reviews
 
     // Show movie data and hide no connection icon and message
     private void showMovies() {

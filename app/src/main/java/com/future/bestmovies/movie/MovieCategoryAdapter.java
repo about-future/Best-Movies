@@ -55,7 +55,7 @@ public class MovieCategoryAdapter extends RecyclerView.Adapter<MovieCategoryAdap
             int posterColumnIndex = mMoviesCursor.getColumnIndex(MovieDetailsEntry.COLUMN_POSTER_PATH);
             posterPath = mMoviesCursor.getString(posterColumnIndex);
         }
-        // TODO: correct image loading when offline
+        // Try loading image from device memory or cache
         Picasso.get()
                 .load(ImageUtils.buildImageUrlForRecyclerView(
                         mContext,
@@ -69,7 +69,7 @@ public class MovieCategoryAdapter extends RecyclerView.Adapter<MovieCategoryAdap
 
                     @Override
                     public void onError(Exception e) {
-                        // Try again online if cache failed
+                        // Try again online, if loading from device memory or cache failed
                         Picasso.get()
                                 .load(ImageUtils.buildImageUrlForRecyclerView(
                                         mContext,

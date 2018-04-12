@@ -1,4 +1,4 @@
-package com.future.bestmovies.movie;
+package com.future.bestmovies.movie_details;
 
 import android.content.AsyncTaskLoader;
 import android.content.Context;
@@ -12,11 +12,11 @@ import java.io.IOException;
 
 import retrofit2.Call;
 
-public class MovieDetailsLoader extends AsyncTaskLoader<MovieDetails> {
-    private MovieDetails cachedMovie;
+public class DetailsLoader extends AsyncTaskLoader<Details> {
+    private Details cachedMovie;
     private final int movieId;
 
-    public MovieDetailsLoader(Context context, int movieId) {
+    public DetailsLoader(Context context, int movieId) {
         super(context);
         this.movieId = movieId;
     }
@@ -28,22 +28,22 @@ public class MovieDetailsLoader extends AsyncTaskLoader<MovieDetails> {
     }
 
     @Override
-    public MovieDetails loadInBackground() {
+    public Details loadInBackground() {
         ApiInterface movieApiInterface = ApiClient.getClient().create(ApiInterface.class);
-        Call<MovieDetails> call = movieApiInterface.getMovieDetails(movieId, NetworkUtils.API_ID);
+        Call<Details> call = movieApiInterface.getMovieDetails(movieId, NetworkUtils.API_ID);
 
-        MovieDetails result = new MovieDetails();
+        Details result = new Details();
         try {
             result = call.execute().body();
         } catch (IOException e) {
-            Log.v("MovieDetails Loader", "Error: " + e.toString());
+            Log.v("Details Loader", "Error: " + e.toString());
         }
 
-        return result; //NetworkUtils.fetchMovieDetails(movieId);
+        return result;
     }
 
     @Override
-    public void deliverResult(MovieDetails data) {
+    public void deliverResult(Details data) {
         cachedMovie = data;
         super.deliverResult(data);
     }

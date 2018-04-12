@@ -12,6 +12,8 @@ import android.widget.TextView;
 
 import com.future.bestmovies.R;
 import com.future.bestmovies.utils.ImageUtils;
+import com.squareup.picasso.Callback;
+import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -42,13 +44,32 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
     }
 
     @Override
-    public void onBindViewHolder(@NonNull VideoAdapter.VideoViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull final VideoAdapter.VideoViewHolder holder, final int position) {
+        //final int currentPosition = position;
+        // Try loading image from device memory or cache
         Picasso.get()
                 .load(ImageUtils.buildVideoThumbnailUrl(
                         mContext,
                         mVideos.get(position).getVideoKey()))
-                .error(R.drawable.ic_image)
-                .into(holder.videoThumbnailImageView);
+                .networkPolicy(NetworkPolicy.OFFLINE)
+                .into(holder.videoThumbnailImageView, new Callback() {
+                    @Override
+                    public void onSuccess() {
+                        // Yay again!
+                    }
+
+                    @Override
+                    public void onError(Exception e) {
+                        // Try again online, if cache loading failed
+                        Picasso.get()
+                                .load(ImageUtils.buildVideoThumbnailUrl(
+                                        mContext,
+                                        mVideos.get(position).getVideoKey()))
+                                .error(R.drawable.ic_image)
+                                .into(holder.videoThumbnailImageView);
+                    }
+                });
+
         holder.videoNameTextView.setText(mVideos.get(position).getVideoName());
         holder.videoTypeTextView.setText(mVideos.get(position).getVideoType());
     }

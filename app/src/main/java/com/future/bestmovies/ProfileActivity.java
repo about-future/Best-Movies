@@ -28,6 +28,8 @@ import com.future.bestmovies.credits.CreditsLoader;
 import com.future.bestmovies.utils.ImageUtils;
 import com.future.bestmovies.utils.NetworkUtils;
 import com.future.bestmovies.utils.ScreenUtils;
+import com.squareup.picasso.Callback;
+import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -47,18 +49,27 @@ public class ProfileActivity extends AppCompatActivity implements CreditsAdapter
     public static final String ACTOR_DETAILS_KEY = "actor";
     private static final String MOVIE_CREDITS_KEY = "movie_credits";
 
-    @BindView(R.id.profile_toolbar) Toolbar toolbar;
+    @BindView(R.id.profile_toolbar)
+    Toolbar toolbar;
 
     // Profile detail variables
-    @BindView(R.id.profile_backdrop_iv) ImageView profileBackdropImageView;
-    @BindView(R.id.actor_age_tv) TextView ageTextView;
-    @BindView(R.id.credit_actor_iv) ImageView profilePictureImageView;
-    @BindView(R.id.credit_gender_tv) TextView genderTextView;
-    @BindView(R.id.credit_birthday_tv) TextView birthdayTextView;
-    @BindView(R.id.credit_place_of_birth_tv) TextView birthPlaceTextView;
-    @BindView(R.id.credit_biography_tv) TextView biographyTextView;
+    @BindView(R.id.profile_backdrop_iv)
+    ImageView profileBackdropImageView;
+    @BindView(R.id.actor_age_tv)
+    TextView ageTextView;
+    @BindView(R.id.credit_actor_iv)
+    ImageView profilePictureImageView;
+    @BindView(R.id.credit_gender_tv)
+    TextView genderTextView;
+    @BindView(R.id.credit_birthday_tv)
+    TextView birthdayTextView;
+    @BindView(R.id.credit_place_of_birth_tv)
+    TextView birthPlaceTextView;
+    @BindView(R.id.credit_biography_tv)
+    TextView biographyTextView;
 
-    @BindView(R.id.credits_rv) RecyclerView mCreditsRecyclerView;
+    @BindView(R.id.credits_rv)
+    RecyclerView mCreditsRecyclerView;
     private Actor mActor;
     private ArrayList<Credits> mCredits;
     private int mActorId;
@@ -67,19 +78,25 @@ public class ProfileActivity extends AppCompatActivity implements CreditsAdapter
     private boolean mIsFavouriteActor;
     private Toast mToast;
     private CreditsAdapter mCreditsAdapter;
-    private GridLayoutManager mCreditsLayoutManager;
 
     // Movie credits variables
-    @BindView(R.id.credits_messages_tv) TextView mCreditsMessagesTextView;
-    @BindView(R.id.loading_credits_pb) ProgressBar mCreditsProgressBar;
-    @BindView(R.id.no_credits_iv) ImageView mNoCreditsImageView;
-    @BindView(R.id.no_credits_connection_iv) ImageView mNoCreditsConnectionImageView;
+    @BindView(R.id.credits_messages_tv)
+    TextView mCreditsMessagesTextView;
+    @BindView(R.id.loading_credits_pb)
+    ProgressBar mCreditsProgressBar;
+    @BindView(R.id.no_credits_iv)
+    ImageView mNoCreditsImageView;
+    @BindView(R.id.no_credits_connection_iv)
+    ImageView mNoCreditsConnectionImageView;
 
-    private MenuItem mFavouriteActorMenuItem;
+    // This will be used in the near future for adding the actor to favourites list
+    //private MenuItem mFavouriteActorMenuItem;
 
     // Resources
-    @BindString(R.string.credit_date_unknown) String dateUnknown;
-    @BindString(R.string.credit_age) String age;
+    @BindString(R.string.credit_date_unknown)
+    String dateUnknown;
+    @BindString(R.string.credit_age)
+    String age;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -92,7 +109,7 @@ public class ProfileActivity extends AppCompatActivity implements CreditsAdapter
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
 
-        mCreditsLayoutManager = new GridLayoutManager(
+        GridLayoutManager mCreditsLayoutManager = new GridLayoutManager(
                 this,
                 ScreenUtils.getNumberOfColumns(this, 120, 3));
         mCreditsRecyclerView.setLayoutManager(mCreditsLayoutManager);
@@ -114,13 +131,31 @@ public class ProfileActivity extends AppCompatActivity implements CreditsAdapter
                 setTitle(mActorName);
 
                 mBackdropPath = intent.getStringExtra(MOVIE_BACKDROP_KEY);
+                // Try loading backdrop image from memory
                 Picasso.get()
                         .load(ImageUtils.buildImageUrl(
                                 this,
                                 mBackdropPath,
                                 ImageUtils.BACKDROP))
-                        .error(R.drawable.ic_landscape)
-                        .into(profileBackdropImageView);
+                        .networkPolicy(NetworkPolicy.OFFLINE)
+                        .into(profileBackdropImageView, new Callback() {
+                            @Override
+                            public void onSuccess() {
+                                // Yay! We have it!
+                            }
+
+                            @Override
+                            public void onError(Exception e) {
+                                // Try again online, if cache loading failed
+                                Picasso.get()
+                                        .load(ImageUtils.buildImageUrl(
+                                                getApplicationContext(),
+                                                mBackdropPath,
+                                                ImageUtils.BACKDROP))
+                                        .error(R.drawable.ic_landscape)
+                                        .into(profileBackdropImageView);
+                            }
+                        });
 
                 if (NetworkUtils.isConnected(this)) {
                     getSupportLoaderManager().restartLoader(ACTOR_LOADER_ID, null, actorResultLoaderListener);
@@ -152,13 +187,31 @@ public class ProfileActivity extends AppCompatActivity implements CreditsAdapter
         super.onRestoreInstanceState(savedInstanceState);
         if (savedInstanceState.containsKey(MOVIE_BACKDROP_KEY)) {
             mBackdropPath = savedInstanceState.getString(MOVIE_BACKDROP_KEY);
+            // Try loading backdrop image from memory
             Picasso.get()
                     .load(ImageUtils.buildImageUrl(
                             this,
                             mBackdropPath,
                             ImageUtils.BACKDROP))
-                    .error(R.drawable.ic_landscape)
-                    .into(profileBackdropImageView);
+                    .networkPolicy(NetworkPolicy.OFFLINE)
+                    .into(profileBackdropImageView, new Callback() {
+                        @Override
+                        public void onSuccess() {
+                            // Yay! We have it!
+                        }
+
+                        @Override
+                        public void onError(Exception e) {
+                            // Try again online, if cache loading failed
+                            Picasso.get()
+                                    .load(ImageUtils.buildImageUrl(
+                                            getApplicationContext(),
+                                            mBackdropPath,
+                                            ImageUtils.BACKDROP))
+                                    .error(R.drawable.ic_landscape)
+                                    .into(profileBackdropImageView);
+                        }
+                    });
         }
         if (savedInstanceState.containsKey(ACTOR_ID_KEY))
             mActorId = savedInstanceState.getInt(ACTOR_ID_KEY);
@@ -183,7 +236,8 @@ public class ProfileActivity extends AppCompatActivity implements CreditsAdapter
         getMenuInflater().inflate(R.menu.profile_menu, menu);
 
         MenuItem favouriteActorMenuItem = menu.findItem(R.id.action_favourite_actor);
-        mFavouriteActorMenuItem = favouriteActorMenuItem;
+        // This item will be used in the near future
+        //mFavouriteActorMenuItem = favouriteActorMenuItem;
         if (mIsFavouriteActor) {
             DrawableCompat.setTint(favouriteActorMenuItem.getIcon(), ContextCompat.getColor(getApplicationContext(), R.color.colorAccent));
         } else {
@@ -300,29 +354,59 @@ public class ProfileActivity extends AppCompatActivity implements CreditsAdapter
                 }
             };
 
-    private void populateActorDetails(Actor actorDetails) {
-        // Profile picture
+    private void populateActorDetails(final Actor actorDetails) {
+        // Try loading profile picture from memory
         Picasso.get()
                 .load(ImageUtils.buildImageUrl(
                         getApplicationContext(),
                         actorDetails.getProfilePath(),
                         ImageUtils.POSTER))
                 .placeholder(R.drawable.no_picture)
-                .error(R.drawable.no_picture)
-                .into(profilePictureImageView);
+                .networkPolicy(NetworkPolicy.OFFLINE)
+                .into(profilePictureImageView, new Callback() {
+                    @Override
+                    public void onSuccess() {
+                        // Yay! We got the picture already!
+                    }
+
+                    @Override
+                    public void onError(Exception e) {
+                        // Try again online, if cache loading failed
+                        Picasso.get()
+                                .load(ImageUtils.buildImageUrl(
+                                        getApplicationContext(),
+                                        actorDetails.getProfilePath(),
+                                        ImageUtils.POSTER))
+                                .placeholder(R.drawable.no_picture)
+                                .error(R.drawable.no_picture)
+                                .into(profilePictureImageView);
+                    }
+                });
 
         // Gender
-        genderTextView.setText(actorDetails.getGender());
+        switch (actorDetails.getGender()) {
+            case 1:
+                genderTextView.setText(getText(R.string.gender_female));
+                break;
+            case 2:
+                genderTextView.setText(getString(R.string.gender_male));
+                break;
+            default:
+                genderTextView.setText(getString(R.string.gender_unknown));
+        }
 
         // Birthday
-        birthdayTextView.setText(actorDetails.getBirthday());
+        if (actorDetails.getBirthday() != null)
+            birthdayTextView.setText(actorDetails.getBirthday());
+        else
+            birthdayTextView.setText(getString(R.string.credit_date_unknown));
 
         // Age
         int birthYear;
         int endYear;
-        if (actorDetails.getBirthday().length() > 4 && !actorDetails.getBirthday().equals(dateUnknown)) {
+        if (actorDetails.getBirthday() != null) {
             birthYear = Integer.valueOf(actorDetails.getBirthday().substring(0, 4));
-            if (actorDetails.getDeathday().length() > 4 && !actorDetails.getDeathday().equals(dateUnknown)) {
+            if (actorDetails.getDeathday() != null) {
                 endYear = Integer.valueOf(actorDetails.getDeathday().substring(0, 4));
             } else {
                 endYear = Calendar.getInstance().get(Calendar.YEAR);
@@ -333,13 +417,16 @@ public class ProfileActivity extends AppCompatActivity implements CreditsAdapter
         }
 
         // Birthplace
-        birthPlaceTextView.setText(actorDetails.getPlaceOfBirth());
+        if (actorDetails.getPlaceOfBirth() != null)
+            birthPlaceTextView.setText(actorDetails.getPlaceOfBirth());
+        else
+            birthPlaceTextView.setText(getString(R.string.credit_date_unknown));
 
         // Biography
-        if (!actorDetails.getBiography().isEmpty()) {
+        if (actorDetails.getBiography() != null && actorDetails.getBiography().length() > 0) {
             biographyTextView.setText(actorDetails.getBiography());
         } else {
-            biographyTextView.setVisibility(View.INVISIBLE);
+            biographyTextView.setVisibility(View.GONE);
         }
 
         // Set title as the name of the actor

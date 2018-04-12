@@ -13,6 +13,8 @@ import android.widget.Toast;
 import com.future.bestmovies.reviews.Review;
 import com.future.bestmovies.reviews.ReviewAdapter;
 import com.future.bestmovies.utils.ImageUtils;
+import com.squareup.picasso.Callback;
+import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -77,13 +79,32 @@ public class ReviewsActivity extends AppCompatActivity {
                 }
                 if (intent.hasExtra(MOVIE_BACKDROP_KEY)) {
                     mMovieBackdrop = intent.getStringExtra(MOVIE_BACKDROP_KEY);
-                    // Set the backdrop for the movie reviews
+                    // Try loading backdrop image from memory
                     Picasso.get()
                             .load(ImageUtils.buildImageUrl(
                                     this,
                                     mMovieBackdrop,
                                     ImageUtils.BACKDROP))
-                            .into(movieBackdropImageView);
+                            .networkPolicy(NetworkPolicy.OFFLINE)
+                            .into(movieBackdropImageView, new Callback() {
+                                @Override
+                                public void onSuccess() {
+                                    // Yay! We have it!
+                                }
+
+                                @Override
+                                public void onError(Exception e) {
+                                    // Try again online, if cache loading failed
+                                    Picasso.get()
+                                            .load(ImageUtils.buildImageUrl(
+                                                    getApplicationContext(),
+                                                    mMovieBackdrop,
+                                                    ImageUtils.BACKDROP))
+                                            .error(R.drawable.ic_landscape)
+                                            .into(movieBackdropImageView);
+                                }
+                            });
+
                 }
             } else {
                 closeOnError();
@@ -142,13 +163,31 @@ public class ReviewsActivity extends AppCompatActivity {
         // Restore the backdrop for the movie reviews
         if (savedInstanceState.containsKey(MOVIE_BACKDROP_KEY)) {
             mMovieBackdrop = savedInstanceState.getString(MOVIE_BACKDROP_KEY);
+            // Try loading backdrop image from memory
             Picasso.get()
                     .load(ImageUtils.buildImageUrl(
                             this,
                             mMovieBackdrop,
                             ImageUtils.BACKDROP))
-                    .error(R.drawable.ic_landscape)
-                    .into(movieBackdropImageView);
+                    .networkPolicy(NetworkPolicy.OFFLINE)
+                    .into(movieBackdropImageView, new Callback() {
+                        @Override
+                        public void onSuccess() {
+                            // Yay! We have it!
+                        }
+
+                        @Override
+                        public void onError(Exception e) {
+                            // Try again online, if cache loading failed
+                            Picasso.get()
+                                    .load(ImageUtils.buildImageUrl(
+                                            getApplicationContext(),
+                                            mMovieBackdrop,
+                                            ImageUtils.BACKDROP))
+                                    .error(R.drawable.ic_landscape)
+                                    .into(movieBackdropImageView);
+                        }
+                    });
         }
 
         super.onRestoreInstanceState(savedInstanceState);

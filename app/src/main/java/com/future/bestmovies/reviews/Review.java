@@ -3,26 +3,26 @@ package com.future.bestmovies.reviews;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.google.gson.annotations.SerializedName;
+
 public class Review implements Parcelable{
-    private final int movieId;
+    @SerializedName("author")
     private final String author;
+    @SerializedName("content")
     private final String content;
 
-    public Review(int movieId, String author, String content) {
-        this.movieId = movieId;
+    public Review(String author, String content) {
         this.author = author;
         this.content = content;
     }
 
     private Review (Parcel in) {
-        movieId = in.readInt();
         author = in.readString();
         content = in.readString();
     }
 
     @Override
     public void writeToParcel(Parcel parcel, int i) {
-        parcel.writeInt(movieId);
         parcel.writeString(author);
         parcel.writeString(content);
     }
@@ -42,7 +42,6 @@ public class Review implements Parcelable{
         public Review[] newArray(int size) {return new Review[size];}
     };
 
-    public int getMovieId() { return movieId; }
     public String getReviewAuthor() {
         return author;
     }

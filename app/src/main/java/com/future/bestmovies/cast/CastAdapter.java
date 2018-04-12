@@ -12,6 +12,8 @@ import android.widget.TextView;
 
 import com.future.bestmovies.R;
 import com.future.bestmovies.utils.ImageUtils;
+import com.squareup.picasso.Callback;
+import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -42,14 +44,32 @@ public class CastAdapter extends RecyclerView.Adapter<CastAdapter.CastViewHolder
     }
 
     @Override
-    public void onBindViewHolder(@NonNull final CastAdapter.CastViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull final CastAdapter.CastViewHolder holder, final int position) {
+        // Try loading image from device memory or cache
         Picasso.get()
                 .load(ImageUtils.buildImageUrl(
                         mContext,
                         mCast.get(position).getProfilePath(),
                         ImageUtils.CAST))
-                .error(R.drawable.ic_person)
-                .into(holder.actorProfileImageView);
+                .networkPolicy(NetworkPolicy.OFFLINE)
+                .into(holder.actorProfileImageView, new Callback() {
+                    @Override
+                    public void onSuccess() {
+                        // Yay!
+                    }
+
+                    @Override
+                    public void onError(Exception e) {
+                        // Try again online, if cache loading failed
+                        Picasso.get()
+                                .load(ImageUtils.buildImageUrl(
+                                        mContext,
+                                        mCast.get(position).getProfilePath(),
+                                        ImageUtils.CAST))
+                                .error(R.drawable.ic_person)
+                                .into(holder.actorProfileImageView);
+                    }
+                });
 
         holder.actorNameTextView.setText(mCast.get(position).getActorName());
         holder.characterTextView.setText(mCast.get(position).getCharacter());

@@ -3,16 +3,20 @@ package com.future.bestmovies.cast;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.google.gson.annotations.SerializedName;
+
 
 public class Cast implements Parcelable {
-    private final int movieId;
+    @SerializedName("character")
     private final String character;
+    @SerializedName("id")
     private final int actorId;
+    @SerializedName("name")
     private final String name;
+    @SerializedName("profile_path")
     private final String profilePath;
 
-    public Cast(int movieId, String character, int id, String name, String profilePath) {
-        this.movieId = movieId;
+    public Cast(String character, int id, String name, String profilePath) {
         this.character = character;
         this.actorId = id;
         this.name = name;
@@ -20,7 +24,6 @@ public class Cast implements Parcelable {
     }
 
     private Cast(Parcel in) {
-        movieId = in.readInt();
         character = in.readString();
         actorId = in.readInt();
         name = in.readString();
@@ -29,7 +32,6 @@ public class Cast implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int i) {
-        parcel.writeInt(movieId);
         parcel.writeString(character);
         parcel.writeInt(actorId);
         parcel.writeString(name);
@@ -51,7 +53,6 @@ public class Cast implements Parcelable {
         public Cast[] newArray(int size) {return new Cast[size];}
     };
 
-    public int getMovieId() { return movieId; }
     public String getActorName() {
         return name;
     }

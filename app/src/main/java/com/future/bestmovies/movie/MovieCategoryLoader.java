@@ -35,14 +35,15 @@ public class MovieCategoryLoader extends AsyncTaskLoader<ArrayList<Movie>> {
                 MoviePreferences.getPreferredQueryType(getContext()),
                 MoviePreferences.getLastPageNumber(getContext()),
                 NetworkUtils.API_ID);
+
         ArrayList<Movie> result = new ArrayList<>();
         try {
             result = call.execute().body().getResults();
         } catch (IOException e) {
-            Log.v("Movies Loader Error", e.toString());
+            Log.v("Movies Loader", "Error: " + e.toString());
         }
 
-        return result; //NetworkUtils.fetchMovieCategory(getContext());
+        return result;
     }
 
     @Override

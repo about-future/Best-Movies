@@ -12,6 +12,8 @@ import android.widget.TextView;
 
 import com.future.bestmovies.R;
 import com.future.bestmovies.utils.ImageUtils;
+import com.squareup.picasso.Callback;
+import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -45,26 +47,44 @@ public class CreditsAdapter extends RecyclerView.Adapter<CreditsAdapter.CreditsV
     }
 
     @Override
-    public void onBindViewHolder(@NonNull CreditsViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull final CreditsViewHolder holder, final int position) {
+        // Try loading image from device memory or cache
         Picasso.get()
                 .load(ImageUtils.buildImageUrl(
                         mContext,
                         mCredits.get(position).getPosterPath(),
                         ImageUtils.POSTER))
-                .error(R.drawable.no_poster)
-                .into(holder.creditPosterImageView);
+                .networkPolicy(NetworkPolicy.OFFLINE)
+                .into(holder.creditPosterImageView, new Callback() {
+                    @Override
+                    public void onSuccess() {
+                        // Yay!
+                    }
+
+                    @Override
+                    public void onError(Exception e) {
+                        // Try again online, if cache loading failed
+                        Picasso.get()
+                                .load(ImageUtils.buildImageUrl(
+                                        mContext,
+                                        mCredits.get(position).getPosterPath(),
+                                        ImageUtils.POSTER))
+                                .error(R.drawable.no_poster)
+                                .into(holder.creditPosterImageView);
+                    }
+                });
 
         holder.creditTitleTextView.setText(mCredits.get(position).getTitle());
 
         String releaseYear;
-        if (!mCredits.get(position).getReleaseDate().equals("9999")) {
-            releaseYear = mCredits.get(position).getReleaseDate();
+        if (mCredits.get(position).getReleaseDate() != null && mCredits.get(position).getReleaseDate().length() > 0) {
+            releaseYear = mCredits.get(position).getReleaseDate().substring(0, 4);
         } else {
             releaseYear = mContext.getText(R.string.credit_date_unknown).toString();
         }
         holder.creditReleaseDateTextView.setText(TextUtils.concat("(", releaseYear, ")"));
 
-        if (!mCredits.get(position).getCharacter().isEmpty())
+        if (mCredits.get(position).getCharacter().length() > 0)
             holder.creditCharacterTextView.setText(TextUtils.concat(
                     mContext.getText(R.string.credit_as_character).toString(),
                     mCredits.get(position).getCharacter()));
@@ -79,7 +99,15 @@ public class CreditsAdapter extends RecyclerView.Adapter<CreditsAdapter.CreditsV
         Collections.sort(newCredits, new Comparator<Credits>() {
             @Override
             public int compare(Credits o1, Credits o2) {
-                return o2.getReleaseDate().compareTo(o1.getReleaseDate());
+                if (o2.getReleaseDate() == null && o1.getReleaseDate() == null) {
+                    return 0;
+                } else if (o2.getReleaseDate() != null && o1.getReleaseDate() == null) {
+                    return 1;
+                } else if (o2.getReleaseDate() == null && o1.getReleaseDate() != null) {
+                    return -1;
+                } else {
+                    return o2.getReleaseDate().compareTo(o1.getReleaseDate());
+                }
             }
         });
 
@@ -88,10 +116,14 @@ public class CreditsAdapter extends RecyclerView.Adapter<CreditsAdapter.CreditsV
     }
 
     class CreditsViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        @BindView(R.id.credit_poster_iv) ImageView creditPosterImageView;
-        @BindView(R.id.credit_title_tv) TextView creditTitleTextView;
-        @BindView(R.id.credit_release_date_tv) TextView creditReleaseDateTextView;
-        @BindView(R.id.credit_character_tv) TextView creditCharacterTextView;
+        @BindView(R.id.credit_poster_iv)
+        ImageView creditPosterImageView;
+        @BindView(R.id.credit_title_tv)
+        TextView creditTitleTextView;
+        @BindView(R.id.credit_release_date_tv)
+        TextView creditReleaseDateTextView;
+        @BindView(R.id.credit_character_tv)
+        TextView creditCharacterTextView;
 
         CreditsViewHolder(View itemView) {
             super(itemView);

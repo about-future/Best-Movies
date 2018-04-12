@@ -3,17 +3,28 @@ package com.future.bestmovies.credits;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-public class Actor implements Parcelable {
-    private final int id;
-    private final String birthday;
-    private final String deathday;
-    private final String gender;
-    private final String name;
-    private final String biography;
-    private final String placeOfBirth;
-    private final String profilePath;
+import com.google.gson.annotations.SerializedName;
 
-    public Actor(int id, String birthday, String deathday, String gender, String name, String biography, String placeOfBirth, String profilePath) {
+public class Actor implements Parcelable {
+    @SerializedName("id")
+    private int id;
+    @SerializedName("birthday")
+    private String birthday;
+    @SerializedName("deathday")
+    private String deathday;
+    @SerializedName("gender")
+    private int gender;
+    @SerializedName("name")
+    private String name;
+    @SerializedName("biography")
+    private String biography;
+    @SerializedName("place_of_birth")
+    private String placeOfBirth;
+    @SerializedName("profile_path")
+    private String profilePath;
+
+    public Actor(int id, String birthday, String deathday, int gender, String name,
+                 String biography, String placeOfBirth, String profilePath) {
         this.id = id;
         this.birthday = birthday;
         this.deathday = deathday;
@@ -24,11 +35,15 @@ public class Actor implements Parcelable {
         this.profilePath = profilePath;
     }
 
+    public Actor() {
+
+    }
+
     private Actor (Parcel in) {
         id = in.readInt();
         birthday = in.readString();
         deathday = in.readString();
-        gender = in.readString();
+        gender = in.readInt();
         name = in.readString();
         biography = in.readString();
         placeOfBirth = in.readString();
@@ -53,7 +68,7 @@ public class Actor implements Parcelable {
         parcel.writeInt(id);
         parcel.writeString(birthday);
         parcel.writeString(deathday);
-        parcel.writeString(gender);
+        parcel.writeInt(gender);
         parcel.writeString(name);
         parcel.writeString(placeOfBirth);
         parcel.writeString(biography);
@@ -63,7 +78,7 @@ public class Actor implements Parcelable {
     public int getActorId() { return id; }
     public String getBirthday() { return birthday; }
     public String getDeathday() { return deathday; }
-    public String getGender() { return gender; }
+    public int getGender() { return gender; }
     public String getActorName() { return name; }
     public String getBiography() { return biography; }
     public String getPlaceOfBirth() { return placeOfBirth; }

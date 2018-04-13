@@ -12,10 +12,9 @@ public class FavouritesContract {
     public static final String CONTENT_AUTHORITY = "com.future.bestmovies";
 
     // Use CONTENT_AUTHORITY to create the base of all URI's which apps will use to contact the content provider.
-    public static final Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
+    private static final Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
 
-    /**
-     * Possible path (appended to base content URI for possible URI's)
+    /* Possible path (appended to base content URI for possible URI's)
      * For instance, content://com.future.bestmovies/movie/ is a valid path for
      * looking at movie data. content://com.future.bestmovies/ratings/ will fail,
      * as the ContentProvider hasn't been given any information on what to do with "ratings".
@@ -48,8 +47,10 @@ public class FavouritesContract {
         public final static String COLUMN_RUNTIME =             "runtime";          // Type: INTEGER
     }
 
-
+    // Inner class that defines constant values for the movie cast database table.
+    // Each entry in the table represents a cast member.
     public static final String PATH_CAST = "cast";
+
     // Inner class that defines constant values for the cast database table.
     // Each entry in the table represents a single cast member.
     public static abstract class CastEntry implements BaseColumns {
@@ -71,8 +72,10 @@ public class FavouritesContract {
         public final static String COLUMN_IMAGE_PROFILE_PATH =  "profile_path";     // Type: TEXT
     }
 
-
+    // Inner class that defines constant values for the movie reviews database table.
+    // Each entry in the table represents a single review.
     public static final String PATH_REVIEWS = "reviews";
+
     // Inner class that defines constant values for the reviews database table.
     // Each entry in the table represents a single review.
     public static abstract class ReviewsEntry implements BaseColumns {
@@ -92,8 +95,10 @@ public class FavouritesContract {
         public final static String COLUMN_CONTENT =             "content";          // Type: TEXT
     }
 
-
+    // Inner class that defines constant values for the movie video database table.
+    // Each entry in the table represents a single video.
     public static final String PATH_VIDEOS = "videos";
+
     // Inner class that defines constant values for the videos database table.
     // Each entry in the table represents a single video.
     public static abstract class VideosEntry implements BaseColumns {
@@ -114,6 +119,8 @@ public class FavouritesContract {
         public final static String COLUMN_VIDEO_TYPE =          "video_type";       // Type: TEXT
     }
 
+    // Build a specific Uri for accessing table contents, using the content uri for
+    // the selected table and a movieId.
     public static Uri buildUriWithId(Uri contentUri, int movieId) {
         return contentUri.buildUpon()
                 .appendPath(Integer.toString(movieId))

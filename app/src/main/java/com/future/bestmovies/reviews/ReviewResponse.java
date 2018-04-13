@@ -6,7 +6,7 @@ import java.util.ArrayList;
 
 public class ReviewResponse {
     @SerializedName("results")
-    private ArrayList<Review> results = new ArrayList<>();
+    private final ArrayList<Review> results = new ArrayList<>();
 
     public ArrayList<Review> getResults() {
         return results;

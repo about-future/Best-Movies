@@ -13,19 +13,6 @@
     <!-- Main activity action bar styles -->
 
     <!-- Details activity Theme and Action Bar styles -->
-    <!-- Transparent Style -->
-    <style name="AppTheme.Transparent" parent="@style/AppTheme">
-        <item name="actionBarStyle">@style/ActionBar.Transparent</item>
-        <!-- StatusBar -->
-        <item name="android:windowTranslucentStatus">true</item>
-        <!-- ActionBar -->
-        <item name="android:windowTranslucentNavigation">true</item>
-    </style>
-
-    <style name="ActionBar.Transparent" parent="@style/Widget.AppCompat.ActionBar">
-        <item name="displayOptions">showHome</item>
-    </style>
-
     <!-- Semitransparent Style -->
     <style name="AppTheme.Semitransparent" parent="@style/AppTheme">
         <item name="android:actionBarStyle">@style/ActionBar.Semitransparent</item>

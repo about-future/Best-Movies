@@ -11,7 +11,7 @@ public class Actor implements Parcelable {
     @SerializedName("birthday")
     private String birthday;
     @SerializedName("deathday")
-    private String deathday;
+    private String deathDay;
     @SerializedName("gender")
     private int gender;
     @SerializedName("name")
@@ -23,11 +23,11 @@ public class Actor implements Parcelable {
     @SerializedName("profile_path")
     private String profilePath;
 
-    public Actor(int id, String birthday, String deathday, int gender, String name,
+    public Actor(int id, String birthday, String deathDay, int gender, String name,
                  String biography, String placeOfBirth, String profilePath) {
         this.id = id;
         this.birthday = birthday;
-        this.deathday = deathday;
+        this.deathDay = deathDay;
         this.gender = gender;
         this.name = name;
         this.biography = biography;
@@ -42,7 +42,7 @@ public class Actor implements Parcelable {
     private Actor (Parcel in) {
         id = in.readInt();
         birthday = in.readString();
-        deathday = in.readString();
+        deathDay = in.readString();
         gender = in.readInt();
         name = in.readString();
         biography = in.readString();
@@ -67,7 +67,7 @@ public class Actor implements Parcelable {
     public void writeToParcel(Parcel parcel, int i) {
         parcel.writeInt(id);
         parcel.writeString(birthday);
-        parcel.writeString(deathday);
+        parcel.writeString(deathDay);
         parcel.writeInt(gender);
         parcel.writeString(name);
         parcel.writeString(placeOfBirth);
@@ -75,9 +75,8 @@ public class Actor implements Parcelable {
         parcel.writeString(profilePath);
     }
 
-    public int getActorId() { return id; }
     public String getBirthday() { return birthday; }
-    public String getDeathday() { return deathday; }
+    public String getDeathDay() { return deathDay; }
     public int getGender() { return gender; }
     public String getActorName() { return name; }
     public String getBiography() { return biography; }

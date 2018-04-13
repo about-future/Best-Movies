@@ -4,24 +4,8 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
-import android.util.Log;
-
-import com.future.bestmovies.credits.Actor;
-import com.future.bestmovies.credits.Credits;
-import com.future.bestmovies.cast.Cast;
-import com.future.bestmovies.reviews.Review;
-import com.future.bestmovies.videos.Video;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Scanner;
 
 public class NetworkUtils {
-    private static final String TAG = NetworkUtils.class.getSimpleName();
     public static final String API_ID = "xxx";
     private static final String YOUTUBE_VIDEO_BASE_URL = "https://www.youtube.com/watch";
     private static final String YOUTUBE_PARAMETER = "v";

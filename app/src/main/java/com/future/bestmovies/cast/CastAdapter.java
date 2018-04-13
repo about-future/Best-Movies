@@ -44,7 +44,9 @@ public class CastAdapter extends RecyclerView.Adapter<CastAdapter.CastViewHolder
     }
 
     @Override
-    public void onBindViewHolder(@NonNull final CastAdapter.CastViewHolder holder, final int position) {
+    public void onBindViewHolder(@NonNull final CastAdapter.CastViewHolder holder, int position) {
+        final int currentPosition = position;
+
         // Try loading image from device memory or cache
         Picasso.get()
                 .load(ImageUtils.buildImageUrl(
@@ -64,7 +66,7 @@ public class CastAdapter extends RecyclerView.Adapter<CastAdapter.CastViewHolder
                         Picasso.get()
                                 .load(ImageUtils.buildImageUrl(
                                         mContext,
-                                        mCast.get(position).getProfilePath(),
+                                        mCast.get(currentPosition).getProfilePath(),
                                         ImageUtils.CAST))
                                 .error(R.drawable.ic_person)
                                 .into(holder.actorProfileImageView);

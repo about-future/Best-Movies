@@ -10,6 +10,7 @@ import com.future.bestmovies.utils.NetworkUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Objects;
 
 import retrofit2.Call;
 
@@ -36,7 +37,7 @@ public class ReviewLoader extends AsyncTaskLoader<ArrayList<Review>> {
 
         ArrayList<Review> result = new ArrayList<>();
         try {
-            result = call.execute().body().getResults();
+            result = Objects.requireNonNull(call.execute().body()).getResults();
         } catch (IOException e) {
             Log.v("Review Loader", "Error: " + e.toString());
         }

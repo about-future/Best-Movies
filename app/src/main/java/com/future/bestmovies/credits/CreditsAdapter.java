@@ -47,7 +47,9 @@ public class CreditsAdapter extends RecyclerView.Adapter<CreditsAdapter.CreditsV
     }
 
     @Override
-    public void onBindViewHolder(@NonNull final CreditsViewHolder holder, final int position) {
+    public void onBindViewHolder(@NonNull final CreditsViewHolder holder, int position) {
+        final int currentPosition = position;
+
         // Try loading image from device memory or cache
         Picasso.get()
                 .load(ImageUtils.buildImageUrl(
@@ -67,7 +69,7 @@ public class CreditsAdapter extends RecyclerView.Adapter<CreditsAdapter.CreditsV
                         Picasso.get()
                                 .load(ImageUtils.buildImageUrl(
                                         mContext,
-                                        mCredits.get(position).getPosterPath(),
+                                        mCredits.get(currentPosition).getPosterPath(),
                                         ImageUtils.POSTER))
                                 .error(R.drawable.no_poster)
                                 .into(holder.creditPosterImageView);

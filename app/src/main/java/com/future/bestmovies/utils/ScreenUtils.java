@@ -1,19 +1,11 @@
 package com.future.bestmovies.utils;
 
 import android.content.Context;
-import android.content.res.Configuration;
 import android.util.DisplayMetrics;
 import android.view.WindowManager;
 
 
 public class ScreenUtils {
-
-    /* Check the screen orientation and return true if it's landscape or false if it's portrait
-     * @param context is used to access resources
-     */
-    public static boolean isLandscapeMode(Context context) {
-        return context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
-    }
 
     /* Return the width, height of the screen in pixels and the screen density (i.e. {720.0, 1280.0, 2.0})
      * @param context is used to create a windowManager, so we can get the screen metrics
@@ -41,21 +33,6 @@ public class ScreenUtils {
         // Divide the first item of the array(screen width) by the last one(screen density),
         // round the resulting number and return it
         return Math.round(screenSize[0] / screenSize[2]);
-    }
-
-    /* Return the smallest width of the screen in DPs (i.e. 360 or 800)
-     * @param context is used to call getScreenSize method
-     */
-    public static int getSmallestScreenWidthInDps (Context context) {
-        // Get screen sizes
-        float[] screenSize = getScreenSize(context);
-
-        // Check which size is smaller, divided by the screen density, round it and return it.
-        if (screenSize[0] < screenSize[1]) {
-            return Math.round(screenSize[0] / screenSize[2]);
-        } else {
-            return Math.round(screenSize[1] / screenSize[2]);
-        }
     }
 
     /* Return the number of columns that will be used for our RecyclerViews that use a GridLayoutManager.

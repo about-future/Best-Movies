@@ -30,8 +30,6 @@ import com.future.bestmovies.movie.MoviePreferences;
 import com.future.bestmovies.utils.ImageUtils;
 import com.future.bestmovies.utils.NetworkUtils;
 import com.future.bestmovies.utils.ScreenUtils;
-import com.squareup.picasso.OkHttp3Downloader;
-import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
@@ -61,7 +59,7 @@ public class MainActivity extends AppCompatActivity implements
     private int mCurrentLoaderId;
 
     // Cursor projection
-    public static final String[] FAVOURITES_MOVIE_PROJECTION = {
+    private static final String[] FAVOURITES_MOVIE_PROJECTION = {
             MovieDetailsEntry.COLUMN_MOVIE_ID,
             MovieDetailsEntry.COLUMN_POSTER_PATH
     };
@@ -90,12 +88,6 @@ public class MainActivity extends AppCompatActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
-
-//        Picasso.Builder builder = new Picasso.Builder(this);
-//        builder.downloader(new OkHttp3Downloader(this, Integer.MAX_VALUE));
-//        Picasso picasso = builder.build();
-//        picasso.setIndicatorsEnabled(true);
-//        Picasso.setSingletonInstance(picasso);
 
         mLoading.setVisibility(View.VISIBLE);
         // The layout manager for our RecyclerView will be a GridLayout, so we can display our movies
@@ -453,6 +445,7 @@ public class MainActivity extends AppCompatActivity implements
                 if (data != null && ((Cursor) data).getCount() == 0) {
                     mNoConnectionImageView.setVisibility(View.VISIBLE);
                     mNoConnectionImageView.setImageResource(R.drawable.ic_favorite);
+                    mNoConnectionImageView.setContentDescription(getString(R.string.no_favourites_icon));
                     mMessagesTextView.setVisibility(View.VISIBLE);
                     mMessagesTextView.setText(R.string.no_favourites);
                 } else {

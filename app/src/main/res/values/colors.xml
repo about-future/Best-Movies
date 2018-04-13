@@ -7,7 +7,6 @@
     <color name="background_box">#303030</color>
     <color name="colorWhite">#FFFFFF</color>
     <color name="colorTransparentWhite">#80FFFFFF</color>
-    <color name="colorTransparentBlack">#80000000</color>
     <color name="colorGray">#808080</color>
     <color name="colorTransparent">#00FFFFFF</color>
     <color name="colorHeart">#FF0066</color>

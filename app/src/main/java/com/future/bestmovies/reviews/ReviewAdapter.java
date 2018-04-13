@@ -19,7 +19,7 @@ import butterknife.ButterKnife;
 
 public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.ReviewViewHolder>{
     private final Context mContext;
-    private ArrayList<Review> mReviews = new ArrayList<Review>();
+    private ArrayList<Review> mReviews = new ArrayList<>();
 
     public ReviewAdapter(Context context) {
         mContext = context;

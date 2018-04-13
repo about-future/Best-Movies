@@ -39,7 +39,7 @@ public class ReviewsActivity extends AppCompatActivity {
     Toolbar toolbar;
 
     private ArrayList<Review> mReviews;
-    ReviewAdapter mReviewAdapter;
+    private ReviewAdapter mReviewAdapter;
     private LinearLayoutManager mReviewLayoutManager;
     private String mMovieTitle;
     private String mMovieBackdrop;

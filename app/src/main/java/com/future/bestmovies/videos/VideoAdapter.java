@@ -44,8 +44,9 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
     }
 
     @Override
-    public void onBindViewHolder(@NonNull final VideoAdapter.VideoViewHolder holder, final int position) {
-        //final int currentPosition = position;
+    public void onBindViewHolder(@NonNull final VideoAdapter.VideoViewHolder holder, int position) {
+        final int currentPosition = position;
+
         // Try loading image from device memory or cache
         Picasso.get()
                 .load(ImageUtils.buildVideoThumbnailUrl(
@@ -64,11 +65,12 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
                         Picasso.get()
                                 .load(ImageUtils.buildVideoThumbnailUrl(
                                         mContext,
-                                        mVideos.get(position).getVideoKey()))
+                                        mVideos.get(currentPosition).getVideoKey()))
                                 .error(R.drawable.ic_image)
                                 .into(holder.videoThumbnailImageView);
                     }
                 });
+        //holder.getAdapterPosition();
 
         holder.videoNameTextView.setText(mVideos.get(position).getVideoName());
         holder.videoTypeTextView.setText(mVideos.get(position).getVideoType());

@@ -11,6 +11,7 @@ import com.future.bestmovies.utils.NetworkUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Objects;
 
 import retrofit2.Call;
 
@@ -38,7 +39,7 @@ public class MovieCategoryLoader extends AsyncTaskLoader<ArrayList<Movie>> {
 
         ArrayList<Movie> result = new ArrayList<>();
         try {
-            result = call.execute().body().getResults();
+            result = Objects.requireNonNull(call.execute().body()).getResults();
         } catch (IOException e) {
             Log.v("Movies Loader", "Error: " + e.toString());
         }

@@ -42,7 +42,7 @@ public class Video implements Parcelable{
         parcel.writeString(type);
     }
 
-    public Video (Parcel in) {
+    private Video (Parcel in) {
         key = in.readString();
         name = in.readString();
         type = in.readString();

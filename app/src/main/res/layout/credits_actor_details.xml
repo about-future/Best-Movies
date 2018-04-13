@@ -22,22 +22,6 @@
             app:layout_constraintTop_toTopOf="parent"
             tools:srcCompat="@drawable/no_picture" />
 
-        <!--<TextView-->
-            <!--android:id="@+id/credit_actor_error_tv"-->
-            <!--android:layout_width="@id/details_poster_iv"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:layout_marginBottom="@dimen/details_message_spacing"-->
-            <!--android:fontFamily="sans-serif-condensed"-->
-            <!--android:gravity="center"-->
-            <!--android:text="@string/no_profile_picture"-->
-            <!--android:textAllCaps="true"-->
-            <!--android:textColor="@color/colorTransparentWhite"-->
-            <!--android:textSize="@dimen/details_font_size"-->
-            <!--android:visibility="visible"-->
-            <!--app:layout_constraintBottom_toBottomOf="@id/credit_actor_iv"-->
-            <!--app:layout_constraintEnd_toEndOf="@id/credit_actor_iv"-->
-            <!--app:layout_constraintStart_toStartOf="@id/credit_actor_iv" />-->
-
         <TextView
             android:id="@+id/credit_gender_tv"
             android:layout_width="wrap_content"

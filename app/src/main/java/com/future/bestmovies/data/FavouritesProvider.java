@@ -9,16 +9,12 @@ import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.util.Log;
 
 import static com.future.bestmovies.data.FavouritesContract.*;
 
 public class FavouritesProvider extends ContentProvider {
     // The instance of subclass FavouritesDbHelper of SQLiteOpenHelper, will be used to access our database.
     private FavouritesDbHelper mDbHelper;
-
-    //Tag for the log messages
-    public static final String LOG_TAG = FavouritesProvider.class.getSimpleName();
 
     // URI matcher code for the content URI for the movie details table
     private static final int MOVIES = 100;
@@ -81,7 +77,7 @@ public class FavouritesProvider extends ContentProvider {
         SQLiteDatabase database = mDbHelper.getReadableDatabase();
 
         // This cursor will hold the result of the query
-        Cursor cursor = null;
+        Cursor cursor;
 
         // Figure out if the URI matcher can match the URI to a specific code
         switch (sUriMatcher.match(uri)) {
@@ -211,7 +207,8 @@ public class FavouritesProvider extends ContentProvider {
         // Get writable database and insert the given values
         long id = mDbHelper.getWritableDatabase().insert(tableName, null, contentValues);
         // Notify all listeners that the data has changed
-        if (id > 0) getContext().getContentResolver().notifyChange(uri, null);
+        if (getContext() != null && id > 0)
+            getContext().getContentResolver().notifyChange(uri, null);
         // Return the id appended to the uri
         return ContentUris.withAppendedId(uri, id);
     }
@@ -252,7 +249,7 @@ public class FavouritesProvider extends ContentProvider {
             db.endTransaction();
         }
 
-        if (rowsInserted > 0)
+        if (getContext() != null && rowsInserted > 0)
             getContext().getContentResolver().notifyChange(uri, null);
 
         return rowsInserted;
@@ -296,7 +293,8 @@ public class FavouritesProvider extends ContentProvider {
         int rowsDeleted = mDbHelper.getWritableDatabase().delete(tableName, selection, selectionArgs);
 
         // If 1 or more rows were deleted, then notify all listeners that the data at the given URI has changed
-        if (rowsDeleted != 0) getContext().getContentResolver().notifyChange(uri, null);
+        if (getContext() != null && rowsDeleted != 0)
+            getContext().getContentResolver().notifyChange(uri, null);
 
         // Returns the number of rows affected by the delete statement
         return rowsDeleted;

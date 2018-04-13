@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.ShareCompat;
 import android.support.v4.content.ContextCompat;
@@ -71,10 +72,10 @@ public class DetailsActivity extends AppCompatActivity implements
     private static final String MOVIES_SHARE_HASHTAG = " #BestMoviesApp";
 
     // Query projection used to check if the movie is a favourite or not
-    public static final String[] MOVIE_CHECK_PROJECTION = {MovieDetailsEntry.COLUMN_MOVIE_ID};
+    private static final String[] MOVIE_CHECK_PROJECTION = {MovieDetailsEntry.COLUMN_MOVIE_ID};
 
     // Query projection used to retrieve movie details
-    public static final String[] MOVIE_DETAILED_PROJECTION = {
+    private static final String[] MOVIE_DETAILED_PROJECTION = {
             MovieDetailsEntry.COLUMN_MOVIE_ID,
             MovieDetailsEntry.COLUMN_BACKDROP_PATH,
             MovieDetailsEntry.COLUMN_GENRES,
@@ -88,7 +89,7 @@ public class DetailsActivity extends AppCompatActivity implements
     };
 
     // Query projection used to retrieve movie cast
-    public static final String[] CAST_DETAILED_PROJECTION = {
+    private static final String[] CAST_DETAILED_PROJECTION = {
             CastEntry.COLUMN_ACTOR_ID,
             CastEntry.COLUMN_ACTOR_NAME,
             CastEntry.COLUMN_CHARACTER_NAME,
@@ -97,14 +98,14 @@ public class DetailsActivity extends AppCompatActivity implements
     };
 
     // Query projection used to retrieve movie reviews
-    public static final String[] REVIEW_DETAILED_PROJECTION = {
+    private static final String[] REVIEW_DETAILED_PROJECTION = {
             ReviewsEntry.COLUMN_AUTHOR,
             ReviewsEntry.COLUMN_CONTENT,
             ReviewsEntry.COLUMN_MOVIE_ID
     };
 
     // Query projection used to retrieve movie videos
-    public static final String[] VIDEOS_DETAILED_PROJECTION = {
+    private static final String[] VIDEOS_DETAILED_PROJECTION = {
             VideosEntry.COLUMN_MOVIE_ID,
             VideosEntry.COLUMN_VIDEO_KEY,
             VideosEntry.COLUMN_VIDEO_NAME,
@@ -112,10 +113,10 @@ public class DetailsActivity extends AppCompatActivity implements
     };
 
     // Instance Keys
-    public static final String MOVIE_OBJECT_KEY = "movie";
+    private static final String MOVIE_OBJECT_KEY = "movie";
     private static final String MOVIE_CAST_KEY = "movie_cast";
     public static final String MOVIE_REVIEWS_KEY = "movie_reviews";
-    public static final String MOVIE_VIDEOS_KEY = "movie_videos";
+    private static final String MOVIE_VIDEOS_KEY = "movie_videos";
 
     private static final String IS_FAVOURITE_KEY = "is_favourite";
     public static final String ACTOR_ID_KEY = "actor_id";
@@ -518,7 +519,7 @@ public class DetailsActivity extends AppCompatActivity implements
         mVideoShare.setVisibility(View.INVISIBLE);
     }
 
-    private LoaderManager.LoaderCallbacks<Details> movieDetailsResultLoaderListener =
+    private final LoaderManager.LoaderCallbacks<Details> movieDetailsResultLoaderListener =
             new LoaderManager.LoaderCallbacks<Details>() {
                 @Override
                 public Loader<Details> onCreateLoader(int loaderId, Bundle bundle) {
@@ -547,7 +548,7 @@ public class DetailsActivity extends AppCompatActivity implements
                 }
             };
 
-    private LoaderManager.LoaderCallbacks<ArrayList<Cast>> castResultLoaderListener =
+    private final LoaderManager.LoaderCallbacks<ArrayList<Cast>> castResultLoaderListener =
             new LoaderManager.LoaderCallbacks<ArrayList<Cast>>() {
                 @Override
                 public Loader<ArrayList<Cast>> onCreateLoader(int loaderId, Bundle bundle) {
@@ -574,7 +575,7 @@ public class DetailsActivity extends AppCompatActivity implements
                 }
             };
 
-    private LoaderManager.LoaderCallbacks<ArrayList<Review>> reviewsResultLoaderListener =
+    private final LoaderManager.LoaderCallbacks<ArrayList<Review>> reviewsResultLoaderListener =
             new LoaderManager.LoaderCallbacks<ArrayList<Review>>() {
                 @Override
                 public Loader<ArrayList<Review>> onCreateLoader(int loaderId, Bundle bundle) {
@@ -602,7 +603,7 @@ public class DetailsActivity extends AppCompatActivity implements
                 }
             };
 
-    private LoaderManager.LoaderCallbacks<ArrayList<Video>> videoResultLoaderListener =
+    private final LoaderManager.LoaderCallbacks<ArrayList<Video>> videoResultLoaderListener =
             new LoaderManager.LoaderCallbacks<ArrayList<Video>>() {
                 @Override
                 public Loader<ArrayList<Video>> onCreateLoader(int loaderId, Bundle bundle) {
@@ -629,7 +630,7 @@ public class DetailsActivity extends AppCompatActivity implements
                 }
             };
 
-    private LoaderManager.LoaderCallbacks<Cursor> favouriteMovieResultLoaderListener =
+    private final LoaderManager.LoaderCallbacks<Cursor> favouriteMovieResultLoaderListener =
             new LoaderManager.LoaderCallbacks<Cursor>() {
                 @Override
                 public Loader<Cursor> onCreateLoader(int loaderId, Bundle bundle) {
@@ -735,7 +736,7 @@ public class DetailsActivity extends AppCompatActivity implements
                 }
             };
 
-    private LoaderManager.LoaderCallbacks<Cursor> favouriteCastResultLoaderListener =
+    private final LoaderManager.LoaderCallbacks<Cursor> favouriteCastResultLoaderListener =
             new LoaderManager.LoaderCallbacks<Cursor>() {
                 @Override
                 public Loader<Cursor> onCreateLoader(int loaderId, Bundle bundle) {
@@ -787,7 +788,7 @@ public class DetailsActivity extends AppCompatActivity implements
                 }
             };
 
-    private LoaderManager.LoaderCallbacks<Cursor> favouriteReviewsResultLoaderListener =
+    private final LoaderManager.LoaderCallbacks<Cursor> favouriteReviewsResultLoaderListener =
             new LoaderManager.LoaderCallbacks<Cursor>() {
                 @Override
                 public Loader<Cursor> onCreateLoader(int loaderId, Bundle bundle) {
@@ -835,7 +836,7 @@ public class DetailsActivity extends AppCompatActivity implements
                 }
             };
 
-    private LoaderManager.LoaderCallbacks<Cursor> favouriteVideosResultLoaderListener =
+    private final LoaderManager.LoaderCallbacks<Cursor> favouriteVideosResultLoaderListener =
             new LoaderManager.LoaderCallbacks<Cursor>() {
                 @Override
                 public Loader<Cursor> onCreateLoader(int loaderId, Bundle bundle) {
@@ -1159,7 +1160,7 @@ public class DetailsActivity extends AppCompatActivity implements
         }
     }
 
-    public void toastThis(String toastMessage) {
+    private void toastThis(String toastMessage) {
         if (mToast != null) mToast.cancel();
         mToast = Toast.makeText(this, toastMessage, Toast.LENGTH_LONG);
         mToast.show();
@@ -1198,7 +1199,9 @@ public class DetailsActivity extends AppCompatActivity implements
                 .setType("text/plain")
                 .setText(videoSummary + MOVIES_SHARE_HASHTAG + "\n" + videoUri)
                 .getIntent();
-        shareIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            shareIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT);
+        }
 
         // Return the intent
         return shareIntent;

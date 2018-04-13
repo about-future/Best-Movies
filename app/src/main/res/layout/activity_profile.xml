@@ -65,6 +65,6 @@
 
     <include
         android:id="@+id/actor_credits"
-        layout="@layout/credits_scrolling"/>
+        layout="@layout/credits_body"/>
 
 </android.support.design.widget.CoordinatorLayout>

@@ -46,7 +46,7 @@ public class ProfileActivity extends AppCompatActivity implements CreditsAdapter
     private static final int ACTOR_LOADER_ID = 136;
     private static final int CREDITS_LOADER_ID = 354;
     private static final String IS_FAVOURITE_ACTOR_KEY = "is_favourite_actor";
-    public static final String ACTOR_DETAILS_KEY = "actor";
+    private static final String ACTOR_DETAILS_KEY = "actor";
     private static final String MOVIE_CREDITS_KEY = "movie_credits";
 
     @BindView(R.id.profile_toolbar)
@@ -296,13 +296,13 @@ public class ProfileActivity extends AppCompatActivity implements CreditsAdapter
         mNoCreditsConnectionImageView.setVisibility(View.INVISIBLE);
     }
 
-    public void toastThis(String toastMessage) {
+    private void toastThis(String toastMessage) {
         if (mToast != null) mToast.cancel();
         mToast = Toast.makeText(this, toastMessage, Toast.LENGTH_LONG);
         mToast.show();
     }
 
-    private LoaderManager.LoaderCallbacks<Actor> actorResultLoaderListener =
+    private final LoaderManager.LoaderCallbacks<Actor> actorResultLoaderListener =
             new LoaderManager.LoaderCallbacks<Actor>() {
                 @NonNull
                 @Override
@@ -328,7 +328,7 @@ public class ProfileActivity extends AppCompatActivity implements CreditsAdapter
                 }
             };
 
-    private LoaderManager.LoaderCallbacks<ArrayList<Credits>> actorCreditsResultLoaderListener =
+    private final LoaderManager.LoaderCallbacks<ArrayList<Credits>> actorCreditsResultLoaderListener =
             new LoaderManager.LoaderCallbacks<ArrayList<Credits>>() {
                 @NonNull
                 @Override
@@ -406,8 +406,8 @@ public class ProfileActivity extends AppCompatActivity implements CreditsAdapter
         int endYear;
         if (actorDetails.getBirthday() != null) {
             birthYear = Integer.valueOf(actorDetails.getBirthday().substring(0, 4));
-            if (actorDetails.getDeathday() != null) {
-                endYear = Integer.valueOf(actorDetails.getDeathday().substring(0, 4));
+            if (actorDetails.getDeathDay() != null) {
+                endYear = Integer.valueOf(actorDetails.getDeathDay().substring(0, 4));
             } else {
                 endYear = Calendar.getInstance().get(Calendar.YEAR);
             }

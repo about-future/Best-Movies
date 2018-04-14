@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:minHeight="@dimen/min_height"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/search_results_rv"
+        android:layout_width="match_parent"
+        android:layout_height="220dp"
+        android:clipToPadding="false"
+        android:visibility="visible" />
+
+    <ProgressBar
+        android:id="@+id/loading_results_pb"
+        android:layout_width="@dimen/icon"
+        android:layout_height="@dimen/icon"
+        android:layout_gravity="center_horizontal"
+        android:visibility="visible" />
+
+    <ImageView
+        android:id="@+id/no_result_iv"
+        android:layout_width="@dimen/icon"
+        android:layout_height="@dimen/icon"
+        android:layout_gravity="center_horizontal"
+        android:contentDescription="@string/no_cast_icon"
+        android:visibility="invisible"
+        app:srcCompat="@drawable/ic_no_results" />
+
+    <TextView
+        android:id="@+id/results_messages_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="@dimen/message_top_margin"
+        android:fontFamily="sans-serif-condensed"
+        android:gravity="center"
+        android:text="@string/loading"
+        android:textSize="@dimen/details_font_size"
+        android:visibility="visible" />
+
+</FrameLayout>

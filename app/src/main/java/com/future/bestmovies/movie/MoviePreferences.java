@@ -45,6 +45,23 @@ public class MoviePreferences {
         Log.v(TAG, "setPageNumber: " + pageNumber);
     }
 
+    public static int getLastSearchPageNumber(Context context) {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        String pageNumberKey = context.getString(R.string.pref_search_page_number_key);
+        int defaultPageNumber = Integer.parseInt(context.getString(R.string.pref_search_page_number_default));
+        Log.v(TAG, "getSearchPageNumber: " + sp.getInt(pageNumberKey, defaultPageNumber));
+        return sp.getInt(pageNumberKey, defaultPageNumber);
+    }
+
+    public static void setLastSearchPageNumber(Context context, int pageNumber) {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor editor = sp.edit();
+        String pageNumberKey = context.getString(R.string.pref_search_page_number_key);
+        editor.putInt(pageNumberKey, pageNumber);
+        editor.apply();
+        Log.v(TAG, "setSearchPageNumber: " + pageNumber);
+    }
+
     public static void setImageWidthForRecyclerView(Context context, int imageWidth) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = sp.edit();

@@ -6,6 +6,7 @@ import com.future.bestmovies.credits.CreditsResponse;
 import com.future.bestmovies.movie_details.Details;
 import com.future.bestmovies.movie.MovieResponse;
 import com.future.bestmovies.reviews.ReviewResponse;
+import com.future.bestmovies.search.SearchResponse;
 import com.future.bestmovies.videos.VideoResponse;
 
 import retrofit2.Call;
@@ -34,4 +35,7 @@ public interface ApiInterface {
 
     @GET("person/{id}/movie_credits")
     Call<CreditsResponse> getActorCredits(@Path("id") int personId, @Query("api_key") String apiKey);
+
+    @GET("search/multi")
+    Call<SearchResponse> searchResults(@Query("query") String queryFor, @Query("api_key") String apiKey, @Query("page") int page, @Query("include_adult") Boolean includeAdultMovies);
 }

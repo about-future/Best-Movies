@@ -4,12 +4,14 @@ import android.content.Context;
 import android.database.Cursor;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import com.future.bestmovies.R;
+import com.future.bestmovies.data.FavouritesContract;
 import com.future.bestmovies.data.FavouritesContract.MovieDetailsEntry;
 import com.future.bestmovies.utils.ImageUtils;
 import com.squareup.picasso.Callback;
@@ -20,6 +22,8 @@ import java.util.ArrayList;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+
+import static com.future.bestmovies.data.FavouritesContract.*;
 
 
 public class MovieCategoryAdapter extends RecyclerView.Adapter<MovieCategoryAdapter.MovieViewHolder> {
@@ -47,15 +51,33 @@ public class MovieCategoryAdapter extends RecyclerView.Adapter<MovieCategoryAdap
 
     @Override
     public void onBindViewHolder(@NonNull final MovieViewHolder holder, int position) {
-        final String posterPath;
+        String posterPath;
+
         if (mMovies != null && mMoviesCursor == null) {
             posterPath = mMovies.get(position).getPosterPath();
         } else {
             mMoviesCursor.moveToPosition(position);
-            int posterColumnIndex = mMoviesCursor.getColumnIndex(MovieDetailsEntry.COLUMN_POSTER_PATH);
-            posterPath = mMoviesCursor.getString(posterColumnIndex);
+
+            int posterColumnIndex;
+
+            try {
+                posterColumnIndex = mMoviesCursor.getColumnIndex(MovieDetailsEntry.COLUMN_POSTER_PATH);
+                posterPath = mMoviesCursor.getString(posterColumnIndex);
+            } catch (IllegalStateException e) {
+                Log.v("NO MOVIE POSTER", e.toString());
+                try {
+                    posterColumnIndex = mMoviesCursor.getColumnIndex(ActorsEntry.COLUMN_PROFILE_PATH);
+                    posterPath = mMoviesCursor.getString(posterColumnIndex);
+                } catch (IllegalStateException f) {
+                    Log.v("NO ACTOR POSTER", f.toString());
+                    posterColumnIndex = 0;
+                    posterPath = "ups";
+                }
+            }
         }
+
         // Try loading image from device memory or cache
+        final String finalPosterPath = posterPath;
         Picasso.get()
                 .load(ImageUtils.buildImageUrlForRecyclerView(
                         mContext,
@@ -73,7 +95,7 @@ public class MovieCategoryAdapter extends RecyclerView.Adapter<MovieCategoryAdap
                         Picasso.get()
                                 .load(ImageUtils.buildImageUrlForRecyclerView(
                                         mContext,
-                                        posterPath))
+                                        finalPosterPath))
                                 .error(R.drawable.no_poster)
                                 .into(holder.moviePosterImageView);
                     }
@@ -124,8 +146,19 @@ public class MovieCategoryAdapter extends RecyclerView.Adapter<MovieCategoryAdap
                 mOnClickListener.onGridItemClick(mMovies.get(adapterPosition), 0);
             else {
                 mMoviesCursor.moveToPosition(adapterPosition);
-                int movieId = mMoviesCursor.getInt(mMoviesCursor.getColumnIndex(MovieDetailsEntry.COLUMN_MOVIE_ID));
-                mOnClickListener.onGridItemClick(null, movieId);
+                int resultId;
+                try {
+                    resultId = mMoviesCursor.getInt(mMoviesCursor.getColumnIndex(MovieDetailsEntry.COLUMN_MOVIE_ID));
+                } catch (IllegalStateException e) {
+                    Log.v("NO MOVIE ID", e.toString());
+                    try {
+                        resultId = mMoviesCursor.getInt(mMoviesCursor.getColumnIndex(ActorsEntry.COLUMN_ACTOR_ID));
+                    } catch (IllegalStateException f) {
+                        Log.v("NO ACTOR ID", f.toString());
+                        resultId = 0;
+                    }
+                }
+                mOnClickListener.onGridItemClick(null, resultId);
             }
         }
     }

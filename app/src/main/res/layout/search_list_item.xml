@@ -1,48 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:padding="@dimen/details_vertical_spacing">
 
-        <ImageView
-            android:id="@+id/search_result_iv"
-            android:layout_width="40dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:adjustViewBounds="true"
-            android:background="@color/colorPrimaryDark"
-            android:contentDescription="@string/movie_poster"
-            android:scaleType="centerCrop"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:srcCompat="@drawable/ic_local_movies" />
+    <ImageView
+        android:id="@+id/search_result_iv"
+        android:layout_width="40dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:adjustViewBounds="true"
+        android:background="@color/colorPrimaryDark"
+        android:contentDescription="@string/movie_poster"
+        android:scaleType="centerCrop"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:srcCompat="@drawable/ic_local_movies" />
 
-        <TextView
-            android:id="@+id/search_result_tv"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
-            android:layout_marginStart="@dimen/details_horizontal_spacing"
-            android:fontFamily="sans-serif-condensed"
-            android:textColor="@color/colorWhite"
-            android:textSize="22sp"
-            app:layout_constraintStart_toEndOf="@id/search_result_iv"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:text="Gal Gadot" />
+    <TextView
+        android:id="@+id/search_result_tv"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/details_horizontal_spacing"
+        android:layout_marginTop="6dp"
+        android:fontFamily="sans-serif-condensed"
+        android:textColor="@color/colorWhite"
+        android:textSize="22sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/search_result_iv"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="Gal Gadot" />
 
-        <TextView
-            android:id="@+id/search_result_label"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/details_horizontal_spacing"
-            android:fontFamily="sans-serif-condensed"
-            android:text="@string/search_result_person"
-            android:textColor="@color/colorAccent"
-            android:textSize="@dimen/details_font_size"
-            app:layout_constraintStart_toEndOf="@id/search_result_iv"
-            app:layout_constraintTop_toBottomOf="@id/search_result_tv" />
+    <TextView
+        android:id="@+id/search_result_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/details_horizontal_spacing"
+        android:fontFamily="sans-serif-condensed"
+        android:text="@string/search_result_person"
+        android:textColor="@color/colorAccent"
+        android:textSize="@dimen/details_font_size"
+        app:layout_constraintStart_toEndOf="@id/search_result_iv"
+        app:layout_constraintTop_toBottomOf="@id/search_result_tv" />
 
 </android.support.constraint.ConstraintLayout>

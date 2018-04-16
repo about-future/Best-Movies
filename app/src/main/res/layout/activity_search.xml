@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".SearchActivity">
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/search_results_rv"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="visible" />
+
+    <ProgressBar
+        android:id="@+id/loading_results_pb"
+        android:layout_width="@dimen/icon"
+        android:layout_height="@dimen/icon"
+        android:layout_gravity="center|bottom"
+        android:layout_marginBottom="@dimen/details_vertical_spacing"
+        android:visibility="visible" />
+
+    <ImageView
+        android:id="@+id/no_result_iv"
+        android:layout_width="@dimen/icon"
+        android:layout_height="@dimen/icon"
+        android:layout_gravity="center"
+        android:contentDescription="@string/no_cast_icon"
+        android:visibility="invisible"
+        app:srcCompat="@drawable/ic_no_results" />
+
+    <TextView
+        android:id="@+id/results_messages_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="40dp"
+        android:fontFamily="sans-serif-condensed"
+        android:gravity="center"
+        android:text="@string/loading"
+        android:textSize="@dimen/details_font_size"
+        android:visibility="invisible" />
+
+</FrameLayout>

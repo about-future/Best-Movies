@@ -6,7 +6,7 @@ import java.util.ArrayList;
 
 public class SearchResponse {
     @SerializedName("results")
-    private final ArrayList<Search> results = new ArrayList<>();
+    private final ArrayList<SearchResult> results = new ArrayList<>();
 
-    public ArrayList<Search> getResults() { return results; }
+    public ArrayList<SearchResult> getResults() { return results; }
 }

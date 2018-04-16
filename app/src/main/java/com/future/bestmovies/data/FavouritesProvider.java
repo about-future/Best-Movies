@@ -10,6 +10,9 @@ import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import com.future.bestmovies.credits.Actor;
+import com.future.bestmovies.credits.Credits;
+
 import static com.future.bestmovies.data.FavouritesContract.*;
 
 public class FavouritesProvider extends ContentProvider {
@@ -36,6 +39,16 @@ public class FavouritesProvider extends ContentProvider {
     // URI matcher code for the content URI for a single video in the videos table
     private static final int VIDEO_ID = 401;
 
+    // URI matcher code for the content URI for the actors table
+    private static final int ACTORS = 500;
+    // URI matcher code for the content URI for a single actor in the actors table
+    private static final int ACTOR_ID = 501;
+
+    // URI matcher code for the content URI for the credits table
+    private static final int CREDITS = 600;
+    // URI matcher code for the content URI for a single credit in the credits table
+    private static final int CREDIT_ID = 601;
+
     /**
      * UriMatcher object to match a content URI to a corresponding code.
      * The input passed into the constructor represents the code to return for the root URI.
@@ -59,6 +72,12 @@ public class FavouritesProvider extends ContentProvider {
 
         sUriMatcher.addURI(CONTENT_AUTHORITY, PATH_VIDEOS, VIDEOS);
         sUriMatcher.addURI(CONTENT_AUTHORITY, PATH_VIDEOS + "/#", VIDEO_ID);
+
+        sUriMatcher.addURI(CONTENT_AUTHORITY, PATH_ACTORS, ACTORS);
+        sUriMatcher.addURI(CONTENT_AUTHORITY, PATH_ACTORS + "/#", ACTOR_ID);
+
+        sUriMatcher.addURI(CONTENT_AUTHORITY, PATH_CREDITS, CREDITS);
+        sUriMatcher.addURI(CONTENT_AUTHORITY, PATH_CREDITS + "/#", CREDIT_ID);
     }
 
     // Initialize the provider and the database helper object.
@@ -144,6 +163,31 @@ public class FavouritesProvider extends ContentProvider {
                 cursor = database.query(VideosEntry.TABLE_NAME, projection, selection, selectionArgs,
                         null, null, sortOrder);
                 break;
+
+            case ACTORS:
+                cursor = database.query(ActorsEntry.TABLE_NAME, projection, selection, selectionArgs,
+                        null, null, sortOrder);
+                break;
+
+            case ACTOR_ID:
+                selection = ActorsEntry.COLUMN_ACTOR_ID + "=?";
+                selectionArgs = new String[]{String.valueOf(ContentUris.parseId(uri))};
+                cursor = database.query(ActorsEntry.TABLE_NAME, projection, selection, selectionArgs,
+                        null, null, sortOrder);
+                break;
+
+            case CREDITS:
+                cursor = database.query(CreditsEntry.TABLE_NAME, projection, selection, selectionArgs,
+                        null, null, sortOrder);
+                break;
+
+            case CREDIT_ID:
+                selection = CreditsEntry.COLUMN_ACTOR_ID + "=?";
+                selectionArgs = new String[]{String.valueOf(ContentUris.parseId(uri))};
+                cursor = database.query(CreditsEntry.TABLE_NAME, projection, selection, selectionArgs,
+                        null, null, sortOrder);
+                break;
+
             default:
                 throw new IllegalArgumentException("Cannot query unknown Uri " + uri);
         }
@@ -176,6 +220,14 @@ public class FavouritesProvider extends ContentProvider {
                 return VideosEntry.CONTENT_LIST_TYPE;
             case VIDEO_ID:
                 return VideosEntry.CONTENT_ITEM_TYPE;
+            case ACTORS:
+                return ActorsEntry.CONTENT_LIST_TYPE;
+            case ACTOR_ID:
+                return ActorsEntry.CONTENT_ITEM_TYPE;
+            case CREDITS:
+                return CreditsEntry.CONTENT_LIST_TYPE;
+            case CREDIT_ID:
+                return CreditsEntry.CONTENT_ITEM_TYPE;
             default:
                 throw new IllegalStateException("Unknown URI " + uri + " with match " + sUriMatcher.match(uri));
         }
@@ -187,6 +239,8 @@ public class FavouritesProvider extends ContentProvider {
         switch (sUriMatcher.match(uri)) {
             case MOVIES:
                 return insertFavourite(MovieDetailsEntry.TABLE_NAME, uri, contentValues);
+            case ACTORS:
+                return insertFavourite(ActorsEntry.TABLE_NAME, uri, contentValues);
 
             // In the present, the bellow cases are not used, but in the future they might be used,
             // so it's good to have all cases created
@@ -196,6 +250,7 @@ public class FavouritesProvider extends ContentProvider {
                 return insertFavourite(VideosEntry.TABLE_NAME, uri, contentValues);
             case REVIEWS:
                 return insertFavourite(ReviewsEntry.TABLE_NAME, uri, contentValues);
+
             default:
                 throw new IllegalArgumentException("Insertion is not supported for " + uri);
         }
@@ -226,6 +281,9 @@ public class FavouritesProvider extends ContentProvider {
 
             case VIDEOS:
                 return bulkInsertData(VideosEntry.TABLE_NAME, uri, values);
+
+            case CREDITS:
+                return bulkInsertData(CreditsEntry.TABLE_NAME, uri, values);
 
             default:
                 return super.bulkInsert(uri, values);
@@ -282,6 +340,14 @@ public class FavouritesProvider extends ContentProvider {
             case VIDEOS:
                 // Delete all rows that match the selection and selection args
                 return deleteFavourite(VideosEntry.TABLE_NAME, uri, selection, selectionArgs);
+
+            case ACTORS:
+                // Delete all rows that match the selection and selection args
+                return deleteFavourite(ActorsEntry.TABLE_NAME, uri, selection, selectionArgs);
+
+            case CREDITS:
+                // Delete all rows that match the selection and selection args
+                return deleteFavourite(CreditsEntry.TABLE_NAME, uri, selection, selectionArgs);
 
             default:
                 throw new IllegalArgumentException("Delete is not supported for " + uri);

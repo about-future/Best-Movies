@@ -3,9 +3,11 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
+        android:id="@+id/action_search"
         android:title="@string/search_menu"
         android:icon="@drawable/ic_search"
-        app:showAsAction="always"/>
+        app:showAsAction="ifRoom|collapseActionView"
+        app:actionViewClass="android.support.v7.widget.SearchView"/>
 
     <item
         android:title="@string/main_menu"
@@ -39,9 +41,15 @@
                 app:showAsAction="never" />
 
             <item
-                android:id="@+id/action_favourites"
+                android:id="@+id/action_favourite_actors"
                 android:orderInCategory="5"
-                android:title="@string/menu_favourites"
+                android:title="@string/menu_favourite_actors"
+                app:showAsAction="never" />
+
+            <item
+                android:id="@+id/action_favourite_movies"
+                android:orderInCategory="6"
+                android:title="@string/menu_favourite_movies"
                 app:showAsAction="never" />
 
             <item

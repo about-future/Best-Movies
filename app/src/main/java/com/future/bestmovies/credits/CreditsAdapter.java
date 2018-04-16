@@ -86,7 +86,7 @@ public class CreditsAdapter extends RecyclerView.Adapter<CreditsAdapter.CreditsV
         }
         holder.creditReleaseDateTextView.setText(TextUtils.concat("(", releaseYear, ")"));
 
-        if (mCredits.get(position).getCharacter().length() > 0)
+        if (mCredits.get(position).getCharacter() != null && mCredits.get(position).getCharacter().length() > 0)
             holder.creditCharacterTextView.setText(TextUtils.concat(
                     mContext.getText(R.string.credit_as_character).toString(),
                     mCredits.get(position).getCharacter()));

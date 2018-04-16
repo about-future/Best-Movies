@@ -1,14 +1,12 @@
 package com.future.bestmovies.search;
 
-import android.content.AsyncTaskLoader;
 import android.content.Context;
+import android.support.v4.content.AsyncTaskLoader;
 import android.util.Log;
 
 import com.future.bestmovies.movie.MoviePreferences;
 import com.future.bestmovies.retrofit.ApiClient;
 import com.future.bestmovies.retrofit.ApiInterface;
-import com.future.bestmovies.reviews.Review;
-import com.future.bestmovies.reviews.ReviewResponse;
 import com.future.bestmovies.utils.NetworkUtils;
 
 import java.io.IOException;
@@ -17,8 +15,8 @@ import java.util.Objects;
 
 import retrofit2.Call;
 
-public class SearchLoader extends AsyncTaskLoader<ArrayList<Search>> {
-    private ArrayList<Search> cachedSearch;
+public class SearchLoader extends AsyncTaskLoader<ArrayList<SearchResult>> {
+    private ArrayList<SearchResult> cachedSearchResults;
     private final String searchQuery;
     //private Context context;
 
@@ -30,12 +28,12 @@ public class SearchLoader extends AsyncTaskLoader<ArrayList<Search>> {
 
     @Override
     protected void onStartLoading() {
-        if (cachedSearch == null)
+        if (cachedSearchResults == null)
             forceLoad();
     }
 
     @Override
-    public ArrayList<Search> loadInBackground() {
+    public ArrayList<SearchResult> loadInBackground() {
         ApiInterface movieApiInterface = ApiClient.getClient().create(ApiInterface.class);
         Call<SearchResponse> call = movieApiInterface.searchResults(
                 searchQuery,
@@ -43,7 +41,7 @@ public class SearchLoader extends AsyncTaskLoader<ArrayList<Search>> {
                 MoviePreferences.getLastSearchPageNumber(getContext()),
                 false);
 
-        ArrayList<Search> result = new ArrayList<>();
+        ArrayList<SearchResult> result = new ArrayList<>();
         try {
             result = Objects.requireNonNull(call.execute().body()).getResults();
         } catch (IOException e) {
@@ -54,8 +52,8 @@ public class SearchLoader extends AsyncTaskLoader<ArrayList<Search>> {
     }
 
     @Override
-    public void deliverResult(ArrayList<Search> data) {
-        cachedSearch = data;
+    public void deliverResult(ArrayList<SearchResult> data) {
+        cachedSearchResults = data;
         super.deliverResult(data);
     }
 }

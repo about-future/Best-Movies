@@ -13,6 +13,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SearchView;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
@@ -50,16 +51,24 @@ public class MainActivity extends AppCompatActivity implements
     private static final String CATEGORY_TOP_RATED = "top_rated";
     private static final String CATEGORY_UPCOMING = "upcoming";
     private static final String CATEGORY_NOW_PLAYING = "now_playing";
-    private static final String CATEGORY_FAVOURITES = "favourites";
+    private static final String CATEGORY_FAVOURITE_ACTORS = "favourite_actors";
+    private static final String CATEGORY_FAVOURITE_MOVIES = "favourite_movies";
 
     // Loaders
     private static final int MOVIES_LOADER_ID = 24;
-    private static final int FAVOURITES_LOADER_ID = 516;
+    private static final int FAVOURITE_ACTORS_LOADER_ID = 136;
+    private static final int FAVOURITE_MOVIES_LOADER_ID = 805;
     private static final String CURRENT_LOADED_ID = "loader_id";
     private int mCurrentLoaderId;
 
-    // Cursor projection
-    private static final String[] FAVOURITES_MOVIE_PROJECTION = {
+    // Actors cursor projection
+    private static final String[] FAVOURITE_ACTORS_PROJECTION = {
+            ActorsEntry.COLUMN_ACTOR_ID,
+            ActorsEntry.COLUMN_PROFILE_PATH
+    };
+
+    // Movies cursor projection
+    private static final String[] FAVOURITE_MOVIES_PROJECTION = {
             MovieDetailsEntry.COLUMN_MOVIE_ID,
             MovieDetailsEntry.COLUMN_POSTER_PATH
     };
@@ -116,9 +125,6 @@ public class MainActivity extends AppCompatActivity implements
 
 
         if (savedInstanceState == null) {
-//            if (MoviePreferences.getPreferredQueryType(this) == null) {
-//            }
-
             // Set current loader id and title, depending on preferred "query type" (aka: "movie category" or "sort order")
             switch (MoviePreferences.getPreferredQueryType(this)) {
                 case CATEGORY_TOP_RATED:
@@ -133,9 +139,13 @@ public class MainActivity extends AppCompatActivity implements
                     mCurrentLoaderId = MOVIES_LOADER_ID;
                     setTitle(R.string.menu_now_playing);
                     break;
-                case CATEGORY_FAVOURITES:
-                    mCurrentLoaderId = FAVOURITES_LOADER_ID;
-                    setTitle(R.string.menu_favourites);
+                case CATEGORY_FAVOURITE_ACTORS:
+                    mCurrentLoaderId = FAVOURITE_ACTORS_LOADER_ID;
+                    setTitle(R.string.menu_favourite_actors);
+                    break;
+                case CATEGORY_FAVOURITE_MOVIES:
+                    mCurrentLoaderId = FAVOURITE_MOVIES_LOADER_ID;
+                    setTitle(R.string.menu_favourite_movies);
                     break;
                 default:
                     // If we run the app for the first time, no movie category was set as query
@@ -162,8 +172,9 @@ public class MainActivity extends AppCompatActivity implements
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
 
-                // This scroll listener will be used only if the selected category is not favourites
-                if (!TextUtils.equals(MoviePreferences.getPreferredQueryType(getApplicationContext()), CATEGORY_FAVOURITES)) {
+                // This scroll listener will be used only if the selected category is not favourite actors or movies
+                if (!TextUtils.equals(MoviePreferences.getPreferredQueryType(getApplicationContext()), CATEGORY_FAVOURITE_ACTORS) &&
+                        !TextUtils.equals(MoviePreferences.getPreferredQueryType(getApplicationContext()), CATEGORY_FAVOURITE_MOVIES)) {
                     // To be able to load data in advance, before the user gets to the bottom of our
                     // present results, we have to know how many items are visible on the screen, how
                     // many items are in total and how many items are already scrolled out of the screen
@@ -221,7 +232,9 @@ public class MainActivity extends AppCompatActivity implements
     // Fetch data or show connection error
     private void fetchMovies(Context context) {
         // If there is a network connection, fetch data
-        if (NetworkUtils.isConnected(context) && mCurrentLoaderId != FAVOURITES_LOADER_ID) {
+        if (NetworkUtils.isConnected(context) &&
+                mCurrentLoaderId != FAVOURITE_ACTORS_LOADER_ID &&
+                mCurrentLoaderId != FAVOURITE_MOVIES_LOADER_ID) {
             showMovies();
 
             // Before we fetch data, we need the last page number that was loaded in our RecyclerView,
@@ -233,7 +246,7 @@ public class MainActivity extends AppCompatActivity implements
         }
         // If selected loader id is FAVOURITES_LOADER_ID, we don't need internet connection, so we
         // showMovies and start favourites loader
-        else if (mCurrentLoaderId == FAVOURITES_LOADER_ID) {
+        else if (mCurrentLoaderId == FAVOURITE_ACTORS_LOADER_ID || mCurrentLoaderId == FAVOURITE_MOVIES_LOADER_ID) {
             showMovies();
 
             //Init or restart loader
@@ -255,6 +268,24 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main_menu, menu);
+
+        MenuItem searchItem = menu.findItem(R.id.action_search);
+        SearchView searchView = (SearchView) searchItem.getActionView();
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                Intent searchIntent = new Intent(MainActivity.this, SearchActivity.class);
+                searchIntent.putExtra(SearchActivity.SEARCH_QUERY_KEY, query);
+                startActivity(searchIntent);
+                return true;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                return false;
+            }
+        });
+
         return true;
     }
 
@@ -278,8 +309,12 @@ public class MainActivity extends AppCompatActivity implements
                 selectedItem = menu.findItem(R.id.action_now_playing);
                 selectedItem.setIcon(R.drawable.ic_check);
                 break;
-            case CATEGORY_FAVOURITES:
-                selectedItem = menu.findItem(R.id.action_favourites);
+            case CATEGORY_FAVOURITE_ACTORS:
+                selectedItem = menu.findItem(R.id.action_favourite_actors);
+                selectedItem.setIcon(R.drawable.ic_check);
+                break;
+            case CATEGORY_FAVOURITE_MOVIES:
+                selectedItem = menu.findItem(R.id.action_favourite_movies);
                 selectedItem.setIcon(R.drawable.ic_check);
                 break;
         }
@@ -293,7 +328,8 @@ public class MainActivity extends AppCompatActivity implements
             case R.id.action_popular:
                 MoviePreferences.setPreferredQueryType(this, getString(R.string.category_popular));
                 MoviePreferences.setLastPageNumber(this, 0);
-                getSupportLoaderManager().destroyLoader(FAVOURITES_LOADER_ID);
+                getSupportLoaderManager().destroyLoader(FAVOURITE_ACTORS_LOADER_ID);
+                getSupportLoaderManager().destroyLoader(FAVOURITE_MOVIES_LOADER_ID);
                 mCurrentLoaderId = MOVIES_LOADER_ID;
                 fetchMovies(getApplicationContext());
                 setTitle(item.getTitle());
@@ -303,7 +339,8 @@ public class MainActivity extends AppCompatActivity implements
             case R.id.action_top_rated:
                 MoviePreferences.setPreferredQueryType(this, getString(R.string.category_top_rated));
                 MoviePreferences.setLastPageNumber(this, 0);
-                getSupportLoaderManager().destroyLoader(FAVOURITES_LOADER_ID);
+                getSupportLoaderManager().destroyLoader(FAVOURITE_ACTORS_LOADER_ID);
+                getSupportLoaderManager().destroyLoader(FAVOURITE_MOVIES_LOADER_ID);
                 mCurrentLoaderId = MOVIES_LOADER_ID;
                 fetchMovies(getApplicationContext());
                 setTitle(item.getTitle());
@@ -313,7 +350,8 @@ public class MainActivity extends AppCompatActivity implements
             case R.id.action_upcoming:
                 MoviePreferences.setPreferredQueryType(this, getString(R.string.category_upcoming));
                 MoviePreferences.setLastPageNumber(this, 0);
-                getSupportLoaderManager().destroyLoader(FAVOURITES_LOADER_ID);
+                getSupportLoaderManager().destroyLoader(FAVOURITE_ACTORS_LOADER_ID);
+                getSupportLoaderManager().destroyLoader(FAVOURITE_MOVIES_LOADER_ID);
                 mCurrentLoaderId = MOVIES_LOADER_ID;
                 fetchMovies(getApplicationContext());
                 setTitle(item.getTitle());
@@ -323,18 +361,29 @@ public class MainActivity extends AppCompatActivity implements
             case R.id.action_now_playing:
                 MoviePreferences.setPreferredQueryType(this, getString(R.string.category_now_playing));
                 MoviePreferences.setLastPageNumber(this, 0);
-                getSupportLoaderManager().destroyLoader(FAVOURITES_LOADER_ID);
+                getSupportLoaderManager().destroyLoader(FAVOURITE_ACTORS_LOADER_ID);
+                getSupportLoaderManager().destroyLoader(FAVOURITE_MOVIES_LOADER_ID);
                 mCurrentLoaderId = MOVIES_LOADER_ID;
                 fetchMovies(getApplicationContext());
                 setTitle(item.getTitle());
                 invalidateOptionsMenu();
                 break;
 
-            case R.id.action_favourites:
-                MoviePreferences.setPreferredQueryType(this, getString(R.string.category_favourites));
+            case R.id.action_favourite_actors:
+                MoviePreferences.setPreferredQueryType(this, getString(R.string.category_favourite_actors));
                 getSupportLoaderManager().destroyLoader(MOVIES_LOADER_ID);
-                mCurrentLoaderId = FAVOURITES_LOADER_ID;
-                //getSupportLoaderManager().restartLoader(mCurrentLoaderId, null, this);
+                getSupportLoaderManager().destroyLoader(FAVOURITE_MOVIES_LOADER_ID);
+                mCurrentLoaderId = FAVOURITE_ACTORS_LOADER_ID;
+                fetchMovies(getApplicationContext());
+                setTitle(item.getTitle());
+                invalidateOptionsMenu();
+                break;
+
+            case R.id.action_favourite_movies:
+                MoviePreferences.setPreferredQueryType(this, getString(R.string.category_favourite_movies));
+                getSupportLoaderManager().destroyLoader(MOVIES_LOADER_ID);
+                getSupportLoaderManager().destroyLoader(FAVOURITE_ACTORS_LOADER_ID);
+                mCurrentLoaderId = FAVOURITE_MOVIES_LOADER_ID;
                 fetchMovies(getApplicationContext());
                 setTitle(item.getTitle());
                 invalidateOptionsMenu();
@@ -352,16 +401,24 @@ public class MainActivity extends AppCompatActivity implements
     // so we can display all the information that we received about it, without heaving to fetch
     // more data from movie API server
     @Override
-    public void onGridItemClick(Movie movieClicked, int movieId) {
-        if (movieClicked != null && movieId == 0) {
+    public void onGridItemClick(Movie movieClicked, int favouriteId) {
+        if (movieClicked != null && favouriteId == 0) {
             Intent movieDetailsIntent = new Intent(MainActivity.this, DetailsActivity.class);
             movieDetailsIntent.putExtra(DetailsActivity.MOVIE_ID_KEY, movieClicked.getMovieId());
             movieDetailsIntent.putExtra(DetailsActivity.MOVIE_TITLE_KEY, movieClicked.getTitle());
             startActivity(movieDetailsIntent);
         } else {
-            Intent movieDetailsIntent = new Intent(MainActivity.this, DetailsActivity.class);
-            movieDetailsIntent.putExtra(DetailsActivity.MOVIE_ID_KEY, movieId);
-            startActivity(movieDetailsIntent);
+            if (mCurrentLoaderId == FAVOURITE_MOVIES_LOADER_ID) {
+                Intent movieDetailsIntent = new Intent(MainActivity.this, DetailsActivity.class);
+                movieDetailsIntent.putExtra(DetailsActivity.MOVIE_ID_KEY, favouriteId);
+                startActivity(movieDetailsIntent);
+            } else if (mCurrentLoaderId == FAVOURITE_ACTORS_LOADER_ID) {
+                Intent actorIntent = new Intent(MainActivity.this, ProfileActivity.class);
+                actorIntent.putExtra(DetailsActivity.ACTOR_ID_KEY, favouriteId);
+                // TODO: find a backdrop
+                //actorIntent.putExtra(DetailsActivity.MOVIE_BACKDROP_KEY, );
+                startActivity(actorIntent);
+            }
         }
     }
 
@@ -391,12 +448,22 @@ public class MainActivity extends AppCompatActivity implements
                 // If the loaded id matches movies loader, return a new movie category loader
                 return new MovieCategoryLoader(getApplicationContext());
 
-            case FAVOURITES_LOADER_ID:
+            case FAVOURITE_ACTORS_LOADER_ID:
+                // If the loader id matches favourite actors loader, return a cursor loader
+                return new CursorLoader(
+                        getApplicationContext(),
+                        ActorsEntry.CONTENT_URI,
+                        FAVOURITE_ACTORS_PROJECTION,
+                        null,
+                        null,
+                        null);
+
+            case FAVOURITE_MOVIES_LOADER_ID:
                 // If the loader id matches favourites loader, return a cursor loader
                 return new CursorLoader(
                         getApplicationContext(),
                         MovieDetailsEntry.CONTENT_URI,
-                        FAVOURITES_MOVIE_PROJECTION,
+                        FAVOURITE_MOVIES_PROJECTION,
                         null,
                         null,
                         null);
@@ -439,7 +506,30 @@ public class MainActivity extends AppCompatActivity implements
 
                 break;
 
-            case FAVOURITES_LOADER_ID:
+            case FAVOURITE_ACTORS_LOADER_ID:
+                mAdapter.swapCursor((Cursor) data);
+
+                if (data != null && ((Cursor) data).getCount() == 0) {
+                    mNoConnectionImageView.setVisibility(View.VISIBLE);
+                    mNoConnectionImageView.setImageResource(R.drawable.ic_star);
+                    mNoConnectionImageView.setContentDescription(getString(R.string.no_favourites_icon));
+                    mMessagesTextView.setVisibility(View.VISIBLE);
+                    mMessagesTextView.setText(R.string.no_favourites);
+                } else {
+                    mNoConnectionImageView.setVisibility(View.INVISIBLE);
+                    mMessagesTextView.setVisibility(View.INVISIBLE);
+                    // If the RecyclerView has no position, we assume the first position in the list
+                    if (mPosition == RecyclerView.NO_POSITION) {
+                        mPosition = 0;
+                        // Scroll the RecyclerView to mPosition
+                        mMoviesRecyclerView.smoothScrollToPosition(mPosition);
+                    }
+                }
+
+                break;
+
+
+            case FAVOURITE_MOVIES_LOADER_ID:
                 mAdapter.swapCursor((Cursor) data);
 
                 if (data != null && ((Cursor) data).getCount() == 0) {
@@ -469,7 +559,10 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void onLoaderReset(@NonNull Loader loader) {
         switch (loader.getId()) {
-            case FAVOURITES_LOADER_ID:
+            case FAVOURITE_ACTORS_LOADER_ID:
+                mAdapter.swapCursor(null);
+                break;
+            case FAVOURITE_MOVIES_LOADER_ID:
                 mAdapter.swapCursor(null);
                 break;
             default:

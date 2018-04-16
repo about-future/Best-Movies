@@ -1,10 +1,14 @@
 package com.future.bestmovies;
 
+import android.content.ContentValues;
 import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -25,6 +29,7 @@ import com.future.bestmovies.credits.ActorLoader;
 import com.future.bestmovies.credits.Credits;
 import com.future.bestmovies.credits.CreditsAdapter;
 import com.future.bestmovies.credits.CreditsLoader;
+import com.future.bestmovies.data.FavouritesContract;
 import com.future.bestmovies.utils.ImageUtils;
 import com.future.bestmovies.utils.NetworkUtils;
 import com.future.bestmovies.utils.ScreenUtils;
@@ -40,14 +45,45 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 import static com.future.bestmovies.DetailsActivity.*;
+import static com.future.bestmovies.data.FavouritesContract.*;
 
 public class ProfileActivity extends AppCompatActivity implements CreditsAdapter.ListItemClickListener {
 
     private static final int ACTOR_LOADER_ID = 136;
-    private static final int CREDITS_LOADER_ID = 354;
+    private static final int CREDITS_LOADER_ID = 435;
+    private static final int FAVOURITE_ACTOR_LOADER_ID = 516136;
+    private static final int FAVOURITE_CREDITS_LOADER_ID = 516435;
+    private static final int CHECK_IF_FAVOURITE_ACTOR_LOADER_ID = 473136;
+
     private static final String IS_FAVOURITE_ACTOR_KEY = "is_favourite_actor";
     private static final String ACTOR_DETAILS_KEY = "actor";
     private static final String MOVIE_CREDITS_KEY = "movie_credits";
+    private static final String CREDITS_POSITION_KEY = "credits_position";
+
+    // Query projection used to check if the actor is a favourite or not
+    private static final String[] ACTOR_CHECK_PROJECTION = {ActorsEntry.COLUMN_ACTOR_ID};
+
+    // Query projection used to retrieve actor details
+    private static final String[] ACTOR_DETAILED_PROJECTION = {
+            ActorsEntry.COLUMN_ACTOR_ID,
+            ActorsEntry.COLUMN_BIRTHDAY,
+            ActorsEntry.COLUMN_BIOGRAPHY,
+            ActorsEntry.COLUMN_DEATH_DAY,
+            ActorsEntry.COLUMN_GENDER,
+            ActorsEntry.COLUMN_NAME,
+            ActorsEntry.COLUMN_PROFILE_PATH,
+            ActorsEntry.COLUMN_PLACE_OF_BIRTH
+    };
+
+    // Query projection used to retrieve movie credits
+    private static final String[] CREDITS_DETAILED_PROJECTION = {
+            CreditsEntry.COLUMN_ACTOR_ID,
+            CreditsEntry.COLUMN_CHARACTER,
+            CreditsEntry.COLUMN_MOVIE_ID,
+            CreditsEntry.COLUMN_POSTER_PATH,
+            CreditsEntry.COLUMN_RELEASE_DATE,
+            CreditsEntry.COLUMN_TITLE
+    };
 
     @BindView(R.id.profile_toolbar)
     Toolbar toolbar;
@@ -78,6 +114,10 @@ public class ProfileActivity extends AppCompatActivity implements CreditsAdapter
     private boolean mIsFavouriteActor;
     private Toast mToast;
     private CreditsAdapter mCreditsAdapter;
+    private GridLayoutManager mCreditsLayoutManager;
+    private int mCreditsPosition = RecyclerView.NO_POSITION;
+
+    private Bundle mBundleState;
 
     // Movie credits variables
     @BindView(R.id.credits_messages_tv)
@@ -88,9 +128,10 @@ public class ProfileActivity extends AppCompatActivity implements CreditsAdapter
     ImageView mNoCreditsImageView;
     @BindView(R.id.no_credits_connection_iv)
     ImageView mNoCreditsConnectionImageView;
+    @BindString(R.string.no_connection)
+    String noConnection;
 
-    // This will be used in the near future for adding the actor to favourites list
-    //private MenuItem mFavouriteActorMenuItem;
+    private MenuItem mFavouriteActorMenuItem;
 
     // Resources
     @BindString(R.string.credit_date_unknown)
@@ -109,7 +150,7 @@ public class ProfileActivity extends AppCompatActivity implements CreditsAdapter
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
 
-        GridLayoutManager mCreditsLayoutManager = new GridLayoutManager(
+        mCreditsLayoutManager = new GridLayoutManager(
                 this,
                 ScreenUtils.getNumberOfColumns(this, 120, 3));
         mCreditsRecyclerView.setLayoutManager(mCreditsLayoutManager);
@@ -157,13 +198,8 @@ public class ProfileActivity extends AppCompatActivity implements CreditsAdapter
                             }
                         });
 
-                if (NetworkUtils.isConnected(this)) {
-                    getSupportLoaderManager().restartLoader(ACTOR_LOADER_ID, null, actorResultLoaderListener);
-                    hideCredits();
-                    getSupportLoaderManager().restartLoader(CREDITS_LOADER_ID, null, actorCreditsResultLoaderListener);
-                } else {
-                    closeOnError(getString(R.string.no_connection));
-                }
+                // Check if this actor is a favourite or not
+                getSupportLoaderManager().restartLoader(CHECK_IF_FAVOURITE_ACTOR_LOADER_ID, null, favouriteActorResultLoaderListener);
             } else {
                 closeOnError(getString(R.string.details_error_message));
             }
@@ -227,8 +263,38 @@ public class ProfileActivity extends AppCompatActivity implements CreditsAdapter
             if (mCredits != null)
                 populateCredits(mCredits);
         }
+
+        // Favourite Actor
         if (savedInstanceState.containsKey(IS_FAVOURITE_ACTOR_KEY))
             mIsFavouriteActor = savedInstanceState.getBoolean(IS_FAVOURITE_ACTOR_KEY);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mBundleState = new Bundle();
+
+        // Save Credits position
+        mCreditsPosition = mCreditsLayoutManager.findFirstCompletelyVisibleItemPosition();
+        mBundleState.putInt(CREDITS_POSITION_KEY, mCreditsPosition);
+
+        mBundleState.putBoolean(IS_FAVOURITE_ACTOR_KEY, mIsFavouriteActor);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        // restore RecyclerView state
+        if (mBundleState != null) {
+            // Restore Credits position
+            mCreditsPosition = mBundleState.getInt(CREDITS_POSITION_KEY);
+            if (mCreditsPosition == RecyclerView.NO_POSITION) mCreditsPosition = 0;
+            // Scroll the RecyclerView to mCreditsPosition
+            mCreditsRecyclerView.smoothScrollToPosition(mCreditsPosition);
+
+            mIsFavouriteActor = mBundleState.getBoolean(IS_FAVOURITE_ACTOR_KEY);
+        }
     }
 
     @Override
@@ -237,7 +303,7 @@ public class ProfileActivity extends AppCompatActivity implements CreditsAdapter
 
         MenuItem favouriteActorMenuItem = menu.findItem(R.id.action_favourite_actor);
         // This item will be used in the near future
-        //mFavouriteActorMenuItem = favouriteActorMenuItem;
+        mFavouriteActorMenuItem = favouriteActorMenuItem;
         if (mIsFavouriteActor) {
             DrawableCompat.setTint(favouriteActorMenuItem.getIcon(), ContextCompat.getColor(getApplicationContext(), R.color.colorAccent));
         } else {
@@ -257,15 +323,11 @@ public class ProfileActivity extends AppCompatActivity implements CreditsAdapter
         }
 
         if (id == R.id.action_favourite_actor) {
-            if (!mIsFavouriteActor) {
-                DrawableCompat.setTint(item.getIcon(), ContextCompat.getColor(getApplicationContext(), R.color.colorAccent));
-                toastThis(getString(R.string.favourite_actor_insert_successful));
-            } else {
-                DrawableCompat.setTint(item.getIcon(), ContextCompat.getColor(getApplicationContext(), R.color.colorWhite));
-                toastThis(getString(R.string.favourite_actor_delete_successful));
+            if (mIsFavouriteActor)
+                deleteFavouriteActor(mActor, item);
+            else {
+                insertFavouriteActor(mActor, item);
             }
-
-            mIsFavouriteActor = !mIsFavouriteActor;
 
             return true;
         }
@@ -294,6 +356,15 @@ public class ProfileActivity extends AppCompatActivity implements CreditsAdapter
         mCreditsMessagesTextView.setVisibility(View.VISIBLE);
         mNoCreditsImageView.setVisibility(View.INVISIBLE);
         mNoCreditsConnectionImageView.setVisibility(View.INVISIBLE);
+    }
+
+    // Hide progress bar and show no reviews and message
+    private void noCredits() {
+        mCreditsRecyclerView.setVisibility(View.GONE);
+        mCreditsMessagesTextView.setVisibility(View.VISIBLE);
+        mCreditsMessagesTextView.setText(R.string.no_credits);
+        mCreditsProgressBar.setVisibility(View.INVISIBLE);
+        mNoCreditsImageView.setVisibility(View.VISIBLE);
     }
 
     private void toastThis(String toastMessage) {
@@ -350,6 +421,152 @@ public class ProfileActivity extends AppCompatActivity implements CreditsAdapter
 
                 @Override
                 public void onLoaderReset(@NonNull Loader<ArrayList<Credits>> loader) {
+
+                }
+            };
+
+    private final LoaderManager.LoaderCallbacks<Cursor> favouriteActorResultLoaderListener =
+            new LoaderManager.LoaderCallbacks<Cursor>() {
+                @NonNull
+                @Override
+                public Loader<Cursor> onCreateLoader(int loaderId, @Nullable Bundle args) {
+                    switch (loaderId) {
+                        case FAVOURITE_ACTOR_LOADER_ID:
+                            return new CursorLoader(getApplicationContext(),
+                                    FavouritesContract.buildUriWithId(ActorsEntry.CONTENT_URI, mActorId),
+                                    ACTOR_DETAILED_PROJECTION,
+                                    null,
+                                    null,
+                                    null);
+                        case CHECK_IF_FAVOURITE_ACTOR_LOADER_ID:
+                            return new CursorLoader(getApplicationContext(),
+                                    FavouritesContract.buildUriWithId(ActorsEntry.CONTENT_URI, mActorId),
+                                    ACTOR_CHECK_PROJECTION,
+                                    null,
+                                    null,
+                                    null);
+                        default:
+                            throw new RuntimeException("Loader Not Implemented: " + loaderId);
+                    }
+                }
+
+                @Override
+                public void onLoadFinished(@NonNull Loader<Cursor> loader, Cursor cursor) {
+                    switch (loader.getId()) {
+                        case FAVOURITE_ACTOR_LOADER_ID:
+                            if (cursor != null && cursor.moveToFirst()) {
+                                // Find the columns of actor attributes that we're interested in
+                                int actorIdColumnIndex = cursor.getColumnIndex(ActorsEntry.COLUMN_ACTOR_ID);
+                                int biographyColumnIndex = cursor.getColumnIndex(ActorsEntry.COLUMN_BIOGRAPHY);
+                                int birthdayColumnIndex = cursor.getColumnIndex(ActorsEntry.COLUMN_BIRTHDAY);
+                                int deathDayColumnIndex = cursor.getColumnIndex(ActorsEntry.COLUMN_DEATH_DAY);
+                                int genderColumnIndex = cursor.getColumnIndex(ActorsEntry.COLUMN_GENDER);
+                                int nameColumnIndex = cursor.getColumnIndex(ActorsEntry.COLUMN_NAME);
+                                int placeColumnIndex = cursor.getColumnIndex(ActorsEntry.COLUMN_PLACE_OF_BIRTH);
+                                int profilePathColumnIndex = cursor.getColumnIndex(ActorsEntry.COLUMN_PROFILE_PATH);
+
+                                // Set the extracted value from the Cursor for the given column index and use each
+                                // value to create an Actor object
+                                mActor = new Actor(
+                                        cursor.getInt(actorIdColumnIndex),
+                                        cursor.getString(biographyColumnIndex),
+                                        cursor.getString(birthdayColumnIndex),
+                                        cursor.getString(deathDayColumnIndex),
+                                        cursor.getInt(genderColumnIndex),
+                                        cursor.getString(nameColumnIndex),
+                                        cursor.getString(placeColumnIndex),
+                                        cursor.getString(profilePathColumnIndex)
+                                );
+
+                                cursor.close();
+                                // Populate actor details section
+                                populateActorDetails(mActor);
+                            }
+                            break;
+
+                        case CHECK_IF_FAVOURITE_ACTOR_LOADER_ID:
+                            if (cursor != null && cursor.moveToFirst()) {
+                                mIsFavouriteActor = true;
+
+                                // As soon as we know the movie is a favourite, color the star, so the user will know it too
+                                if (mFavouriteActorMenuItem != null)
+                                    DrawableCompat.setTint(mFavouriteActorMenuItem.getIcon(), ContextCompat.getColor(getApplicationContext(), R.color.colorAccent));
+                                cursor.close();
+                                // If it's a favourite actor, load data using a cursor for each section
+                                getSupportLoaderManager().initLoader(FAVOURITE_ACTOR_LOADER_ID, null, favouriteActorResultLoaderListener);
+                                getSupportLoaderManager().initLoader(FAVOURITE_CREDITS_LOADER_ID, null, favouriteCreditsResultLoaderListener);
+                            } else {
+                                mIsFavouriteActor = false;
+                                if (NetworkUtils.isConnected(getApplicationContext())) {
+                                    // Otherwise, use am actor details loader and download the actor details and credits
+                                    getSupportLoaderManager().restartLoader(ACTOR_LOADER_ID, null, actorResultLoaderListener);
+                                    hideCredits();
+                                    getSupportLoaderManager().restartLoader(CREDITS_LOADER_ID, null, actorCreditsResultLoaderListener);
+                                } else {
+                                    closeOnError(noConnection);
+                                }
+                            }
+                            break;
+                    }
+                }
+
+                @Override
+                public void onLoaderReset(@NonNull Loader<Cursor> loader) {
+
+                }
+            };
+
+    private final LoaderManager.LoaderCallbacks<Cursor> favouriteCreditsResultLoaderListener =
+            new LoaderManager.LoaderCallbacks<Cursor>() {
+                @NonNull
+                @Override
+                public Loader<Cursor> onCreateLoader(int loaderId, @Nullable Bundle args) {
+                    switch (loaderId) {
+                        case FAVOURITE_CREDITS_LOADER_ID:
+                            return new CursorLoader(getApplicationContext(),
+                                    FavouritesContract.buildUriWithId(CreditsEntry.CONTENT_URI, mActorId),
+                                    CREDITS_DETAILED_PROJECTION,
+                                    null,
+                                    null,
+                                    null);
+                        default:
+                            throw new RuntimeException("Loader Not Implemented: " + loaderId);
+                    }
+                }
+
+                @Override
+                public void onLoadFinished(@NonNull Loader<Cursor> loader, Cursor cursor) {
+                    if (cursor != null && cursor.moveToFirst()) {
+                        // Find the columns of movie credit attributes that we're interested in
+                        int characterColumnIndex = cursor.getColumnIndex(CreditsEntry.COLUMN_CHARACTER);
+                        int movieIdColumnIndex = cursor.getColumnIndex(CreditsEntry.COLUMN_MOVIE_ID);
+                        int posterPathColumnIndex = cursor.getColumnIndex(CreditsEntry.COLUMN_POSTER_PATH);
+                        int releaseDateColumnIndex = cursor.getColumnIndex(CreditsEntry.COLUMN_RELEASE_DATE);
+                        int titleColumnIndex = cursor.getColumnIndex(CreditsEntry.COLUMN_TITLE);
+
+                        mCredits = new ArrayList<>();
+                        for (int i = 0; i < cursor.getCount(); i++) {
+                            cursor.moveToPosition(i);
+                            // Set the extracted value from the Cursor for the given column index and use each
+                            // value to create a Credit object
+                            mCredits.add(new Credits(
+                                    cursor.getString(characterColumnIndex),
+                                    cursor.getInt(movieIdColumnIndex),
+                                    cursor.getString(posterPathColumnIndex),
+                                    cursor.getString(releaseDateColumnIndex),
+                                    cursor.getString(titleColumnIndex)));
+                        }
+                        cursor.close();
+
+                        // Populate movie cast section
+                        populateCredits(mCredits);
+                    } else {
+                        noCredits();
+                    }
+                }
+
+                @Override
+                public void onLoaderReset(@NonNull Loader<Cursor> loader) {
 
                 }
             };
@@ -447,6 +664,80 @@ public class ProfileActivity extends AppCompatActivity implements CreditsAdapter
             mCreditsProgressBar.setVisibility(View.INVISIBLE);
             mNoCreditsImageView.setVisibility(View.VISIBLE);
             mNoCreditsConnectionImageView.setVisibility(View.INVISIBLE);
+        }
+    }
+
+    private void insertFavouriteActor(Actor selectedActor, MenuItem item) {
+        int INITIAL_VALUE = -1;
+
+        // Actor details insertion
+        ContentValues actorValues = new ContentValues();
+        actorValues.put(ActorsEntry.COLUMN_ACTOR_ID, selectedActor.getId());
+        actorValues.put(ActorsEntry.COLUMN_BIOGRAPHY, selectedActor.getBiography());
+        actorValues.put(ActorsEntry.COLUMN_BIRTHDAY, selectedActor.getBirthday());
+        actorValues.put(ActorsEntry.COLUMN_DEATH_DAY, selectedActor.getDeathDay());
+        actorValues.put(ActorsEntry.COLUMN_GENDER, selectedActor.getGender());
+        actorValues.put(ActorsEntry.COLUMN_NAME, selectedActor.getActorName());
+        actorValues.put(ActorsEntry.COLUMN_PLACE_OF_BIRTH, selectedActor.getPlaceOfBirth());
+        actorValues.put(ActorsEntry.COLUMN_PROFILE_PATH, selectedActor.getProfilePath());
+
+        Uri actorResponseUri = getContentResolver().insert(ActorsEntry.CONTENT_URI, actorValues);
+
+        // Credits insertion
+        ContentValues[] allCreditsValues = new ContentValues[mCredits.size()];
+        // For each movie credit, get the data and put it in creditValue
+        for (int i = 0; i < mCredits.size(); i++) {
+            ContentValues creditValues = new ContentValues();
+            creditValues.put(CreditsEntry.COLUMN_ACTOR_ID, selectedActor.getId());
+            creditValues.put(CreditsEntry.COLUMN_CHARACTER, mCredits.get(i).getCharacter());
+            creditValues.put(CreditsEntry.COLUMN_MOVIE_ID, mCredits.get(i).getMovieId());
+            creditValues.put(CreditsEntry.COLUMN_POSTER_PATH, mCredits.get(i).getPosterPath());
+            creditValues.put(CreditsEntry.COLUMN_RELEASE_DATE, mCredits.get(i).getReleaseDate());
+            creditValues.put(CreditsEntry.COLUMN_TITLE, mCredits.get(i).getTitle());
+
+            // Add each castValues to the array
+            allCreditsValues[i] = creditValues;
+        }
+
+        // Initialize the value of castResponse
+        int creditsResponse = INITIAL_VALUE;
+        // If we have credits values to insert, insert them and update the value of creditsResponse
+        if (allCreditsValues.length != 0) {
+            creditsResponse = getContentResolver().bulkInsert(CreditsEntry.CONTENT_URI, allCreditsValues);
+        }
+
+        // Show a toast message depending on whether or not the insertion was successful
+        if (actorResponseUri != null && creditsResponse > 0) {
+            // The insertion was successful and we can display a toast.
+            DrawableCompat.setTint(item.getIcon(), ContextCompat.getColor(getApplicationContext(), R.color.colorAccent));
+            toastThis(getString(R.string.favourite_actor_insert_successful));
+            mIsFavouriteActor = true;
+        } else {
+            // Otherwise, if the new content URI is null, then there was an error with insertion.
+            DrawableCompat.setTint(item.getIcon(), ContextCompat.getColor(getApplicationContext(), R.color.colorWhite));
+            toastThis(getString(R.string.favourite_actor_insert_failed));
+        }
+    }
+
+    private void deleteFavouriteActor(Actor selectedActor, MenuItem item) {
+        int rowsDeleted = getContentResolver().delete(ActorsEntry.CONTENT_URI,
+                ActorsEntry.COLUMN_ACTOR_ID + " =?",
+                new String[]{String.valueOf(selectedActor.getId())});
+
+        getContentResolver().delete(CreditsEntry.CONTENT_URI,
+                CreditsEntry.COLUMN_ACTOR_ID + " =?",
+                new String[]{String.valueOf(selectedActor.getId())});
+
+        // Show a toast message depending on whether or not the delete was successful.
+        if (rowsDeleted != 0) {
+            // Otherwise, the delete was successful and we can display a toast.
+            DrawableCompat.setTint(item.getIcon(), ContextCompat.getColor(getApplicationContext(), R.color.colorWhite));
+            toastThis(getString(R.string.favourite_actor_delete_successful));
+            mIsFavouriteActor = false;
+        } else {
+            // Otherwise, if no rows were affected, then there was an error with the delete.
+            DrawableCompat.setTint(item.getIcon(), ContextCompat.getColor(getApplicationContext(), R.color.colorAccent));
+            toastThis(getString(R.string.favourite_actor_delete_failed));
         }
     }
 

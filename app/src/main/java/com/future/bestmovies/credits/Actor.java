@@ -23,8 +23,8 @@ public class Actor implements Parcelable {
     @SerializedName("profile_path")
     private String profilePath;
 
-    public Actor(int id, String birthday, String deathDay, int gender, String name,
-                 String biography, String placeOfBirth, String profilePath) {
+    public Actor(int id, String biography, String birthday, String deathDay, int gender,
+                 String name, String placeOfBirth, String profilePath) {
         this.id = id;
         this.birthday = birthday;
         this.deathDay = deathDay;
@@ -75,6 +75,7 @@ public class Actor implements Parcelable {
         parcel.writeString(profilePath);
     }
 
+    public int getId() { return id; }
     public String getBirthday() { return birthday; }
     public String getDeathDay() { return deathDay; }
     public int getGender() { return gender; }

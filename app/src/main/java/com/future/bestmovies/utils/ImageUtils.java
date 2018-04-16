@@ -20,6 +20,8 @@ public class ImageUtils {
     private static final String VIDEO_THUMBNAIL_SIZE_H = "/hqdefault.jpg"; // 480x360
     private static final String VIDEO_THUMBNAIL_SIZE_SD = "/sddefault.jpg"; // 640x480
 
+    private static final String SEARCH_RESULT_IMAGE_SIZE = "45";  // "92"
+
     /* Return an image URL used in DetailsActivity
      * @param context is used to access getImageWidth method
      * @param imagePath (i.e. "/nBNZadXqJSdt05SHLqgT0HuC5Gm.jpg")
@@ -49,6 +51,19 @@ public class ImageUtils {
             return IMAGES_BASE_URL.concat(String.valueOf(imageWidth)).concat(imagePath);
         } catch (NullPointerException e) {
             Log.v("BuildImageUrlRecycler", "Error: " + e.toString());
+            return "ups";
+        }
+    }
+
+    /* Return an image URL used in SearchActivity
+     * @param imagePath (i.e. "/nBNZadXqJSdt05SHLqgT0HuC5Gm.jpg") is used to build the image URL
+     */
+    public static String buildImageUrlForSearchResults(String imagePath) {
+        // Create the image URL and return it
+        try {
+            return IMAGES_BASE_URL.concat(SEARCH_RESULT_IMAGE_SIZE).concat(imagePath);
+        } catch (NullPointerException e) {
+            Log.v("BuildImageUrlForSearch", "Error: " + e.toString());
             return "ups";
         }
     }

@@ -20,6 +20,7 @@
             android:theme="@style/AppTheme.Semitransparent">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -64,6 +65,15 @@
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".DetailsActivity" />
+        </activity>
+        <activity
+            android:name=".SearchActivity"
+            android:label="@string/activity_title_search"
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/AppTheme">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MainActivity" />
         </activity>
     </application>
 

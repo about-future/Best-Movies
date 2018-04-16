@@ -5,6 +5,9 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import com.future.bestmovies.credits.Credits;
+import com.future.bestmovies.credits.CreditsAdapter;
+
 import static com.future.bestmovies.data.FavouritesContract.*;
 
 public class FavouritesDbHelper extends SQLiteOpenHelper {
@@ -73,6 +76,36 @@ public class FavouritesDbHelper extends SQLiteOpenHelper {
     private static final String SQL_DELETE_VIDEOS_ENTRIES =
             "DROP TABLE IF EXISTS " + ReviewsEntry.TABLE_NAME;
 
+    // Actor Table
+    private static final String SQL_CREATE_ACTORS_TABLE =
+            "CREATE TABLE " + ActorsEntry.TABLE_NAME        + " ("                                      +
+                    ActorsEntry._ID                         + " INTEGER PRIMARY KEY AUTOINCREMENT, "    +
+                    ActorsEntry.COLUMN_ACTOR_ID             + " INTEGER NOT NULL, "                     +
+                    ActorsEntry.COLUMN_BIOGRAPHY            + " TEXT, "                                 +
+                    ActorsEntry.COLUMN_BIRTHDAY             + " TEXT, "                                 +
+                    ActorsEntry.COLUMN_DEATH_DAY            + " TEXT, "                                 +
+                    ActorsEntry.COLUMN_GENDER               + " INTEGER, "                              +
+                    ActorsEntry.COLUMN_NAME                 + " TEXT, "                                 +
+                    ActorsEntry.COLUMN_PLACE_OF_BIRTH       + " TEXT, "                                 +
+                    ActorsEntry.COLUMN_PROFILE_PATH         + " TEXT);";
+
+    private static final String SQL_DELETE_ACTORS_ENTRIES =
+            "DROP TABLE IF EXISTS " + ActorsEntry.TABLE_NAME;
+
+    // Actor Credits Table
+    private static final String SQL_CREATE_CREDITS_TABLE =
+            "CREATE TABLE " + CreditsEntry.TABLE_NAME       + " ("                                      +
+                    CreditsEntry._ID                        + " INTEGER PRIMARY KEY AUTOINCREMENT, "    +
+                    CreditsEntry.COLUMN_ACTOR_ID            + " INTEGER NOT NULL, "                     +
+                    CreditsEntry.COLUMN_CHARACTER           + " TEXT, "                                 +
+                    CreditsEntry.COLUMN_MOVIE_ID            + " INTEGER NOT NULL, "                     +
+                    CreditsEntry.COLUMN_POSTER_PATH         + " TEXT, "                                 +
+                    CreditsEntry.COLUMN_RELEASE_DATE        + " TEXT, "                                 +
+                    CreditsEntry.COLUMN_TITLE               + " TEXT);";
+
+    private static final String SQL_DELETE_CREDITS_ENTRIES =
+            "DROP TABLE IF EXISTS " + CreditsEntry.TABLE_NAME;
+
     public FavouritesDbHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
@@ -83,6 +116,9 @@ public class FavouritesDbHelper extends SQLiteOpenHelper {
         db.execSQL(SQL_CREATE_CAST_TABLE);
         db.execSQL(SQL_CREATE_REVIEWS_TABLE);
         db.execSQL(SQL_CREATE_VIDEOS_TABLE);
+
+        db.execSQL(SQL_CREATE_ACTORS_TABLE);
+        db.execSQL(SQL_CREATE_CREDITS_TABLE);
     }
 
     @Override
@@ -91,6 +127,10 @@ public class FavouritesDbHelper extends SQLiteOpenHelper {
         db.execSQL(SQL_DELETE_CAST_ENTRIES);
         db.execSQL(SQL_DELETE_REVIEWS_ENTRIES);
         db.execSQL(SQL_DELETE_VIDEOS_ENTRIES);
+
+        db.execSQL(SQL_DELETE_ACTORS_ENTRIES);
+        db.execSQL(SQL_DELETE_CREDITS_ENTRIES);
+
         onCreate(db);
     }
 }

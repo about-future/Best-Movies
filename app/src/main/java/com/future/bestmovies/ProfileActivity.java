@@ -16,6 +16,8 @@ import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -51,18 +53,23 @@ public class ProfileActivity extends AppCompatActivity implements CreditsAdapter
 
     private static final int ACTOR_LOADER_ID = 136;
     private static final int CREDITS_LOADER_ID = 435;
-    private static final int FAVOURITE_ACTOR_LOADER_ID = 516136;
-    private static final int FAVOURITE_CREDITS_LOADER_ID = 516435;
+    /* private static final int FAVOURITE_ACTOR_LOADER_ID = 516136;
+    private static final int FAVOURITE_CREDITS_LOADER_ID = 516435; */
     private static final int CHECK_IF_FAVOURITE_ACTOR_LOADER_ID = 473136;
 
     private static final String IS_FAVOURITE_ACTOR_KEY = "is_favourite_actor";
+    private static final String PROFILE_PATH_KEY = "is_favourite_actor";
     private static final String ACTOR_DETAILS_KEY = "actor";
     private static final String MOVIE_CREDITS_KEY = "movie_credits";
     private static final String CREDITS_POSITION_KEY = "credits_position";
 
     // Query projection used to check if the actor is a favourite or not
-    private static final String[] ACTOR_CHECK_PROJECTION = {ActorsEntry.COLUMN_ACTOR_ID};
+    private static final String[] ACTOR_CHECK_PROJECTION = {
+            ActorsEntry.COLUMN_ACTOR_ID,
+            ActorsEntry.COLUMN_PROFILE_PATH
+    };
 
+    /*
     // Query projection used to retrieve actor details
     private static final String[] ACTOR_DETAILED_PROJECTION = {
             ActorsEntry.COLUMN_ACTOR_ID,
@@ -84,6 +91,7 @@ public class ProfileActivity extends AppCompatActivity implements CreditsAdapter
             CreditsEntry.COLUMN_RELEASE_DATE,
             CreditsEntry.COLUMN_TITLE
     };
+    */
 
     @BindView(R.id.profile_toolbar)
     Toolbar toolbar;
@@ -112,12 +120,11 @@ public class ProfileActivity extends AppCompatActivity implements CreditsAdapter
     private String mActorName;
     private String mBackdropPath;
     private boolean mIsFavouriteActor;
+    private String mProfilePath;
     private Toast mToast;
     private CreditsAdapter mCreditsAdapter;
     private GridLayoutManager mCreditsLayoutManager;
     private int mCreditsPosition = RecyclerView.NO_POSITION;
-
-    private Bundle mBundleState;
 
     // Movie credits variables
     @BindView(R.id.credits_messages_tv)
@@ -132,6 +139,7 @@ public class ProfileActivity extends AppCompatActivity implements CreditsAdapter
     String noConnection;
 
     private MenuItem mFavouriteActorMenuItem;
+    private Bundle mBundleState;
 
     // Resources
     @BindString(R.string.credit_date_unknown)
@@ -150,6 +158,7 @@ public class ProfileActivity extends AppCompatActivity implements CreditsAdapter
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
 
+        // TODO: Make credits column number dynamic
         mCreditsLayoutManager = new GridLayoutManager(
                 this,
                 ScreenUtils.getNumberOfColumns(this, 120, 3));
@@ -172,31 +181,33 @@ public class ProfileActivity extends AppCompatActivity implements CreditsAdapter
                 setTitle(mActorName);
 
                 mBackdropPath = intent.getStringExtra(MOVIE_BACKDROP_KEY);
-                // Try loading backdrop image from memory
-                Picasso.get()
-                        .load(ImageUtils.buildImageUrl(
-                                this,
-                                mBackdropPath,
-                                ImageUtils.BACKDROP))
-                        .networkPolicy(NetworkPolicy.OFFLINE)
-                        .into(profileBackdropImageView, new Callback() {
-                            @Override
-                            public void onSuccess() {
-                                // Yay! We have it!
-                            }
+                if (mBackdropPath != null) {
+                    // Try loading backdrop image from memory
+                    Picasso.get()
+                            .load(ImageUtils.buildImageUrl(
+                                    this,
+                                    mBackdropPath,
+                                    ImageUtils.BACKDROP))
+                            .networkPolicy(NetworkPolicy.OFFLINE)
+                            .into(profileBackdropImageView, new Callback() {
+                                @Override
+                                public void onSuccess() {
+                                    // Yay! We have it!
+                                }
 
-                            @Override
-                            public void onError(Exception e) {
-                                // Try again online, if cache loading failed
-                                Picasso.get()
-                                        .load(ImageUtils.buildImageUrl(
-                                                getApplicationContext(),
-                                                mBackdropPath,
-                                                ImageUtils.BACKDROP))
-                                        .error(R.drawable.ic_landscape)
-                                        .into(profileBackdropImageView);
-                            }
-                        });
+                                @Override
+                                public void onError(Exception e) {
+                                    // Try again online, if cache loading failed
+                                    Picasso.get()
+                                            .load(ImageUtils.buildImageUrl(
+                                                    getApplicationContext(),
+                                                    mBackdropPath,
+                                                    ImageUtils.BACKDROP))
+                                            .error(R.drawable.ic_landscape)
+                                            .into(profileBackdropImageView);
+                                }
+                            });
+                }
 
                 // Check if this actor is a favourite or not
                 getSupportLoaderManager().restartLoader(CHECK_IF_FAVOURITE_ACTOR_LOADER_ID, null, favouriteActorResultLoaderListener);
@@ -214,6 +225,7 @@ public class ProfileActivity extends AppCompatActivity implements CreditsAdapter
         outState.putParcelable(ACTOR_DETAILS_KEY, mActor);
         outState.putParcelableArrayList(MOVIE_CREDITS_KEY, mCredits);
         outState.putBoolean(IS_FAVOURITE_ACTOR_KEY, mIsFavouriteActor);
+        outState.putString(PROFILE_PATH_KEY, mProfilePath);
 
         super.onSaveInstanceState(outState);
     }
@@ -267,6 +279,10 @@ public class ProfileActivity extends AppCompatActivity implements CreditsAdapter
         // Favourite Actor
         if (savedInstanceState.containsKey(IS_FAVOURITE_ACTOR_KEY))
             mIsFavouriteActor = savedInstanceState.getBoolean(IS_FAVOURITE_ACTOR_KEY);
+
+        // Image profile path
+        if (savedInstanceState.containsKey(PROFILE_PATH_KEY))
+            mProfilePath = savedInstanceState.getString(PROFILE_PATH_KEY);
     }
 
     @Override
@@ -274,11 +290,22 @@ public class ProfileActivity extends AppCompatActivity implements CreditsAdapter
         super.onPause();
         mBundleState = new Bundle();
 
-        // Save Credits position
+        // Actor details
+        mBundleState.putString(MOVIE_BACKDROP_KEY, mBackdropPath);
+        mBundleState.putInt(ACTOR_ID_KEY, mActorId);
+        mBundleState.putString(ACTOR_NAME_KEY, mActorName);
+        mBundleState.putParcelable(ACTOR_DETAILS_KEY, mActor);
+
+        // Movie credits and position
+        mBundleState.putParcelableArrayList(MOVIE_CREDITS_KEY, mCredits);
         mCreditsPosition = mCreditsLayoutManager.findFirstCompletelyVisibleItemPosition();
         mBundleState.putInt(CREDITS_POSITION_KEY, mCreditsPosition);
 
+        // Save if it's a favourite actor or not
         mBundleState.putBoolean(IS_FAVOURITE_ACTOR_KEY, mIsFavouriteActor);
+
+        // Image profile path
+        mBundleState.putString(PROFILE_PATH_KEY, mProfilePath);
     }
 
     @Override
@@ -287,13 +314,68 @@ public class ProfileActivity extends AppCompatActivity implements CreditsAdapter
 
         // restore RecyclerView state
         if (mBundleState != null) {
-            // Restore Credits position
-            mCreditsPosition = mBundleState.getInt(CREDITS_POSITION_KEY);
-            if (mCreditsPosition == RecyclerView.NO_POSITION) mCreditsPosition = 0;
-            // Scroll the RecyclerView to mCreditsPosition
-            mCreditsRecyclerView.smoothScrollToPosition(mCreditsPosition);
+            // Restore backdrop
+            if (mBundleState.containsKey(MOVIE_BACKDROP_KEY)) {
+                mBackdropPath = mBundleState.getString(MOVIE_BACKDROP_KEY);
+                // Try loading backdrop image from memory
+                Picasso.get()
+                        .load(ImageUtils.buildImageUrl(
+                                this,
+                                mBackdropPath,
+                                ImageUtils.BACKDROP))
+                        .networkPolicy(NetworkPolicy.OFFLINE)
+                        .into(profileBackdropImageView, new Callback() {
+                            @Override
+                            public void onSuccess() {
+                                // Yay! We have it!
+                            }
 
-            mIsFavouriteActor = mBundleState.getBoolean(IS_FAVOURITE_ACTOR_KEY);
+                            @Override
+                            public void onError(Exception e) {
+                                // Try again online, if cache loading failed
+                                Picasso.get()
+                                        .load(ImageUtils.buildImageUrl(
+                                                getApplicationContext(),
+                                                mBackdropPath,
+                                                ImageUtils.BACKDROP))
+                                        .error(R.drawable.ic_landscape)
+                                        .into(profileBackdropImageView);
+                            }
+                        });
+            }
+
+            // Restore actor details
+            if (mBundleState.containsKey(ACTOR_ID_KEY)) {
+                mActorId = mBundleState.getInt(ACTOR_ID_KEY);
+            }
+
+            if (mBundleState.containsKey(ACTOR_DETAILS_KEY)) {
+                mActor = mBundleState.getParcelable(ACTOR_DETAILS_KEY);
+                if (mActor != null)
+                    populateActorDetails(mActor);
+            }
+
+            // Restore Credits and position
+            if (mBundleState.containsKey(MOVIE_CREDITS_KEY)) {
+                mCredits = mBundleState.getParcelableArrayList(MOVIE_CREDITS_KEY);
+                if (mCredits != null)
+                    populateCredits(mCredits);
+            }
+
+            if (mBundleState.containsKey(CREDITS_POSITION_KEY)) {
+                mCreditsPosition = mBundleState.getInt(CREDITS_POSITION_KEY);
+                if (mCreditsPosition == RecyclerView.NO_POSITION)
+                    mCreditsPosition = 0;
+                mCreditsRecyclerView.smoothScrollToPosition(mCreditsPosition);
+            }
+
+            // Favourite state for star color
+            if (mBundleState.containsKey(IS_FAVOURITE_ACTOR_KEY))
+                mIsFavouriteActor = mBundleState.getBoolean(IS_FAVOURITE_ACTOR_KEY);
+
+            // Image profile path
+            if (mBundleState.containsKey(PROFILE_PATH_KEY))
+                mProfilePath = mBundleState.getString(PROFILE_PATH_KEY);
         }
     }
 
@@ -365,6 +447,7 @@ public class ProfileActivity extends AppCompatActivity implements CreditsAdapter
         mCreditsMessagesTextView.setText(R.string.no_credits);
         mCreditsProgressBar.setVisibility(View.INVISIBLE);
         mNoCreditsImageView.setVisibility(View.VISIBLE);
+        mNoCreditsConnectionImageView.setVisibility(View.INVISIBLE);
     }
 
     private void toastThis(String toastMessage) {
@@ -373,7 +456,7 @@ public class ProfileActivity extends AppCompatActivity implements CreditsAdapter
         mToast.show();
     }
 
-    private final LoaderManager.LoaderCallbacks<Actor> actorResultLoaderListener =
+    private final LoaderManager.LoaderCallbacks<Actor> actorDetailsResultLoaderListener =
             new LoaderManager.LoaderCallbacks<Actor>() {
                 @NonNull
                 @Override
@@ -421,7 +504,7 @@ public class ProfileActivity extends AppCompatActivity implements CreditsAdapter
 
                 @Override
                 public void onLoaderReset(@NonNull Loader<ArrayList<Credits>> loader) {
-
+                    mCreditsAdapter.swapCredits(null);
                 }
             };
 
@@ -431,6 +514,7 @@ public class ProfileActivity extends AppCompatActivity implements CreditsAdapter
                 @Override
                 public Loader<Cursor> onCreateLoader(int loaderId, @Nullable Bundle args) {
                     switch (loaderId) {
+                        /*
                         case FAVOURITE_ACTOR_LOADER_ID:
                             return new CursorLoader(getApplicationContext(),
                                     FavouritesContract.buildUriWithId(ActorsEntry.CONTENT_URI, mActorId),
@@ -438,6 +522,7 @@ public class ProfileActivity extends AppCompatActivity implements CreditsAdapter
                                     null,
                                     null,
                                     null);
+                                    */
                         case CHECK_IF_FAVOURITE_ACTOR_LOADER_ID:
                             return new CursorLoader(getApplicationContext(),
                                     FavouritesContract.buildUriWithId(ActorsEntry.CONTENT_URI, mActorId),
@@ -453,8 +538,11 @@ public class ProfileActivity extends AppCompatActivity implements CreditsAdapter
                 @Override
                 public void onLoadFinished(@NonNull Loader<Cursor> loader, Cursor cursor) {
                     switch (loader.getId()) {
+                        /*
                         case FAVOURITE_ACTOR_LOADER_ID:
-                            if (cursor != null && cursor.moveToFirst()) {
+                            if (cursor != null && !cursor.isClosed()) {
+                                cursor.moveToFirst();
+
                                 // Find the columns of actor attributes that we're interested in
                                 int actorIdColumnIndex = cursor.getColumnIndex(ActorsEntry.COLUMN_ACTOR_ID);
                                 int biographyColumnIndex = cursor.getColumnIndex(ActorsEntry.COLUMN_BIOGRAPHY);
@@ -483,29 +571,57 @@ public class ProfileActivity extends AppCompatActivity implements CreditsAdapter
                                 populateActorDetails(mActor);
                             }
                             break;
+                            */
 
                         case CHECK_IF_FAVOURITE_ACTOR_LOADER_ID:
-                            if (cursor != null && cursor.moveToFirst()) {
+                            if (cursor != null && !cursor.isClosed() && cursor.moveToFirst()) {
                                 mIsFavouriteActor = true;
 
-                                // As soon as we know the movie is a favourite, color the star, so the user will know it too
+                                // As soon as we know the movie is a favourite, color the star,
+                                // so the user will know it too and close the cursor
                                 if (mFavouriteActorMenuItem != null)
                                     DrawableCompat.setTint(mFavouriteActorMenuItem.getIcon(), ContextCompat.getColor(getApplicationContext(), R.color.colorAccent));
+
+                                // Save the current image profile path saved in the database
+                                int profilePathColumnIndex = cursor.getColumnIndex(ActorsEntry.COLUMN_PROFILE_PATH);
+                                mProfilePath = cursor.getString(profilePathColumnIndex);
+
                                 cursor.close();
+
+                                /*
                                 // If it's a favourite actor, load data using a cursor for each section
                                 getSupportLoaderManager().initLoader(FAVOURITE_ACTOR_LOADER_ID, null, favouriteActorResultLoaderListener);
                                 getSupportLoaderManager().initLoader(FAVOURITE_CREDITS_LOADER_ID, null, favouriteCreditsResultLoaderListener);
-                            } else {
-                                mIsFavouriteActor = false;
                                 if (NetworkUtils.isConnected(getApplicationContext())) {
-                                    // Otherwise, use am actor details loader and download the actor details and credits
-                                    getSupportLoaderManager().restartLoader(ACTOR_LOADER_ID, null, actorResultLoaderListener);
                                     hideCredits();
                                     getSupportLoaderManager().restartLoader(CREDITS_LOADER_ID, null, actorCreditsResultLoaderListener);
                                 } else {
                                     closeOnError(noConnection);
                                 }
+                                */
+                            } else {
+                                mIsFavouriteActor = false;
+                                /*
+                                if (NetworkUtils.isConnected(getApplicationContext())) {
+                                    // Otherwise, use am actor details loader and download the actor details and credits
+                                    getSupportLoaderManager().restartLoader(ACTOR_LOADER_ID, null, actorDetailsResultLoaderListener);
+                                    hideCredits();
+                                    getSupportLoaderManager().restartLoader(CREDITS_LOADER_ID, null, actorCreditsResultLoaderListener);
+                                } else {
+                                    closeOnError(noConnection);
+                                }
+                                */
                             }
+
+                            if (NetworkUtils.isConnected(getApplicationContext())) {
+                                // Otherwise, use am actor details loader and download the actor details and credits
+                                getSupportLoaderManager().restartLoader(ACTOR_LOADER_ID, null, actorDetailsResultLoaderListener);
+                                hideCredits();
+                                getSupportLoaderManager().restartLoader(CREDITS_LOADER_ID, null, actorCreditsResultLoaderListener);
+                            } else {
+                                closeOnError(noConnection);
+                            }
+
                             break;
                     }
                 }
@@ -516,6 +632,7 @@ public class ProfileActivity extends AppCompatActivity implements CreditsAdapter
                 }
             };
 
+    /*
     private final LoaderManager.LoaderCallbacks<Cursor> favouriteCreditsResultLoaderListener =
             new LoaderManager.LoaderCallbacks<Cursor>() {
                 @NonNull
@@ -536,7 +653,9 @@ public class ProfileActivity extends AppCompatActivity implements CreditsAdapter
 
                 @Override
                 public void onLoadFinished(@NonNull Loader<Cursor> loader, Cursor cursor) {
-                    if (cursor != null && cursor.moveToFirst()) {
+                    if (cursor != null && !cursor.isClosed()) {
+                        cursor.moveToFirst();
+
                         // Find the columns of movie credit attributes that we're interested in
                         int characterColumnIndex = cursor.getColumnIndex(CreditsEntry.COLUMN_CHARACTER);
                         int movieIdColumnIndex = cursor.getColumnIndex(CreditsEntry.COLUMN_MOVIE_ID);
@@ -547,6 +666,39 @@ public class ProfileActivity extends AppCompatActivity implements CreditsAdapter
                         mCredits = new ArrayList<>();
                         for (int i = 0; i < cursor.getCount(); i++) {
                             cursor.moveToPosition(i);
+
+                            // If there is no backdrop set yet, we take the first available movie poster
+                            // and set it as a backdrop for the actor profile, so the UI will look good.
+                            if (mBackdropPath == null && cursor.getString(posterPathColumnIndex) != null) {
+                                mBackdropPath = cursor.getString(posterPathColumnIndex);
+                                Log.v("Backdrop", "THIS IS IT: " + mBackdropPath);
+                                // Try loading backdrop image from memory
+                                Picasso.get()
+                                        .load(ImageUtils.buildImageUrl(
+                                                getApplicationContext(),
+                                                mBackdropPath,
+                                                ImageUtils.BACKDROP))
+                                        .networkPolicy(NetworkPolicy.OFFLINE)
+                                        .into(profileBackdropImageView, new Callback() {
+                                            @Override
+                                            public void onSuccess() {
+                                                // Yay! We have it!
+                                            }
+
+                                            @Override
+                                            public void onError(Exception e) {
+                                                // Try again online, if cache loading failed
+                                                Picasso.get()
+                                                        .load(ImageUtils.buildImageUrl(
+                                                                getApplicationContext(),
+                                                                mBackdropPath,
+                                                                ImageUtils.BACKDROP))
+                                                        .error(R.drawable.ic_landscape)
+                                                        .into(profileBackdropImageView);
+                                            }
+                                        });
+                            }
+
                             // Set the extracted value from the Cursor for the given column index and use each
                             // value to create a Credit object
                             mCredits.add(new Credits(
@@ -556,6 +708,7 @@ public class ProfileActivity extends AppCompatActivity implements CreditsAdapter
                                     cursor.getString(releaseDateColumnIndex),
                                     cursor.getString(titleColumnIndex)));
                         }
+
                         cursor.close();
 
                         // Populate movie cast section
@@ -570,6 +723,7 @@ public class ProfileActivity extends AppCompatActivity implements CreditsAdapter
 
                 }
             };
+    */
 
     private void populateActorDetails(final Actor actorDetails) {
         // Try loading profile picture from memory
@@ -599,6 +753,14 @@ public class ProfileActivity extends AppCompatActivity implements CreditsAdapter
                                 .into(profilePictureImageView);
                     }
                 });
+
+        if (mIsFavouriteActor && !TextUtils.equals(actorDetails.getProfilePath(), mProfilePath)) {
+            deleteFavouriteActor(mActor, mFavouriteActorMenuItem);
+            insertFavouriteActor(mActor, mFavouriteActorMenuItem);
+            // TODO: Make silent update
+        }
+
+        Log.v("FAVOURITE", String.valueOf(mIsFavouriteActor));
 
         // Gender
         switch (actorDetails.getGender()) {
@@ -655,33 +817,69 @@ public class ProfileActivity extends AppCompatActivity implements CreditsAdapter
 
         // If movieCredits has data
         if (movieCredits.size() != 0) {
+            // If there is no backdrop set yet for our layout, we take the first available movie
+            // poster and set it as a backdrop for the actor profile, so the UI will look good.
+            if (mBackdropPath == null) {
+                int i = 0;
+                while (mBackdropPath == null && i < mCredits.size()) {
+                    mBackdropPath = movieCredits.get(i).getPosterPath();
+                    i++;
+                }
+
+                Log.v("Backdrop", "THIS IS IT: " + mBackdropPath);
+                // Try loading backdrop image from memory
+                Picasso.get()
+                        .load(ImageUtils.buildImageUrl(
+                                getApplicationContext(),
+                                mBackdropPath,
+                                ImageUtils.BACKDROP))
+                        .networkPolicy(NetworkPolicy.OFFLINE)
+                        .into(profileBackdropImageView, new Callback() {
+                            @Override
+                            public void onSuccess() {
+                                // Yay! We have it!
+                            }
+
+                            @Override
+                            public void onError(Exception e) {
+                                // Try again online, if cache loading failed
+                                Picasso.get()
+                                        .load(ImageUtils.buildImageUrl(
+                                                getApplicationContext(),
+                                                mBackdropPath,
+                                                ImageUtils.BACKDROP))
+                                        .error(R.drawable.ic_landscape)
+                                        .into(profileBackdropImageView);
+                            }
+                        });
+            }
+
             // Show movie credits
             showCredits();
         } else {
             // Otherwise, hide progress bar and show "No credits available" message
-            mCreditsMessagesTextView.setVisibility(View.VISIBLE);
-            mCreditsMessagesTextView.setText(R.string.no_credits);
-            mCreditsProgressBar.setVisibility(View.INVISIBLE);
-            mNoCreditsImageView.setVisibility(View.VISIBLE);
-            mNoCreditsConnectionImageView.setVisibility(View.INVISIBLE);
+            noCredits();
         }
     }
 
     private void insertFavouriteActor(Actor selectedActor, MenuItem item) {
-        int INITIAL_VALUE = -1;
+        /*int INITIAL_VALUE = -1; */
 
         // Actor details insertion
         ContentValues actorValues = new ContentValues();
         actorValues.put(ActorsEntry.COLUMN_ACTOR_ID, selectedActor.getId());
-        actorValues.put(ActorsEntry.COLUMN_BIOGRAPHY, selectedActor.getBiography());
         actorValues.put(ActorsEntry.COLUMN_BIRTHDAY, selectedActor.getBirthday());
-        actorValues.put(ActorsEntry.COLUMN_DEATH_DAY, selectedActor.getDeathDay());
         actorValues.put(ActorsEntry.COLUMN_GENDER, selectedActor.getGender());
         actorValues.put(ActorsEntry.COLUMN_NAME, selectedActor.getActorName());
         actorValues.put(ActorsEntry.COLUMN_PLACE_OF_BIRTH, selectedActor.getPlaceOfBirth());
+        actorValues.put(ActorsEntry.COLUMN_BIOGRAPHY, selectedActor.getBiography());
+        actorValues.put(ActorsEntry.COLUMN_DEATH_DAY, selectedActor.getDeathDay());
         actorValues.put(ActorsEntry.COLUMN_PROFILE_PATH, selectedActor.getProfilePath());
 
         Uri actorResponseUri = getContentResolver().insert(ActorsEntry.CONTENT_URI, actorValues);
+
+        /* THIS IS THE CORRECT IMPLEMENTATION, BUT BECAUSE EACH ACTOR ADDS MOVIES DURING HIS/HERS
+           CAREER, IT'S BETTER NOT TO SAVE THE CREDITS
 
         // Credits insertion
         ContentValues[] allCreditsValues = new ContentValues[mCredits.size()];
@@ -705,13 +903,15 @@ public class ProfileActivity extends AppCompatActivity implements CreditsAdapter
         if (allCreditsValues.length != 0) {
             creditsResponse = getContentResolver().bulkInsert(CreditsEntry.CONTENT_URI, allCreditsValues);
         }
+        */
 
         // Show a toast message depending on whether or not the insertion was successful
-        if (actorResponseUri != null && creditsResponse > 0) {
+        if (actorResponseUri != null) { /* && creditsResponse > 0) { */
             // The insertion was successful and we can display a toast.
             DrawableCompat.setTint(item.getIcon(), ContextCompat.getColor(getApplicationContext(), R.color.colorAccent));
             toastThis(getString(R.string.favourite_actor_insert_successful));
             mIsFavouriteActor = true;
+            Log.v("ACTOR", "INSERTED");
         } else {
             // Otherwise, if the new content URI is null, then there was an error with insertion.
             DrawableCompat.setTint(item.getIcon(), ContextCompat.getColor(getApplicationContext(), R.color.colorWhite));
@@ -724,9 +924,11 @@ public class ProfileActivity extends AppCompatActivity implements CreditsAdapter
                 ActorsEntry.COLUMN_ACTOR_ID + " =?",
                 new String[]{String.valueOf(selectedActor.getId())});
 
+        /*
         getContentResolver().delete(CreditsEntry.CONTENT_URI,
                 CreditsEntry.COLUMN_ACTOR_ID + " =?",
                 new String[]{String.valueOf(selectedActor.getId())});
+        */
 
         // Show a toast message depending on whether or not the delete was successful.
         if (rowsDeleted != 0) {
@@ -734,6 +936,7 @@ public class ProfileActivity extends AppCompatActivity implements CreditsAdapter
             DrawableCompat.setTint(item.getIcon(), ContextCompat.getColor(getApplicationContext(), R.color.colorWhite));
             toastThis(getString(R.string.favourite_actor_delete_successful));
             mIsFavouriteActor = false;
+            Log.v("ACTOR", "DELETED");
         } else {
             // Otherwise, if no rows were affected, then there was an error with the delete.
             DrawableCompat.setTint(item.getIcon(), ContextCompat.getColor(getApplicationContext(), R.color.colorAccent));

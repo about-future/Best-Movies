@@ -86,7 +86,8 @@
     <string name="no_cast">No cast available</string>
     <string name="no_reviews">No reviews available</string>
     <string name="no_videos">No videos available</string>
-    <string name="no_favourites">I\'m a favourite movie list\nand I feel so empty&#8230;</string>
+    <string name="no_favourite_movies">I\'m a favourite movies list\nand I feel so empty&#8230;</string>
+    <string name="no_favourite_actors">I\'m a favourite actors list\nand I feel so empty&#8230;</string>
     <string name="no_credits">No credits available</string>
     <string name="no_search_results">No results available</string>
 
@@ -103,7 +104,7 @@
     <!-- PREFERENCES -->
     <!-- Page number preference -->
     <string name="pref_page_number_key" translatable="false">page_number</string>
-    <string name="pref_page_number_default" translatable="false">0</string>
+    <string name="pref_page_number_default" translatable="false">1</string>
 
     <!-- SearchResult page number preference -->
     <string name="pref_search_page_number_key" translatable="false">page_number</string>

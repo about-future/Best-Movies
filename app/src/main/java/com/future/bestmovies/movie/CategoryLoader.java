@@ -16,10 +16,10 @@ import java.util.Objects;
 import retrofit2.Call;
 
 
-public class MovieCategoryLoader extends AsyncTaskLoader<ArrayList<Movie>> {
+public class CategoryLoader extends AsyncTaskLoader<ArrayList<Movie>> {
     private ArrayList<Movie> cacheMovies;
 
-    public MovieCategoryLoader(Context context) {
+    public CategoryLoader(Context context) {
         super(context);
     }
 
@@ -32,7 +32,7 @@ public class MovieCategoryLoader extends AsyncTaskLoader<ArrayList<Movie>> {
     @Override
     public ArrayList<Movie> loadInBackground() {
         ApiInterface moviesApiInterface = ApiClient.getClient().create(ApiInterface.class);
-        Call<MovieResponse> call = moviesApiInterface.getMovies(
+        Call<CategoryResponse> call = moviesApiInterface.getMovies(
                 MoviePreferences.getPreferredQueryType(getContext()),
                 MoviePreferences.getLastPageNumber(getContext()),
                 NetworkUtils.API_ID);

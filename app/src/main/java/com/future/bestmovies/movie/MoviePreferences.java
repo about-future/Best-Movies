@@ -17,7 +17,7 @@ public class MoviePreferences {
     public static String getPreferredQueryType(Context context) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         String defaultCategory = context.getString(R.string.category_popular);
-        //Log.v(TAG, "getQueryType: " + sp.getString(CATEGORY, defaultCategory));
+        Log.v(TAG, "getQueryType: " + sp.getString(CATEGORY, defaultCategory));
         return sp.getString(CATEGORY, defaultCategory);
     }
 
@@ -25,6 +25,7 @@ public class MoviePreferences {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = sp.edit();
         editor.putString(CATEGORY, category);
+        Log.v("CATEGORY", category);
         editor.apply();
     }
 

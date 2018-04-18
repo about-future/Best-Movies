@@ -52,7 +52,7 @@
                 android:value=".DetailsActivity" />
         </activity>
 
-        <!-- Our ContentProvider -->
+        <!-- ContentProvider -->
         <provider
             android:name=".data.FavouritesProvider"
             android:authorities="@string/content_authority"
@@ -66,11 +66,16 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".DetailsActivity" />
         </activity>
+
         <activity
             android:name=".SearchActivity"
             android:label="@string/activity_title_search"
             android:parentActivityName=".MainActivity"
             android:theme="@style/AppTheme">
+            <!--<intent-filter>-->
+                <!--<action android:name="com.google.android.gms.actions.SEARCH_ACTIONS"/>-->
+                <!--<category android:name="android.intent.category.DEFAULT"/>-->
+            <!--</intent-filter>-->
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity" />

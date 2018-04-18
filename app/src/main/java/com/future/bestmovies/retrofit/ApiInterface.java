@@ -4,7 +4,7 @@ import com.future.bestmovies.cast.CastResponse;
 import com.future.bestmovies.credits.Actor;
 import com.future.bestmovies.credits.CreditsResponse;
 import com.future.bestmovies.movie_details.Details;
-import com.future.bestmovies.movie.MovieResponse;
+import com.future.bestmovies.movie.CategoryResponse;
 import com.future.bestmovies.reviews.ReviewResponse;
 import com.future.bestmovies.search.SearchResponse;
 import com.future.bestmovies.videos.VideoResponse;
@@ -16,7 +16,7 @@ import retrofit2.http.Query;
 
 public interface ApiInterface {
     @GET("movie/{category}")
-    Call<MovieResponse> getMovies(@Path("category") String category, @Query("page") int page, @Query("api_key") String apiKey);
+    Call<CategoryResponse> getMovies(@Path("category") String category, @Query("page") int page, @Query("api_key") String apiKey);
 
     @GET("movie/{id}")
     Call<Details> getMovieDetails(@Path("id") int movieId, @Query("api_key") String apiKey);

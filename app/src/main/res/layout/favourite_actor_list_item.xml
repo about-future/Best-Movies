@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/touch_selector"
+    android:orientation="vertical">
+
+    <ImageView
+        android:id="@+id/profile_picture_iv"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:adjustViewBounds="true"
+        android:background="@color/background_box"
+        android:contentDescription="@string/movie_poster"
+        android:scaleType="centerCrop"
+        tools:srcCompat="@drawable/ic_local_movies" />
+
+    <TextView
+        android:id="@+id/person_name_tv"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fontFamily="sans-serif-condensed"
+        android:gravity="center|bottom"
+        android:paddingBottom="@dimen/details_vertical_spacing"
+        android:textColor="@color/colorWhite"
+        android:textSize="18sp"
+        android:visibility="gone"
+        tools:text="Person Name" />
+
+</LinearLayout>

@@ -24,9 +24,11 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.future.bestmovies.movie.FavouriteActorsAdapter;
+import com.future.bestmovies.movie.CategoryAdapter;
+import com.future.bestmovies.movie.FavouriteMoviesAdapter;
 import com.future.bestmovies.movie.Movie;
-import com.future.bestmovies.movie.MovieCategoryAdapter;
-import com.future.bestmovies.movie.MovieCategoryLoader;
+import com.future.bestmovies.movie.CategoryLoader;
 import com.future.bestmovies.movie.MoviePreferences;
 import com.future.bestmovies.utils.ImageUtils;
 import com.future.bestmovies.utils.NetworkUtils;
@@ -41,7 +43,10 @@ import static com.future.bestmovies.data.FavouritesContract.*;
 
 
 public class MainActivity extends AppCompatActivity implements
-        MovieCategoryAdapter.GridItemClickListener, LoaderManager.LoaderCallbacks {
+        CategoryAdapter.GridItemClickListener,
+        FavouriteMoviesAdapter.GridItemClickListener,
+        FavouriteActorsAdapter.GridItemClickListener,
+        LoaderManager.LoaderCallbacks {
 
     private static final String TAG = MainActivity.class.getSimpleName();
     private static final String TITLE_KEY = "title";
@@ -55,7 +60,7 @@ public class MainActivity extends AppCompatActivity implements
     private static final String CATEGORY_FAVOURITE_MOVIES = "favourite_movies";
 
     // Loaders
-    private static final int MOVIES_LOADER_ID = 24;
+    private static final int CATEGORY_LOADER_ID = 24;
     private static final int FAVOURITE_ACTORS_LOADER_ID = 136;
     private static final int FAVOURITE_MOVIES_LOADER_ID = 805;
     private static final String CURRENT_LOADED_ID = "loader_id";
@@ -64,6 +69,7 @@ public class MainActivity extends AppCompatActivity implements
     // Actors cursor projection
     private static final String[] FAVOURITE_ACTORS_PROJECTION = {
             ActorsEntry.COLUMN_ACTOR_ID,
+            ActorsEntry.COLUMN_NAME,
             ActorsEntry.COLUMN_PROFILE_PATH
     };
 
@@ -81,7 +87,9 @@ public class MainActivity extends AppCompatActivity implements
     ImageView mNoConnectionImageView;
     @BindView(R.id.loading_pb)
     ProgressBar mLoading;
-    private MovieCategoryAdapter mAdapter;
+    private CategoryAdapter mCategoryAdapter;
+    private FavouriteMoviesAdapter mMoviesAdapter;
+    private FavouriteActorsAdapter mActorsAdapter;
     private GridLayoutManager mGridLayoutManager;
     private int mPosition = RecyclerView.NO_POSITION;
 
@@ -106,8 +114,10 @@ public class MainActivity extends AppCompatActivity implements
                 ScreenUtils.getNumberOfColumns(this, 200, 2));
         mMoviesRecyclerView.setLayoutManager(mGridLayoutManager);
         mMoviesRecyclerView.setHasFixedSize(true);
-        mAdapter = new MovieCategoryAdapter(this, this);
-        mMoviesRecyclerView.setAdapter(mAdapter);
+        mCategoryAdapter = new CategoryAdapter(this, this);
+        mMoviesAdapter = new FavouriteMoviesAdapter(this, this);
+        mActorsAdapter = new FavouriteActorsAdapter(this, this);
+        //mMoviesRecyclerView.setAdapter(mCategoryAdapter);
 
         // Check if preference "image_width" was create before, if not, proceed.
         if (!MoviePreferences.isImageWidthAvailable(this)) {
@@ -121,37 +131,47 @@ public class MainActivity extends AppCompatActivity implements
         }
 
         // Every time we create this activity we set the page number of our results to be 0
-        MoviePreferences.setLastPageNumber(this, 0);
-
+        MoviePreferences.setLastPageNumber(this, 1);
 
         if (savedInstanceState == null) {
             // Set current loader id and title, depending on preferred "query type" (aka: "movie category" or "sort order")
             switch (MoviePreferences.getPreferredQueryType(this)) {
+                case CATEGORY_POPULAR:
+                    mCurrentLoaderId = CATEGORY_LOADER_ID;
+                    setTitle(R.string.menu_popular);
+                    mCategoryAdapter = new CategoryAdapter(this, this);
+                    mMoviesRecyclerView.setAdapter(mCategoryAdapter);
+                    break;
                 case CATEGORY_TOP_RATED:
-                    mCurrentLoaderId = MOVIES_LOADER_ID;
+                    mCurrentLoaderId = CATEGORY_LOADER_ID;
                     setTitle(R.string.menu_top_rated);
+                    mCategoryAdapter = new CategoryAdapter(this, this);
+                    mMoviesRecyclerView.setAdapter(mCategoryAdapter);
                     break;
                 case CATEGORY_UPCOMING:
-                    mCurrentLoaderId = MOVIES_LOADER_ID;
+                    mCurrentLoaderId = CATEGORY_LOADER_ID;
                     setTitle(R.string.menu_upcoming);
+                    mCategoryAdapter = new CategoryAdapter(this, this);
+                    mMoviesRecyclerView.setAdapter(mCategoryAdapter);
                     break;
                 case CATEGORY_NOW_PLAYING:
-                    mCurrentLoaderId = MOVIES_LOADER_ID;
+                    mCurrentLoaderId = CATEGORY_LOADER_ID;
                     setTitle(R.string.menu_now_playing);
+                    mCategoryAdapter = new CategoryAdapter(this, this);
+                    mMoviesRecyclerView.setAdapter(mCategoryAdapter);
                     break;
                 case CATEGORY_FAVOURITE_ACTORS:
                     mCurrentLoaderId = FAVOURITE_ACTORS_LOADER_ID;
                     setTitle(R.string.menu_favourite_actors);
+                    mActorsAdapter = new FavouriteActorsAdapter(this, this);
+                    mMoviesRecyclerView.setAdapter(mActorsAdapter);
                     break;
                 case CATEGORY_FAVOURITE_MOVIES:
                     mCurrentLoaderId = FAVOURITE_MOVIES_LOADER_ID;
                     setTitle(R.string.menu_favourite_movies);
+                    mMoviesAdapter = new FavouriteMoviesAdapter(this, this);
+                    mMoviesRecyclerView.setAdapter(mMoviesAdapter);
                     break;
-                default:
-                    // If we run the app for the first time, no movie category was set as query
-                    // preference and no loader was initialized
-                    mCurrentLoaderId = MOVIES_LOADER_ID;
-                    setTitle(R.string.menu_popular);
             }
 
             // Fetch movie data, using the selected loader id
@@ -202,6 +222,7 @@ public class MainActivity extends AppCompatActivity implements
     public void onSaveInstanceState(Bundle outState) {
         outState.putInt(CURRENT_LOADED_ID, mCurrentLoaderId);
         outState.putString(TITLE_KEY, getTitle().toString());
+
         super.onSaveInstanceState(outState);
     }
 
@@ -210,6 +231,20 @@ public class MainActivity extends AppCompatActivity implements
         if (savedInstanceState != null) {
             if (savedInstanceState.containsKey(CURRENT_LOADED_ID)) {
                 mCurrentLoaderId = savedInstanceState.getInt(CURRENT_LOADED_ID);
+                switch (mCurrentLoaderId) {
+                    case CATEGORY_LOADER_ID:
+                        //mCategoryAdapter = new CategoryAdapter(this, this);
+                        mMoviesRecyclerView.setAdapter(mCategoryAdapter);
+                        break;
+                    case FAVOURITE_ACTORS_LOADER_ID:
+                        //mActorsAdapter = new FavouriteActorsAdapter(this, this);
+                        mMoviesRecyclerView.setAdapter(mActorsAdapter);
+                        break;
+                    case FAVOURITE_MOVIES_LOADER_ID:
+                        //mMoviesAdapter = new FavouriteMoviesAdapter(this, this);
+                        mMoviesRecyclerView.setAdapter(mMoviesAdapter);
+                        break;
+                }
                 fetchMovies(this);
             }
             if (savedInstanceState.containsKey(TITLE_KEY))
@@ -223,6 +258,11 @@ public class MainActivity extends AppCompatActivity implements
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
+                // Before we fetch data, we need the last page number that was loaded in our RecyclerView,
+                // increment it by 1 and save it in a preference for next data fetching
+                int nextPage = MoviePreferences.getLastPageNumber(getApplicationContext()) + 1;
+                MoviePreferences.setLastPageNumber(getApplicationContext(), nextPage);
+
                 fetchMovies(getApplicationContext());
                 mLoading.setVisibility(View.GONE);
             }
@@ -232,15 +272,9 @@ public class MainActivity extends AppCompatActivity implements
     // Fetch data or show connection error
     private void fetchMovies(Context context) {
         // If there is a network connection, fetch data
-        if (NetworkUtils.isConnected(context) &&
-                mCurrentLoaderId != FAVOURITE_ACTORS_LOADER_ID &&
-                mCurrentLoaderId != FAVOURITE_MOVIES_LOADER_ID) {
+        if (NetworkUtils.isConnected(context) && mCurrentLoaderId != FAVOURITE_ACTORS_LOADER_ID && mCurrentLoaderId != FAVOURITE_MOVIES_LOADER_ID) {
             showMovies();
 
-            // Before we fetch data, we need the last page number that was loaded in our RecyclerView,
-            // increment it by 1 and save it in a preference for next data fetching
-            int nextPage = MoviePreferences.getLastPageNumber(context) + 1;
-            MoviePreferences.setLastPageNumber(context, nextPage);
             //Init or restart loader
             getSupportLoaderManager().restartLoader(mCurrentLoaderId, null, this);
         }
@@ -261,7 +295,7 @@ public class MainActivity extends AppCompatActivity implements
             mMessagesTextView.setText(R.string.no_internet);
 
             // Every time we have a connection error, we set the page number of our results to be 0
-            MoviePreferences.setLastPageNumber(this, 0);
+            MoviePreferences.setLastPageNumber(this, 1);
         }
     }
 
@@ -327,10 +361,12 @@ public class MainActivity extends AppCompatActivity implements
         switch (item.getItemId()) {
             case R.id.action_popular:
                 MoviePreferences.setPreferredQueryType(this, getString(R.string.category_popular));
-                MoviePreferences.setLastPageNumber(this, 0);
+                MoviePreferences.setLastPageNumber(this, 1);
                 getSupportLoaderManager().destroyLoader(FAVOURITE_ACTORS_LOADER_ID);
                 getSupportLoaderManager().destroyLoader(FAVOURITE_MOVIES_LOADER_ID);
-                mCurrentLoaderId = MOVIES_LOADER_ID;
+                mCurrentLoaderId = CATEGORY_LOADER_ID;
+                mCategoryAdapter = new CategoryAdapter(this, this);
+                mMoviesRecyclerView.setAdapter(mCategoryAdapter);
                 fetchMovies(getApplicationContext());
                 setTitle(item.getTitle());
                 invalidateOptionsMenu();
@@ -338,10 +374,12 @@ public class MainActivity extends AppCompatActivity implements
 
             case R.id.action_top_rated:
                 MoviePreferences.setPreferredQueryType(this, getString(R.string.category_top_rated));
-                MoviePreferences.setLastPageNumber(this, 0);
+                MoviePreferences.setLastPageNumber(this, 1);
                 getSupportLoaderManager().destroyLoader(FAVOURITE_ACTORS_LOADER_ID);
                 getSupportLoaderManager().destroyLoader(FAVOURITE_MOVIES_LOADER_ID);
-                mCurrentLoaderId = MOVIES_LOADER_ID;
+                mCurrentLoaderId = CATEGORY_LOADER_ID;
+                mCategoryAdapter = new CategoryAdapter(this, this);
+                mMoviesRecyclerView.setAdapter(mCategoryAdapter);
                 fetchMovies(getApplicationContext());
                 setTitle(item.getTitle());
                 invalidateOptionsMenu();
@@ -349,10 +387,12 @@ public class MainActivity extends AppCompatActivity implements
 
             case R.id.action_upcoming:
                 MoviePreferences.setPreferredQueryType(this, getString(R.string.category_upcoming));
-                MoviePreferences.setLastPageNumber(this, 0);
+                MoviePreferences.setLastPageNumber(this, 1);
                 getSupportLoaderManager().destroyLoader(FAVOURITE_ACTORS_LOADER_ID);
                 getSupportLoaderManager().destroyLoader(FAVOURITE_MOVIES_LOADER_ID);
-                mCurrentLoaderId = MOVIES_LOADER_ID;
+                mCurrentLoaderId = CATEGORY_LOADER_ID;
+                mCategoryAdapter = new CategoryAdapter(this, this);
+                mMoviesRecyclerView.setAdapter(mCategoryAdapter);
                 fetchMovies(getApplicationContext());
                 setTitle(item.getTitle());
                 invalidateOptionsMenu();
@@ -360,10 +400,12 @@ public class MainActivity extends AppCompatActivity implements
 
             case R.id.action_now_playing:
                 MoviePreferences.setPreferredQueryType(this, getString(R.string.category_now_playing));
-                MoviePreferences.setLastPageNumber(this, 0);
+                MoviePreferences.setLastPageNumber(this, 1);
                 getSupportLoaderManager().destroyLoader(FAVOURITE_ACTORS_LOADER_ID);
                 getSupportLoaderManager().destroyLoader(FAVOURITE_MOVIES_LOADER_ID);
-                mCurrentLoaderId = MOVIES_LOADER_ID;
+                mCurrentLoaderId = CATEGORY_LOADER_ID;
+                mCategoryAdapter = new CategoryAdapter(this, this);
+                mMoviesRecyclerView.setAdapter(mCategoryAdapter);
                 fetchMovies(getApplicationContext());
                 setTitle(item.getTitle());
                 invalidateOptionsMenu();
@@ -371,7 +413,7 @@ public class MainActivity extends AppCompatActivity implements
 
             case R.id.action_favourite_actors:
                 MoviePreferences.setPreferredQueryType(this, getString(R.string.category_favourite_actors));
-                getSupportLoaderManager().destroyLoader(MOVIES_LOADER_ID);
+                getSupportLoaderManager().destroyLoader(CATEGORY_LOADER_ID);
                 getSupportLoaderManager().destroyLoader(FAVOURITE_MOVIES_LOADER_ID);
                 mCurrentLoaderId = FAVOURITE_ACTORS_LOADER_ID;
                 fetchMovies(getApplicationContext());
@@ -381,7 +423,7 @@ public class MainActivity extends AppCompatActivity implements
 
             case R.id.action_favourite_movies:
                 MoviePreferences.setPreferredQueryType(this, getString(R.string.category_favourite_movies));
-                getSupportLoaderManager().destroyLoader(MOVIES_LOADER_ID);
+                getSupportLoaderManager().destroyLoader(CATEGORY_LOADER_ID);
                 getSupportLoaderManager().destroyLoader(FAVOURITE_ACTORS_LOADER_ID);
                 mCurrentLoaderId = FAVOURITE_MOVIES_LOADER_ID;
                 fetchMovies(getApplicationContext());
@@ -401,25 +443,25 @@ public class MainActivity extends AppCompatActivity implements
     // so we can display all the information that we received about it, without heaving to fetch
     // more data from movie API server
     @Override
-    public void onGridItemClick(Movie movieClicked, int favouriteId) {
-        if (movieClicked != null && favouriteId == 0) {
-            Intent movieDetailsIntent = new Intent(MainActivity.this, DetailsActivity.class);
-            movieDetailsIntent.putExtra(DetailsActivity.MOVIE_ID_KEY, movieClicked.getMovieId());
-            movieDetailsIntent.putExtra(DetailsActivity.MOVIE_TITLE_KEY, movieClicked.getTitle());
-            startActivity(movieDetailsIntent);
-        } else {
-            if (mCurrentLoaderId == FAVOURITE_MOVIES_LOADER_ID) {
-                Intent movieDetailsIntent = new Intent(MainActivity.this, DetailsActivity.class);
-                movieDetailsIntent.putExtra(DetailsActivity.MOVIE_ID_KEY, favouriteId);
-                startActivity(movieDetailsIntent);
-            } else if (mCurrentLoaderId == FAVOURITE_ACTORS_LOADER_ID) {
-                Intent actorIntent = new Intent(MainActivity.this, ProfileActivity.class);
-                actorIntent.putExtra(DetailsActivity.ACTOR_ID_KEY, favouriteId);
-                // TODO: find a backdrop
-                //actorIntent.putExtra(DetailsActivity.MOVIE_BACKDROP_KEY, );
-                startActivity(actorIntent);
-            }
-        }
+    public void onGridItemClick(Movie movieClicked) {
+        Intent movieDetailsIntent = new Intent(MainActivity.this, DetailsActivity.class);
+        movieDetailsIntent.putExtra(DetailsActivity.MOVIE_ID_KEY, movieClicked.getMovieId());
+        movieDetailsIntent.putExtra(DetailsActivity.MOVIE_TITLE_KEY, movieClicked.getTitle());
+        startActivity(movieDetailsIntent);
+    }
+
+    @Override
+    public void onMovieItemClick(int movieId) {
+        Intent movieDetailsIntent = new Intent(MainActivity.this, DetailsActivity.class);
+        movieDetailsIntent.putExtra(DetailsActivity.MOVIE_ID_KEY, movieId);
+        startActivity(movieDetailsIntent);
+    }
+
+    @Override
+    public void onActorItemClick(int actorId) {
+        Intent actorIntent = new Intent(MainActivity.this, ProfileActivity.class);
+        actorIntent.putExtra(DetailsActivity.ACTOR_ID_KEY, actorId);
+        startActivity(actorIntent);
     }
 
     // Show movie data and hide no connection icon and message
@@ -444,9 +486,9 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public Loader onCreateLoader(int loaderId, @Nullable Bundle args) {
         switch (loaderId) {
-            case MOVIES_LOADER_ID:
+            case CATEGORY_LOADER_ID:
                 // If the loaded id matches movies loader, return a new movie category loader
-                return new MovieCategoryLoader(getApplicationContext());
+                return new CategoryLoader(getApplicationContext());
 
             case FAVOURITE_ACTORS_LOADER_ID:
                 // If the loader id matches favourite actors loader, return a cursor loader
@@ -481,7 +523,7 @@ public class MainActivity extends AppCompatActivity implements
         }
 
         switch (loader.getId()) {
-            case MOVIES_LOADER_ID:
+            case CATEGORY_LOADER_ID:
                 mNoConnectionImageView.setVisibility(View.INVISIBLE);
                 mMessagesTextView.setVisibility(View.INVISIBLE);
 
@@ -490,11 +532,11 @@ public class MainActivity extends AppCompatActivity implements
                 // If currentPage is "1", we know that the user has changed the movie category or uses the
                 // app for the first time. In this situation we swap the Movie array with the new data
                 if (currentPage == 1) {
-                    mAdapter.swapMovies((ArrayList<Movie>) data);
+                    mCategoryAdapter.swapMovies((ArrayList<Movie>) data);
                 } else {
                     // Otherwise, we add the new data to the old data, creating an infinite scrolling effect
                     if (currentPage > 1)
-                        mAdapter.addMovies((ArrayList<Movie>) data);
+                        mCategoryAdapter.addMovies((ArrayList<Movie>) data);
                 }
 
                 // If the RecyclerView has no position, we assume the first position in the list
@@ -507,46 +549,51 @@ public class MainActivity extends AppCompatActivity implements
                 break;
 
             case FAVOURITE_ACTORS_LOADER_ID:
-                mAdapter.swapCursor((Cursor) data);
+                mActorsAdapter = new FavouriteActorsAdapter(this, this);
+                mMoviesRecyclerView.setAdapter(mActorsAdapter);
+
+                mActorsAdapter.swapActors((Cursor) data);
 
                 if (data != null && ((Cursor) data).getCount() == 0) {
                     mNoConnectionImageView.setVisibility(View.VISIBLE);
                     mNoConnectionImageView.setImageResource(R.drawable.ic_star);
                     mNoConnectionImageView.setContentDescription(getString(R.string.no_favourites_icon));
                     mMessagesTextView.setVisibility(View.VISIBLE);
-                    mMessagesTextView.setText(R.string.no_favourites);
+                    mMessagesTextView.setText(R.string.no_favourite_actors);
                 } else {
                     mNoConnectionImageView.setVisibility(View.INVISIBLE);
                     mMessagesTextView.setVisibility(View.INVISIBLE);
                     // If the RecyclerView has no position, we assume the first position in the list
                     if (mPosition == RecyclerView.NO_POSITION) {
                         mPosition = 0;
-                        // Scroll the RecyclerView to mPosition
-                        mMoviesRecyclerView.smoothScrollToPosition(mPosition);
                     }
+                    // Scroll the RecyclerView to mPosition
+                    mMoviesRecyclerView.smoothScrollToPosition(mPosition);
                 }
 
                 break;
 
-
             case FAVOURITE_MOVIES_LOADER_ID:
-                mAdapter.swapCursor((Cursor) data);
+                mMoviesAdapter = new FavouriteMoviesAdapter(this, this);
+                mMoviesRecyclerView.setAdapter(mMoviesAdapter);
+
+                mMoviesAdapter.swapMovies((Cursor) data);
 
                 if (data != null && ((Cursor) data).getCount() == 0) {
                     mNoConnectionImageView.setVisibility(View.VISIBLE);
                     mNoConnectionImageView.setImageResource(R.drawable.ic_favorite);
                     mNoConnectionImageView.setContentDescription(getString(R.string.no_favourites_icon));
                     mMessagesTextView.setVisibility(View.VISIBLE);
-                    mMessagesTextView.setText(R.string.no_favourites);
+                    mMessagesTextView.setText(R.string.no_favourite_movies);
                 } else {
                     mNoConnectionImageView.setVisibility(View.INVISIBLE);
                     mMessagesTextView.setVisibility(View.INVISIBLE);
                     // If the RecyclerView has no position, we assume the first position in the list
                     if (mPosition == RecyclerView.NO_POSITION) {
                         mPosition = 0;
-                        // Scroll the RecyclerView to mPosition
-                        mMoviesRecyclerView.smoothScrollToPosition(mPosition);
                     }
+                    // Scroll the RecyclerView to mPosition
+                    mMoviesRecyclerView.smoothScrollToPosition(mPosition);
                 }
 
                 break;
@@ -558,15 +605,15 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public void onLoaderReset(@NonNull Loader loader) {
-        switch (loader.getId()) {
-            case FAVOURITE_ACTORS_LOADER_ID:
-                mAdapter.swapCursor(null);
-                break;
-            case FAVOURITE_MOVIES_LOADER_ID:
-                mAdapter.swapCursor(null);
-                break;
-            default:
-                break;
-        }
+//        switch (loader.getId()) {
+//            case FAVOURITE_ACTORS_LOADER_ID:
+//                mActorsAdapter.swapActors(null);
+//                break;
+//            case FAVOURITE_MOVIES_LOADER_ID:
+//                mMoviesAdapter.swapCursor(null);
+//                break;
+//            default:
+//                break;
+//        }
     }
 }

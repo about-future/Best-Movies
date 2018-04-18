@@ -1,5 +1,6 @@
 package com.future.bestmovies;
 
+import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;

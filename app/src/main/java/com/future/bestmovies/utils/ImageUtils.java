@@ -35,7 +35,7 @@ public class ImageUtils {
             return IMAGES_BASE_URL.concat(String.valueOf(imageWidth)).concat(imagePath);
         } catch (NullPointerException e) {
             Log.v("BuildImageUrl", "Error: " + e.toString());
-            return "ups";
+            return null;
         }
     }
 
@@ -47,12 +47,7 @@ public class ImageUtils {
         // Get the image width, so we can build our image URL (i.e. 500 or 342 or 185)
         int imageWidth = MoviePreferences.getImageWidthForRecyclerView(context);
         // Create the image URL and return it
-        try {
-            return IMAGES_BASE_URL.concat(String.valueOf(imageWidth)).concat(imagePath);
-        } catch (NullPointerException e) {
-            Log.v("BuildImageUrlRecycler", "Error: " + e.toString());
-            return "ups";
-        }
+        return IMAGES_BASE_URL.concat(String.valueOf(imageWidth)).concat(imagePath);
     }
 
     /* Return an image URL used in SearchActivity

@@ -57,6 +57,7 @@ public class Details implements Parcelable {
         backdropPath = in.readString();
         overview = in.readString();
         releaseDate = in.readString();
+        // TOD: Genres list implementation still unsure
         genres = new ArrayList<>();
         in.readList(genres, Genre.class.getClassLoader());
         language = in.readString();

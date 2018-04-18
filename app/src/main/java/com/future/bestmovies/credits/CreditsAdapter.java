@@ -48,33 +48,61 @@ public class CreditsAdapter extends RecyclerView.Adapter<CreditsAdapter.CreditsV
 
     @Override
     public void onBindViewHolder(@NonNull final CreditsViewHolder holder, int position) {
-        final int currentPosition = position;
+        String posterPath = mCredits.get(position).getPosterPath();
 
-        // Try loading image from device memory or cache
-        Picasso.get()
-                .load(ImageUtils.buildImageUrl(
-                        mContext,
-                        mCredits.get(position).getPosterPath(),
-                        ImageUtils.POSTER))
-                .networkPolicy(NetworkPolicy.OFFLINE)
-                .into(holder.creditPosterImageView, new Callback() {
-                    @Override
-                    public void onSuccess() {
-                        // Yay!
-                    }
+        // Generate the image Url
+        final String posterUrl;
+        if (!TextUtils.isEmpty(posterPath)) {
+            posterUrl = ImageUtils.buildImageUrl(mContext, posterPath, ImageUtils.POSTER);
 
-                    @Override
-                    public void onError(Exception e) {
-                        // Try again online, if cache loading failed
-                        Picasso.get()
-                                .load(ImageUtils.buildImageUrl(
-                                        mContext,
-                                        mCredits.get(currentPosition).getPosterPath(),
-                                        ImageUtils.POSTER))
-                                .error(R.drawable.no_poster)
-                                .into(holder.creditPosterImageView);
-                    }
-                });
+            // Try loading image from device memory or cache
+            Picasso.get()
+                    .load(posterUrl)
+                    .networkPolicy(NetworkPolicy.OFFLINE)
+                    .into(holder.creditPosterImageView, new Callback() {
+                        @Override
+                        public void onSuccess() {
+                            // Yay!
+                        }
+
+                        @Override
+                        public void onError(Exception e) {
+                            // Try again online, if cache loading failed
+                            Picasso.get()
+                                    .load(posterUrl)
+                                    .error(R.drawable.no_poster)
+                                    .into(holder.creditPosterImageView);
+                        }
+                    });
+        } else {
+            holder.creditPosterImageView.setImageResource(R.drawable.no_poster);
+        }
+
+//        // Try loading image from device memory or cache
+//        Picasso.get()
+//                .load(ImageUtils.buildImageUrl(
+//                        mContext,
+//                        posterPath,
+//                        ImageUtils.POSTER))
+//                .networkPolicy(NetworkPolicy.OFFLINE)
+//                .into(holder.creditPosterImageView, new Callback() {
+//                    @Override
+//                    public void onSuccess() {
+//                        // Yay!
+//                    }
+//
+//                    @Override
+//                    public void onError(Exception e) {
+//                        // Try again online, if cache loading failed
+//                        Picasso.get()
+//                                .load(ImageUtils.buildImageUrl(
+//                                        mContext,
+//                                        posterPath,
+//                                        ImageUtils.POSTER))
+//                                .error(R.drawable.no_poster)
+//                                .into(holder.creditPosterImageView);
+//                    }
+//                });
 
         holder.creditTitleTextView.setText(mCredits.get(position).getTitle());
 
@@ -98,20 +126,22 @@ public class CreditsAdapter extends RecyclerView.Adapter<CreditsAdapter.CreditsV
     }
 
     public void swapCredits(ArrayList<Credits> newCredits) {
-        Collections.sort(newCredits, new Comparator<Credits>() {
-            @Override
-            public int compare(Credits o1, Credits o2) {
-                if (o2.getReleaseDate() == null && o1.getReleaseDate() == null) {
-                    return 0;
-                } else if (o2.getReleaseDate() != null && o1.getReleaseDate() == null) {
-                    return 1;
-                } else if (o2.getReleaseDate() == null && o1.getReleaseDate() != null) {
-                    return -1;
-                } else {
-                    return o2.getReleaseDate().compareTo(o1.getReleaseDate());
+        if (newCredits != null) {
+            Collections.sort(newCredits, new Comparator<Credits>() {
+                @Override
+                public int compare(Credits o1, Credits o2) {
+                    if (o2.getReleaseDate() == null && o1.getReleaseDate() == null) {
+                        return 0;
+                    } else if (o2.getReleaseDate() != null && o1.getReleaseDate() == null) {
+                        return 1;
+                    } else if (o2.getReleaseDate() == null && o1.getReleaseDate() != null) {
+                        return -1;
+                    } else {
+                        return o2.getReleaseDate().compareTo(o1.getReleaseDate());
+                    }
                 }
-            }
-        });
+            });
+        }
 
         mCredits = newCredits;
         notifyDataSetChanged();

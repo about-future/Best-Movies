@@ -17,7 +17,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 
-public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.ReviewViewHolder>{
+public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.ReviewViewHolder> {
     private final Context mContext;
     private ArrayList<Review> mReviews = new ArrayList<>();
 
@@ -41,7 +41,10 @@ public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.ReviewView
 
     @Override
     public int getItemCount() {
-        return mReviews.size();
+        if (mReviews != null)
+            return mReviews.size();
+        else
+            return 0;
     }
 
     public void swapReviews(ArrayList<Review> newReviews) {
@@ -50,8 +53,10 @@ public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.ReviewView
     }
 
     class ReviewViewHolder extends RecyclerView.ViewHolder {
-        @BindView(R.id.review_author_tv) TextView reviewAuthorTextView;
-        @BindView(R.id.review_content_tv) TextView reviewContentTextView;
+        @BindView(R.id.review_author_tv)
+        TextView reviewAuthorTextView;
+        @BindView(R.id.review_content_tv)
+        TextView reviewContentTextView;
 
         ReviewViewHolder(View itemView) {
             super(itemView);

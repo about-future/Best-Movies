@@ -368,6 +368,40 @@ public class FavouritesProvider extends ContentProvider {
 
     @Override
     public int update(@NonNull Uri uri, ContentValues contentValues, String selection, String[] selectionArgs) {
-        return 0;
+        switch (sUriMatcher.match(uri)) {
+            case ACTORS:
+                return updateActor(uri, contentValues, selection, selectionArgs);
+            case ACTOR_ID:
+                // For the ACTOR_ID code, extract out the ID from the URI,
+                // so we know which row to update. Selection will be "COLUMN_ACTOR_ID=?" and selection
+                // arguments will be a String array containing the actual ID.
+                selection = ActorsEntry.COLUMN_ACTOR_ID + "=?";
+                selectionArgs = new String[] { String.valueOf(ContentUris.parseId(uri)) };
+                return updateActor(uri, contentValues, selection, selectionArgs);
+            default:
+                throw new IllegalArgumentException("Update is not supported for " + uri);
+        }
+    }
+
+    private int updateActor(Uri uri, ContentValues contentValues, String selection, String[] selectionArgs) {
+        // If there are no values to update, then don't try to update the database
+        if (contentValues.size() == 0) {
+            return 0;
+        }
+
+        // Otherwise, get writable database to update the data
+        SQLiteDatabase database = mDbHelper.getWritableDatabase();
+
+        // Perform the update on the database and get the number of rows affected
+        int rowsUpdated = database.update(ActorsEntry.TABLE_NAME, contentValues, selection, selectionArgs);
+
+        // If 1 or more rows were updated, then notify all listeners that the data at the
+        // given URI has changed (uri example: content://com.future.bestmovies/actors/#)
+        if (getContext() != null && rowsUpdated != 0) {
+            getContext().getContentResolver().notifyChange(uri, null);
+        }
+
+        // Returns the number of database rows affected by the update statement
+        return rowsUpdated;
     }
 }

@@ -50,10 +50,10 @@ public class CreditsAdapter extends RecyclerView.Adapter<CreditsAdapter.CreditsV
     public void onBindViewHolder(@NonNull final CreditsViewHolder holder, int position) {
         String posterPath = mCredits.get(position).getPosterPath();
 
-        // Generate the image Url
         final String posterUrl;
+        // If we have a valid poster path, try loading it from cache or from web with Picasso
         if (!TextUtils.isEmpty(posterPath)) {
-            posterUrl = ImageUtils.buildImageUrl(mContext, posterPath, ImageUtils.POSTER);
+            posterUrl = ImageUtils.buildImageUrlForCredits(posterPath);
 
             // Try loading image from device memory or cache
             Picasso.get()
@@ -75,34 +75,9 @@ public class CreditsAdapter extends RecyclerView.Adapter<CreditsAdapter.CreditsV
                         }
                     });
         } else {
+            // Otherwise, don't bother using Picasso and set no_poster for creditPosterImageView
             holder.creditPosterImageView.setImageResource(R.drawable.no_poster);
         }
-
-//        // Try loading image from device memory or cache
-//        Picasso.get()
-//                .load(ImageUtils.buildImageUrl(
-//                        mContext,
-//                        posterPath,
-//                        ImageUtils.POSTER))
-//                .networkPolicy(NetworkPolicy.OFFLINE)
-//                .into(holder.creditPosterImageView, new Callback() {
-//                    @Override
-//                    public void onSuccess() {
-//                        // Yay!
-//                    }
-//
-//                    @Override
-//                    public void onError(Exception e) {
-//                        // Try again online, if cache loading failed
-//                        Picasso.get()
-//                                .load(ImageUtils.buildImageUrl(
-//                                        mContext,
-//                                        posterPath,
-//                                        ImageUtils.POSTER))
-//                                .error(R.drawable.no_poster)
-//                                .into(holder.creditPosterImageView);
-//                    }
-//                });
 
         holder.creditTitleTextView.setText(mCredits.get(position).getTitle());
 
@@ -122,7 +97,10 @@ public class CreditsAdapter extends RecyclerView.Adapter<CreditsAdapter.CreditsV
 
     @Override
     public int getItemCount() {
-        return mCredits.size();
+        if (mCredits != null)
+            return mCredits.size();
+        else
+            return 0;
     }
 
     public void swapCredits(ArrayList<Credits> newCredits) {

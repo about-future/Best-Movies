@@ -3,6 +3,7 @@ package com.future.bestmovies.movie;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -44,31 +45,36 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.MovieV
 
     @Override
     public void onBindViewHolder(@NonNull final MovieViewHolder holder, int position) {
-        final String posterPath = mMovies.get(position).getPosterPath();
+        String posterPath = mMovies.get(position).getPosterPath();
 
-        // Try loading image from device memory or cache
-        Picasso.get()
-                .load(ImageUtils.buildImageUrlForRecyclerView(
-                        mContext,
-                        posterPath))
-                .networkPolicy(NetworkPolicy.OFFLINE)
-                .into(holder.moviePosterImageView, new Callback() {
-                    @Override
-                    public void onSuccess() {
-                        // Celebrate: Yay!!!
-                    }
+        final String posterUrl;
+        // If we have a valid poster path, try loading it from cache or from web with Picasso
+        if (!TextUtils.isEmpty(posterPath)) {
+            posterUrl = ImageUtils.buildImageUrlForRecyclerView(mContext, posterPath);
 
-                    @Override
-                    public void onError(Exception e) {
-                        // Try again online, if loading from device memory or cache failed
-                        Picasso.get()
-                                .load(ImageUtils.buildImageUrlForRecyclerView(
-                                        mContext,
-                                        posterPath))
-                                .error(R.drawable.no_poster)
-                                .into(holder.moviePosterImageView);
-                    }
-                });
+            // Try loading image from device memory or cache
+            Picasso.get()
+                    .load(posterUrl)
+                    .networkPolicy(NetworkPolicy.OFFLINE)
+                    .into(holder.moviePosterImageView, new Callback() {
+                        @Override
+                        public void onSuccess() {
+                            // Celebrate: Yay!!!
+                        }
+
+                        @Override
+                        public void onError(Exception e) {
+                            // Try again online, if loading from device memory or cache failed
+                            Picasso.get()
+                                    .load(posterUrl)
+                                    .error(R.drawable.no_poster)
+                                    .into(holder.moviePosterImageView);
+                        }
+                    });
+        } else {
+            // Otherwise, don't bother using Picasso and set no_poster for moviePosterImageView
+            holder.moviePosterImageView.setImageResource(R.drawable.no_poster);
+        }
     }
 
     @Override

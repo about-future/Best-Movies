@@ -100,6 +100,8 @@
     <string name="favourite_actor_insert_failed">Failed to add actor to favourites</string>
     <string name="favourite_actor_delete_successful">Actor deleted from favourites</string>
     <string name="favourite_actor_delete_failed">Failed to delete from favourites</string>
+    <string name="favourite_actor_update_successful">Actor profile updated successfully</string>
+    <string name="favourite_actor_update_failed">Failed to update actor profile</string>
 
     <!-- PREFERENCES -->
     <!-- Page number preference -->

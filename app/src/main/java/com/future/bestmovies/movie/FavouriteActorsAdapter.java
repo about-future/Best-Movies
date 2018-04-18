@@ -4,6 +4,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -52,33 +53,36 @@ public class FavouriteActorsAdapter extends RecyclerView.Adapter<FavouriteActors
         int pictureColumnIndex = mActorsCursor.getColumnIndex(ActorsEntry.COLUMN_PROFILE_PATH);
 
         holder.actorNameTextView.setText(mActorsCursor.getString(nameColumnIndex));
-        final String profilePath = mActorsCursor.getString(pictureColumnIndex);
+        String profilePath = mActorsCursor.getString(pictureColumnIndex);
 
-        // Try loading image from device memory or cache
-        Picasso.get()
-                .load(ImageUtils.buildImageUrlForRecyclerView(
-                        mContext,
-                        profilePath))
-                //.placeholder(R.drawable.no_picture)
-                .networkPolicy(NetworkPolicy.OFFLINE)
-                .into(holder.actorProfileImageView, new Callback() {
-                    @Override
-                    public void onSuccess() {
-                        // Celebrate: Yay!!!
-                    }
+        final String profileImageUrl;
+        // If we have a valid poster path, try loading it from cache or from web with Picasso
+        if (!TextUtils.isEmpty(profilePath)) {
+            profileImageUrl = ImageUtils.buildImageUrlForRecyclerView(mContext, profilePath);
 
-                    @Override
-                    public void onError(Exception e) {
-                        // Try again online, if loading from device memory or cache failed
-                        Picasso.get()
-                                .load(ImageUtils.buildImageUrlForRecyclerView(
-                                        mContext,
-                                        profilePath))
-                                //.placeholder(R.drawable.no_picture)
-                                .error(R.drawable.no_picture)
-                                .into(holder.actorProfileImageView);
-                    }
-                });
+            // Try loading image from device memory or cache
+            Picasso.get()
+                    .load(profileImageUrl)
+                    .networkPolicy(NetworkPolicy.OFFLINE)
+                    .into(holder.actorProfileImageView, new Callback() {
+                        @Override
+                        public void onSuccess() {
+                            // Celebrate: Yay!!!
+                        }
+
+                        @Override
+                        public void onError(Exception e) {
+                            // Try again online, if loading from device memory or cache failed
+                            Picasso.get()
+                                    .load(profileImageUrl)
+                                    .error(R.drawable.no_picture)
+                                    .into(holder.actorProfileImageView);
+                        }
+                    });
+        } else {
+            // Otherwise, don't bother using Picasso and set no_poster for actorProfileImageView
+            holder.actorProfileImageView.setImageResource(R.drawable.no_picture);
+        }
     }
 
     @Override

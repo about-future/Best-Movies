@@ -357,6 +357,7 @@ public class DetailsActivity extends AppCompatActivity implements
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
+
         if (savedInstanceState != null) {
             // Movie Details
             if (savedInstanceState.containsKey(MOVIE_OBJECT_KEY)) {
@@ -888,30 +889,34 @@ public class DetailsActivity extends AppCompatActivity implements
 
     private void populateMovieDetails(final Details movieDetails) {
         // BACKDROP
-        Picasso.get()
-                .load(ImageUtils.buildImageUrl(
-                        getApplicationContext(),
-                        movieDetails.getBackdropPath(),
-                        ImageUtils.BACKDROP))
-                .networkPolicy(NetworkPolicy.OFFLINE)
-                .into(mMovieBackdropImageView, new Callback() {
-                    @Override
-                    public void onSuccess() {
+        String backdropPath = movieDetails.getBackdropPath();
 
-                    }
+        // If we have a valid image path, try loading it from cache or from web with Picasso
+        if (!TextUtils.isEmpty(backdropPath)) {
+            final String backdropUrl = ImageUtils.buildImageUrl(getApplicationContext(), backdropPath, ImageUtils.BACKDROP);
 
-                    @Override
-                    public void onError(Exception e) {
-                        // Try again online, if loading from device memory or cache failed
-                        Picasso.get()
-                                .load(ImageUtils.buildImageUrl(
-                                        getApplicationContext(),
-                                        movieDetails.getBackdropPath(),
-                                        ImageUtils.BACKDROP))
-                                .error(R.drawable.ic_landscape)
-                                .into(mMovieBackdropImageView);
-                    }
-                });
+            Picasso.get()
+                    .load(backdropUrl)
+                    .networkPolicy(NetworkPolicy.OFFLINE)
+                    .into(mMovieBackdropImageView, new Callback() {
+                        @Override
+                        public void onSuccess() {
+
+                        }
+
+                        @Override
+                        public void onError(Exception e) {
+                            // Try again online, if loading from device memory or cache failed
+                            Picasso.get()
+                                    .load(backdropUrl)
+                                    .error(R.drawable.ic_landscape)
+                                    .into(mMovieBackdropImageView);
+                        }
+                    });
+        } else {
+            // Otherwise, don't bother using Picasso and set no_poster for mMovieBackdropImageView
+            mMovieBackdropImageView.setImageResource(R.drawable.ic_landscape);
+        }
 
         // MOVIE TITLE (set the title of our activity as the movie title)
         setTitle(movieDetails.getMovieTitle());
@@ -921,33 +926,37 @@ public class DetailsActivity extends AppCompatActivity implements
 
         // POSTER
         // Fetch the movie poster, if it's available
-        Picasso.get()
-                .load(ImageUtils.buildImageUrl(
-                        getApplicationContext(),
-                        movieDetails.getPosterPath(),
-                        ImageUtils.POSTER))
-                .placeholder(R.drawable.no_poster)
-                .networkPolicy(NetworkPolicy.OFFLINE)
-                .into(mMoviePosterImageView, new Callback() {
-                    @Override
-                    public void onSuccess() {
-                        // Yay!
-                    }
+        String posterPath = movieDetails.getPosterPath();
 
-                    @Override
-                    public void onError(Exception e) {
-                        // Try again online, if loading from device memory or cache failed. If no poster
-                        // is available or no internet connection, use "no_poster" drawable
-                        Picasso.get()
-                                .load(ImageUtils.buildImageUrl(
-                                        getApplicationContext(),
-                                        movieDetails.getPosterPath(),
-                                        ImageUtils.POSTER))
-                                .placeholder(R.drawable.no_poster)
-                                .error(R.drawable.no_poster)
-                                .into(mMoviePosterImageView);
-                    }
-                });
+        // If we have a valid image path, try loading it from cache or from web with Picasso
+        if (!TextUtils.isEmpty(posterPath)) {
+            final String posterUrl = ImageUtils.buildImageUrl(getApplicationContext(), posterPath, ImageUtils.POSTER);
+
+            Picasso.get()
+                    .load(posterUrl)
+                    .placeholder(R.drawable.no_poster)
+                    .networkPolicy(NetworkPolicy.OFFLINE)
+                    .into(mMoviePosterImageView, new Callback() {
+                        @Override
+                        public void onSuccess() {
+                            // Yay!
+                        }
+
+                        @Override
+                        public void onError(Exception e) {
+                            // Try again online, if loading from device memory or cache failed. If no poster
+                            // is available or no internet connection, use "no_poster" drawable
+                            Picasso.get()
+                                    .load(posterUrl)
+                                    .placeholder(R.drawable.no_poster)
+                                    .error(R.drawable.no_poster)
+                                    .into(mMoviePosterImageView);
+                        }
+                    });
+        } else {
+            // Otherwise, don't bother using Picasso and set no_poster for mMoviePosterImageView
+            mMoviePosterImageView.setImageResource(R.drawable.no_poster);
+        }
         // RATINGS
         mMovieRatingTextView.setText(String.valueOf(movieDetails.getVoteAverage()).concat(getString(R.string.max_rating)));
 

@@ -3,6 +3,7 @@ package com.future.bestmovies.search;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -45,7 +46,7 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
 
     @Override
     public void onBindViewHolder(@NonNull final SearchResultsAdapter.ResultsViewHolder holder, int position) {
-        final String imagePath;
+        String imagePath;
 
         switch (mResults.get(position).getType()) {
             case "movie":
@@ -64,32 +65,44 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
                 holder.resultTypeTextView.setText(mContext.getString(R.string.search_result_tv_show));
         }
 
-        // Try loading image from device memory or cache
-        Picasso.get()
-                .load(ImageUtils.buildImageUrlForSearchResults(imagePath))
-                .networkPolicy(NetworkPolicy.OFFLINE)
-                .placeholder(R.drawable.no_poster)
-                .into(holder.resultPosterImageView, new Callback() {
-                    @Override
-                    public void onSuccess() {
-                        // Yay!
-                    }
+        final String imageUrl;
+        // If we have a valid image path, try loading it from cache or from web with Picasso
+        if (!TextUtils.isEmpty(imagePath)) {
+            imageUrl = ImageUtils.buildImageUrlForSearchResults(imagePath);
 
-                    @Override
-                    public void onError(Exception e) {
-                        // Try again online, if cache loading failed
-                        Picasso.get()
-                                .load(ImageUtils.buildImageUrlForSearchResults(imagePath))
-                                .placeholder(R.drawable.no_poster)
-                                .error(R.drawable.no_poster)
-                                .into(holder.resultPosterImageView);
-                    }
-                });
+            // Try loading image from device memory or cache
+            Picasso.get()
+                    .load(imageUrl)
+                    .networkPolicy(NetworkPolicy.OFFLINE)
+                    .placeholder(R.drawable.no_poster)
+                    .into(holder.resultPosterImageView, new Callback() {
+                        @Override
+                        public void onSuccess() {
+                            // Yay!
+                        }
+
+                        @Override
+                        public void onError(Exception e) {
+                            // Try again online, if cache loading failed
+                            Picasso.get()
+                                    .load(imageUrl)
+                                    .placeholder(R.drawable.no_poster)
+                                    .error(R.drawable.no_poster)
+                                    .into(holder.resultPosterImageView);
+                        }
+                    });
+        } else {
+            // Otherwise, don't bother using Picasso and set no_poster for resultPosterImageView
+            holder.resultPosterImageView.setImageResource(R.drawable.no_poster);
+        }
     }
 
     @Override
     public int getItemCount() {
-        return mResults.size();
+        if (mResults != null)
+            return mResults.size();
+        else
+            return 0;
     }
 
     public void swapResults(ArrayList<SearchResult> newResult) {

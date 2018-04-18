@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.Toast;
@@ -77,34 +78,36 @@ public class ReviewsActivity extends AppCompatActivity {
                     // Set activity title as the movie name
                     setTitle(mMovieTitle);
                 }
+
                 if (intent.hasExtra(MOVIE_BACKDROP_KEY)) {
                     mMovieBackdrop = intent.getStringExtra(MOVIE_BACKDROP_KEY);
-                    // Try loading backdrop image from memory
-                    Picasso.get()
-                            .load(ImageUtils.buildImageUrl(
-                                    this,
-                                    mMovieBackdrop,
-                                    ImageUtils.BACKDROP))
-                            .networkPolicy(NetworkPolicy.OFFLINE)
-                            .into(movieBackdropImageView, new Callback() {
-                                @Override
-                                public void onSuccess() {
-                                    // Yay! We have it!
-                                }
 
-                                @Override
-                                public void onError(Exception e) {
-                                    // Try again online, if cache loading failed
-                                    Picasso.get()
-                                            .load(ImageUtils.buildImageUrl(
-                                                    getApplicationContext(),
-                                                    mMovieBackdrop,
-                                                    ImageUtils.BACKDROP))
-                                            .error(R.drawable.ic_landscape)
-                                            .into(movieBackdropImageView);
-                                }
-                            });
+                    if (!TextUtils.isEmpty(mMovieBackdrop)) {
+                        final String backdropUrl = ImageUtils.buildImageUrl(this, mMovieBackdrop, ImageUtils.BACKDROP);
 
+                        // Try loading backdrop image from memory
+                        Picasso.get()
+                                .load(backdropUrl)
+                                .networkPolicy(NetworkPolicy.OFFLINE)
+                                .into(movieBackdropImageView, new Callback() {
+                                    @Override
+                                    public void onSuccess() {
+                                        // Yay! We have it!
+                                    }
+
+                                    @Override
+                                    public void onError(Exception e) {
+                                        // Try again online, if cache loading failed
+                                        Picasso.get()
+                                                .load(backdropUrl)
+                                                .error(R.drawable.ic_landscape)
+                                                .into(movieBackdropImageView);
+                                    }
+                                });
+                    } else {
+                        // Otherwise, don't bother using Picasso and set no_poster for movieBackdropImageView
+                        movieBackdropImageView.setImageResource(R.drawable.ic_landscape);
+                    }
                 }
             } else {
                 closeOnError();
@@ -163,31 +166,33 @@ public class ReviewsActivity extends AppCompatActivity {
         // Restore the backdrop for the movie reviews
         if (savedInstanceState.containsKey(MOVIE_BACKDROP_KEY)) {
             mMovieBackdrop = savedInstanceState.getString(MOVIE_BACKDROP_KEY);
-            // Try loading backdrop image from memory
-            Picasso.get()
-                    .load(ImageUtils.buildImageUrl(
-                            this,
-                            mMovieBackdrop,
-                            ImageUtils.BACKDROP))
-                    .networkPolicy(NetworkPolicy.OFFLINE)
-                    .into(movieBackdropImageView, new Callback() {
-                        @Override
-                        public void onSuccess() {
-                            // Yay! We have it!
-                        }
 
-                        @Override
-                        public void onError(Exception e) {
-                            // Try again online, if cache loading failed
-                            Picasso.get()
-                                    .load(ImageUtils.buildImageUrl(
-                                            getApplicationContext(),
-                                            mMovieBackdrop,
-                                            ImageUtils.BACKDROP))
-                                    .error(R.drawable.ic_landscape)
-                                    .into(movieBackdropImageView);
-                        }
-                    });
+            if (!TextUtils.isEmpty(mMovieBackdrop)) {
+                final String backdropUrl = ImageUtils.buildImageUrl(this, mMovieBackdrop, ImageUtils.BACKDROP);
+
+                // Try loading backdrop image from memory
+                Picasso.get()
+                        .load(backdropUrl)
+                        .networkPolicy(NetworkPolicy.OFFLINE)
+                        .into(movieBackdropImageView, new Callback() {
+                            @Override
+                            public void onSuccess() {
+                                // Yay! We have it!
+                            }
+
+                            @Override
+                            public void onError(Exception e) {
+                                // Try again online, if cache loading failed
+                                Picasso.get()
+                                        .load(backdropUrl)
+                                        .error(R.drawable.ic_landscape)
+                                        .into(movieBackdropImageView);
+                            }
+                        });
+            } else {
+                // Otherwise, don't bother using Picasso and set no_poster for movieBackdropImageView
+                movieBackdropImageView.setImageResource(R.drawable.ic_landscape);
+            }
         }
 
         super.onRestoreInstanceState(savedInstanceState);

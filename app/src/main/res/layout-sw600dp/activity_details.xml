@@ -33,7 +33,7 @@
                 android:fitsSystemWindows="true"
                 android:scaleType="centerCrop"
                 app:layout_collapseMode="parallax"
-                app:srcCompat="@drawable/ic_landscape" />
+                tools:srcCompat="@drawable/ic_landscape" />
 
             <View
                 android:layout_width="match_parent"

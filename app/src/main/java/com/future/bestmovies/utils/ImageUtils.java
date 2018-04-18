@@ -21,6 +21,8 @@ public class ImageUtils {
     private static final String VIDEO_THUMBNAIL_SIZE_SD = "/sddefault.jpg"; // 640x480
 
     private static final String SEARCH_RESULT_IMAGE_SIZE = "45";  // "92"
+    private static final String CREDITS_IMAGE_SIZE = "92";
+    private static final String CAST_IMAGE_SIZE = "92";
 
     /* Return an image URL used in DetailsActivity
      * @param context is used to access getImageWidth method
@@ -31,12 +33,7 @@ public class ImageUtils {
         // Get the image width, so we can build our image URL (i.e. 1280 or 500 or 342)
         int imageWidth = getImageWidth(context, imageType);
         // Create the image URL and return it
-        try {
-            return IMAGES_BASE_URL.concat(String.valueOf(imageWidth)).concat(imagePath);
-        } catch (NullPointerException e) {
-            Log.v("BuildImageUrl", "Error: " + e.toString());
-            return null;
-        }
+        return IMAGES_BASE_URL.concat(String.valueOf(imageWidth)).concat(imagePath);
     }
 
     /* Return an image URL for each poster used in MainActivity's RecyclerView
@@ -55,12 +52,17 @@ public class ImageUtils {
      */
     public static String buildImageUrlForSearchResults(String imagePath) {
         // Create the image URL and return it
-        try {
-            return IMAGES_BASE_URL.concat(SEARCH_RESULT_IMAGE_SIZE).concat(imagePath);
-        } catch (NullPointerException e) {
-            Log.v("BuildImageUrlForSearch", "Error: " + e.toString());
-            return "ups";
-        }
+        return IMAGES_BASE_URL.concat(SEARCH_RESULT_IMAGE_SIZE).concat(imagePath);
+    }
+
+    public static String buildImageUrlForCredits(String imagePath) {
+        // Create the image URL and return it
+        return IMAGES_BASE_URL.concat(CREDITS_IMAGE_SIZE).concat(imagePath);
+    }
+
+    public static String buildImageUrlForCast(String imagePath) {
+        // Create the image URL and return it
+        return IMAGES_BASE_URL.concat(CAST_IMAGE_SIZE).concat(imagePath);
     }
 
     /* Return the image width for backdrop, poster or cast (i.e. 780, 342 or 185)

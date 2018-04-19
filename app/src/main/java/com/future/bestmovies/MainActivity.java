@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Handler;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.LoaderManager;
@@ -50,6 +51,10 @@ public class MainActivity extends AppCompatActivity implements
 
     private static final String TAG = MainActivity.class.getSimpleName();
     private static final String TITLE_KEY = "title";
+    private static final String POSITION_KEY = "current_position";
+
+    private Bundle mBundleState;
+    private Parcelable state;
 
     // Movie categories
     private static final String CATEGORY_POPULAR = "popular";
@@ -218,10 +223,15 @@ public class MainActivity extends AppCompatActivity implements
         });
     }
 
+    // TODO 1: New settings for deleting all favourite actors and all movies
+    // TODO 2: Search should filter TvShows or App should include TvShows
+
     @Override
     public void onSaveInstanceState(Bundle outState) {
         outState.putInt(CURRENT_LOADED_ID, mCurrentLoaderId);
         outState.putString(TITLE_KEY, getTitle().toString());
+
+        outState.putParcelable(POSITION_KEY, mGridLayoutManager.onSaveInstanceState());
 
         super.onSaveInstanceState(outState);
     }
@@ -247,10 +257,33 @@ public class MainActivity extends AppCompatActivity implements
                 }
                 fetchMovies(this);
             }
+
             if (savedInstanceState.containsKey(TITLE_KEY))
                 setTitle(savedInstanceState.getString(TITLE_KEY));
+
+            if (savedInstanceState.containsKey(POSITION_KEY)) {
+                mGridLayoutManager.onRestoreInstanceState(savedInstanceState.getParcelable(POSITION_KEY));
+            }
         }
         super.onRestoreInstanceState(savedInstanceState);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mBundleState = new Bundle();
+
+        mBundleState.putParcelable(POSITION_KEY, mGridLayoutManager.onSaveInstanceState());
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        if (mBundleState != null) {
+            if (mBundleState.containsKey(POSITION_KEY))
+                mGridLayoutManager.onRestoreInstanceState(mBundleState.getParcelable(POSITION_KEY));
+        }
     }
 
     private void loadNewMovies() {
@@ -563,12 +596,13 @@ public class MainActivity extends AppCompatActivity implements
                 } else {
                     mNoConnectionImageView.setVisibility(View.INVISIBLE);
                     mMessagesTextView.setVisibility(View.INVISIBLE);
+
                     // If the RecyclerView has no position, we assume the first position in the list
                     if (mPosition == RecyclerView.NO_POSITION) {
                         mPosition = 0;
+                        // Scroll the RecyclerView to mPosition
+                        mMoviesRecyclerView.smoothScrollToPosition(mPosition);
                     }
-                    // Scroll the RecyclerView to mPosition
-                    mMoviesRecyclerView.smoothScrollToPosition(mPosition);
                 }
 
                 break;
@@ -588,12 +622,13 @@ public class MainActivity extends AppCompatActivity implements
                 } else {
                     mNoConnectionImageView.setVisibility(View.INVISIBLE);
                     mMessagesTextView.setVisibility(View.INVISIBLE);
+
                     // If the RecyclerView has no position, we assume the first position in the list
                     if (mPosition == RecyclerView.NO_POSITION) {
                         mPosition = 0;
+                        // Scroll the RecyclerView to mPosition
+                        mMoviesRecyclerView.smoothScrollToPosition(mPosition);
                     }
-                    // Scroll the RecyclerView to mPosition
-                    mMoviesRecyclerView.smoothScrollToPosition(mPosition);
                 }
 
                 break;

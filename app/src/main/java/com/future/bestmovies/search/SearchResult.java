@@ -31,6 +31,5 @@ public class SearchResult {
     public String getPersonName() { return personName; }
     public String getMovieTitle() { return movieTitle; }
     public String getShowTitle() { return showTitle; }
-
     public String getType() { return type; }
 }

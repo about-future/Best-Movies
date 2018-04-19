@@ -513,8 +513,6 @@ public class ProfileActivity extends AppCompatActivity implements CreditsAdapter
                 }
             };
 
-    //TODO: remember if backdrop is collapsed or not
-
     private void populateActorDetails(final Actor actorDetails) {
         // Try loading profile picture from memory
         String profilePath = actorDetails.getProfilePath();

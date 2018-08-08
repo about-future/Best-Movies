@@ -36,5 +36,14 @@ Most of us can relate to kicking back on the couch and enjoying a movie with fri
 - How to work with parcelable data
 
 ### Screen Shots
+Favourite Movies and Movie Details |
+--- |
+![](/screenshots/best_movies_1.jpg) |
 
+Actor Details and Credits |
+--- |
+![](/screenshots/best_movies_2.jpg) |
+![](/screenshots/best_movies_3.jpg) |
 
+### Video
+- [Best Movies](https://youtu.be/NSrq0ulqdYg)

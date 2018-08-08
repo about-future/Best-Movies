@@ -46,4 +46,4 @@ Actor Details and Credits |
 ![](/screenshots/best_movies_3.jpg) |
 
 ### Video
-- [Best Movies](https://youtu.be/NSrq0ulqdYg)
+[Best Movies](https://youtu.be/NSrq0ulqdYg)
